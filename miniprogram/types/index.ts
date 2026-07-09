@@ -1,3 +1,7 @@
+export type EntityId = string;
+export type CloudDate = Date | string;
+export type Currency = 'CNY';
+
 export type OrderStatus =
   | 'draft'
   | 'pending_review'
@@ -13,6 +17,9 @@ export type OrderStatus =
   | 'cancelled'
   | 'refunded';
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'manual_review';
+export type RiskLevel = 'low' | 'medium' | 'high';
+
 export type ItemCategory =
   | 'clothing'
   | 'books'
@@ -20,6 +27,74 @@ export type ItemCategory =
   | 'small_gifts'
   | 'phone_accessories'
   | 'daily_items';
+
+export type EvidenceType =
+  | 'item_photo'
+  | 'handover_qr_scan'
+  | 'in_app_chat'
+  | 'payment_record'
+  | 'flight_record'
+  | 'customs_or_airline_proof'
+  | 'delivery_photo_or_video'
+  | 'mutual_confirmation';
+
+export type EvidenceVisibility = 'both_parties' | 'requester_only' | 'traveller_only' | 'admin_only';
+export type TripStatus = 'draft' | 'active' | 'paused' | 'expired' | 'cancelled';
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired' | 'cancelled';
+export type PaymentProvider = 'mock' | 'wechat_pay' | 'provider_todo';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+export type PaymentLockStatus = 'none' | 'locked' | 'released';
+export type RefundStatus = 'none' | 'requested' | 'approved' | 'refunded' | 'rejected';
+export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'cancelled';
+export type DisputeDecisionAction = 'none' | 'refund' | 'complete' | 'cancel_order' | 'keep_in_dispute';
+export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+export type UserRoleFlag = 'requester' | 'traveller' | 'admin' | 'reviewer';
+export type ActorRole = 'user' | 'traveller' | 'requester' | 'admin' | 'system';
+export type AuditTargetType =
+  | 'user'
+  | 'item_request'
+  | 'trip'
+  | 'offer'
+  | 'order'
+  | 'payment'
+  | 'evidence'
+  | 'handover_record'
+  | 'dispute';
+
+export interface CityLocation {
+  country?: string;
+  city: string;
+  airportOrStation?: string;
+  addressText?: string;
+  geoPoint?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+export interface SizeEstimate {
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  note?: string;
+}
+
+export interface FeeBreakdown {
+  serviceFee: number;
+  platformFee: number;
+  total: number;
+  currency: Currency;
+}
+
+export interface TaxRule {
+  defaultPayer: 'requester' | 'traveller' | 'shared' | 'manual_review';
+  note: string;
+}
+
+export interface CancellationRule {
+  beforeHandover: 'eligible_refund' | 'manual_review' | 'non_refundable';
+  afterHandover: 'requires_agreement_or_dispute' | 'manual_review' | 'non_refundable';
+}
 
 export interface TripDraft {
   fromCity: string;
@@ -30,6 +105,30 @@ export interface TripDraft {
   luggageCapacityKg: number;
   acceptableCategories: ItemCategory[];
   note: string;
+}
+
+export interface TripRecord {
+  _id: EntityId;
+  travellerOpenid: string;
+  fromCountry: string;
+  fromCity: string;
+  fromAirportOrStation: string;
+  toCountry: string;
+  toCity: string;
+  toAirportOrStation: string;
+  departureTime: CloudDate;
+  arrivalTime: CloudDate;
+  flightNo: string;
+  luggageCapacityKg: number;
+  acceptableCategories: ItemCategory[];
+  unacceptableCategories: ItemCategory[];
+  handoverPreference: string;
+  note: string;
+  status: TripStatus;
+  verificationStatus: ReviewStatus;
+  verificationEvidenceIds: EntityId[];
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
 }
 
 export interface ItemRequestDraft {
@@ -45,6 +144,30 @@ export interface ItemRequestDraft {
   riskDeclarationAccepted: boolean;
 }
 
+export interface ItemRequestRecord {
+  _id: EntityId;
+  requesterOpenid: string;
+  itemName: string;
+  category: ItemCategory;
+  quantity: number;
+  declaredValue: number;
+  currency: Currency;
+  estimatedWeightKg: number;
+  estimatedSize: SizeEstimate;
+  purchaseMethod: 'owned_item' | 'requester_purchased' | 'unknown';
+  pickupLocation: CityLocation;
+  deliveryLocation: CityLocation;
+  deadline: CloudDate;
+  itemPhotos: EntityId[];
+  riskFlags: string[];
+  reviewStatus: ReviewStatus;
+  reviewReason: string;
+  riskDeclarationAccepted: boolean;
+  note: string;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
 export interface MatchCandidate {
   id: string;
   tripId: string;
@@ -57,6 +180,11 @@ export interface MatchCandidate {
   reasons: string[];
 }
 
+export interface MatchRecord extends MatchCandidate {
+  riskLevel: RiskLevel;
+  generatedAt: CloudDate;
+}
+
 export interface OfferDraft {
   requestId: string;
   tripId: string;
@@ -65,7 +193,129 @@ export interface OfferDraft {
   conditions: string;
 }
 
+export interface OfferRecord {
+  _id: EntityId;
+  requestId: EntityId;
+  tripId: EntityId;
+  travellerOpenid: string;
+  serviceFeeQuote: number;
+  currency: Currency;
+  message: string;
+  conditions: string;
+  status: OfferStatus;
+  expiresAt: CloudDate;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface OrderRecord {
+  _id: EntityId;
+  requestId: EntityId;
+  offerId: EntityId;
+  tripId: EntityId;
+  travellerOpenid: string;
+  requesterOpenid: string;
+  status: OrderStatus;
+  feeBreakdown: FeeBreakdown;
+  taxRule: TaxRule;
+  cancellationRule: CancellationRule;
+  evidenceRequired: EvidenceType[];
+  currentRiskLevel: RiskLevel;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface EvidenceRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  uploaderOpenid: string;
+  evidenceType: EvidenceType;
+  fileIds: string[];
+  fileCount: number;
+  description: string;
+  visibility: EvidenceVisibility;
+  metadata: Record<string, unknown>;
+  createdAt: CloudDate;
+}
+
+export interface PaymentRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  provider: PaymentProvider;
+  providerPaymentId: string;
+  amount: number;
+  currency: Currency;
+  paymentStatus: PaymentStatus;
+  lockStatus: PaymentLockStatus;
+  refundStatus: RefundStatus;
+  createdByOpenid: string;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface HandoverRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  handoverCode: string;
+  confirmedByOpenid: string;
+  confirmationType: 'qr_scan_mock' | 'qr_scan' | 'manual_admin';
+  metadata: Record<string, unknown>;
+  createdAt: CloudDate;
+}
+
+export interface DisputeDecision {
+  adminOpenid: string;
+  action: DisputeDecisionAction;
+  reason: string;
+  evidenceIds: EntityId[];
+  decidedAt: CloudDate;
+}
+
+export interface DisputeRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  openedByOpenid: string;
+  reason: string;
+  description: string;
+  evidenceIds: EntityId[];
+  status: DisputeStatus;
+  decision: DisputeDecision | null;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface AuditLogRecord {
+  _id: EntityId;
+  actorOpenid: string;
+  actorRole: ActorRole;
+  targetType: AuditTargetType;
+  targetId: EntityId;
+  action: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  reason?: string;
+  evidenceIds?: EntityId[];
+  operationId?: string;
+  createdAt: CloudDate;
+}
+
 export interface UserProfile {
   nickname: string;
-  verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
+  verificationStatus: VerificationStatus;
+  avatarUrl?: string;
+  phoneMasked?: string;
+}
+
+export interface UserRecord extends UserProfile {
+  _id: EntityId;
+  openid: string;
+  unionid: string;
+  roleFlags: UserRoleFlag[];
+  ratingAvg: number;
+  completedOrders: number;
+  disputeCount: number;
+  riskLevel: RiskLevel;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+  lastLoginAt: CloudDate;
 }
