@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="card">
+    <view class="detail-title">{{trip.route}}</view>
+    <view class="muted">{{trip.departureDate}} 出发 · {{trip.arrivalDate}} 到达</view>
+  </view>
+
+  <view class="card">
+    <view class="info-row"><text>航班</text><text>{{trip.flightNo}}</text></view>
+    <view class="info-row"><text>可用重量</text><text>{{trip.capacityKg}}kg</text></view>
+  </view>
+
+  <view class="section-title">可接受品类</view>
+  <view class="tag-row section">
+    <view class="tag tag-active" wx:for="{{trip.categories}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <button class="primary-button" bindtap="goMatches">查看匹配需求</button>
+</view>

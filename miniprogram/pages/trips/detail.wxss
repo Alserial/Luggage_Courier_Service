@@ -1,0 +1,14 @@
+.detail-title {
+  margin-bottom: 10rpx;
+  color: #111827;
+  font-size: 38rpx;
+  font-weight: 800;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  color: #374151;
+  font-size: 28rpx;
+}

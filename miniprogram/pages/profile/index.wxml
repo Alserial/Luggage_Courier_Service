@@ -1,0 +1,12 @@
+<view class="page">
+  <view class="section-title">我的</view>
+  <view class="card profile-card">
+    <view class="avatar">用</view>
+    <view>
+      <view class="profile-name">未登录用户</view>
+      <view class="muted">实名状态：未认证</view>
+    </view>
+  </view>
+  <button class="primary-button" bindtap="mockLogin">微信登录 Mock</button>
+  <button class="secondary-button rule-button" bindtap="goRules">查看平台规则</button>
+</view>

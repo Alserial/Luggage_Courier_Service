@@ -1,0 +1,33 @@
+.detail-title {
+  margin-bottom: 10rpx;
+  color: #111827;
+  font-size: 38rpx;
+  font-weight: 800;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  color: #374151;
+  font-size: 28rpx;
+}
+
+.offer-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.offer-title {
+  margin-bottom: 8rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.offer-fee {
+  flex-shrink: 0;
+  color: #0f766e;
+  font-size: 30rpx;
+  font-weight: 800;
+}

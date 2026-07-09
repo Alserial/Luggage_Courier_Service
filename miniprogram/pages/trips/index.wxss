@@ -1,0 +1,26 @@
+.empty-title {
+  margin-bottom: 10rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.trip-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.status-pill {
+  flex-shrink: 0;
+  padding: 10rpx 16rpx;
+  border-radius: 8rpx;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.match-button {
+  margin-top: 18rpx;
+}

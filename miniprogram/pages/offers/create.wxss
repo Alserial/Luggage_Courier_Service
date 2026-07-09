@@ -1,0 +1,13 @@
+.rule-line {
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+  padding: 14rpx 0;
+  color: #374151;
+  font-size: 28rpx;
+}

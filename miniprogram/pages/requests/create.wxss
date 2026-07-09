@@ -1,0 +1,26 @@
+.risk-check {
+  display: flex;
+  gap: 18rpx;
+  align-items: flex-start;
+}
+
+.checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  margin-top: 4rpx;
+  border: 2rpx solid #9ca3af;
+  border-radius: 8rpx;
+  background: #ffffff;
+}
+
+.checked {
+  border-color: #0f766e;
+  background: #0f766e;
+}
+
+.risk-text {
+  flex: 1;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 1.5;
+}

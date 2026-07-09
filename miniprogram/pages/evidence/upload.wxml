@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="section-title">上传证据</view>
+  <view class="card">
+    <view class="field">
+      <text class="field-label">证据类型</text>
+      <picker mode="selector" range="{{evidenceTypes}}" range-key="label" value="{{selectedIndex}}" bindchange="onTypeChange">
+        <view class="input">{{selectedTypeLabel}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">说明</text>
+      <textarea class="textarea" placeholder="说明证据用途、拍摄地点或异常情况" value="{{description}}" bindinput="onDescriptionInput" />
+    </view>
+    <button class="secondary-button" bindtap="chooseMedia">选择图片/视频</button>
+  </view>
+
+  <view class="card" wx:if="{{files.length}}">
+    <view class="file-row" wx:for="{{files}}" wx:key="tempFilePath">
+      <view class="file-name">{{item.type}} · {{item.sizeText}}</view>
+      <view class="muted">待上传</view>
+    </view>
+  </view>
+
+  <button class="primary-button" loading="{{submitting}}" bindtap="submitEvidence">保存证据记录</button>
+</view>

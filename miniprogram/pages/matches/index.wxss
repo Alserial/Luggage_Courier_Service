@@ -1,0 +1,33 @@
+.rule-line {
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.match-title {
+  margin-bottom: 8rpx;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.score {
+  display: flex;
+  width: 88rpx;
+  height: 88rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.reason-row {
+  margin: 24rpx 0;
+}

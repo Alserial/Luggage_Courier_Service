@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="section-title">允许品类</view>
+  <view class="tag-row section">
+    <view class="tag tag-active" wx:for="{{allowed}}" wx:key="value">{{item.label}}</view>
+  </view>
+
+  <view class="section-title">默认禁止</view>
+  <view class="card warning">
+    <view class="rule-line" wx:for="{{prohibited}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="section-title">责任提示</view>
+  <view class="card">
+    <view class="rule-line">平台只提供信息撮合和履约留痕工具。</view>
+    <view class="rule-line">通关、查验、税费、退运或没收结果以海关和航空公司要求为准。</view>
+    <view class="rule-line">用户不得虚假申报、隐藏物品信息或诱导站外交易。</view>
+  </view>
+</view>

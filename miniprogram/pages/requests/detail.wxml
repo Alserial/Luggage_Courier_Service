@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="card">
+    <view class="detail-title">{{request.itemName}}</view>
+    <view class="muted">{{request.route}} · {{request.categoryLabel}}</view>
+  </view>
+
+  <view class="card">
+    <view class="info-row"><text>申报价值</text><text>CNY {{request.declaredValue}}</text></view>
+    <view class="info-row"><text>预估重量</text><text>{{request.estimatedWeightKg}}kg</text></view>
+    <view class="info-row"><text>最晚送达</text><text>{{request.deadline}}</text></view>
+  </view>
+
+  <view class="section-title">风险标签</view>
+  <view class="tag-row section">
+    <view class="tag tag-active" wx:for="{{request.riskFlags}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="card offer-card">
+    <view>
+      <view class="offer-title">{{offer.travellerName}} 的报价</view>
+      <view class="muted">{{offer.conditions}}</view>
+    </view>
+    <view class="offer-fee">CNY {{offer.serviceFeeQuote}}</view>
+  </view>
+
+  <button class="primary-button" loading="{{accepting}}" bindtap="acceptOffer">接受报价并生成订单</button>
+</view>

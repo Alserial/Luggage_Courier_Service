@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="card order-summary">
+    <view>
+      <view class="order-title">{{order.itemName}}</view>
+      <view class="muted">{{order.route}}</view>
+    </view>
+    <view class="status-pill">{{statusLabel}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title compact-title">履约进度</view>
+    <view class="progress-track">
+      <view class="progress-bar" style="width: {{progress}}%;"></view>
+    </view>
+    <view class="timeline-row" wx:for="{{timeline}}" wx:key="value">
+      <view class="dot {{item.done ? 'dot-done' : ''}}"></view>
+      <view>{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title compact-title">费用</view>
+    <view class="fee-row"><text>帮带服务费</text><text>{{fee.serviceFee}}</text></view>
+    <view class="fee-row"><text>平台服务费</text><text>{{fee.platformFee}}</text></view>
+    <view class="fee-row total"><text>合计</text><text>{{fee.total}}</text></view>
+  </view>
+
+  <view class="card warning">
+    <view class="section-title compact-title">税费规则</view>
+    <view class="rule-text">{{order.taxRule}}</view>
+  </view>
+
+  <view class="action-stack">
+    <button wx:if="{{order.status === 'pending_payment'}}" class="primary-button" bindtap="goPayment">Mock 支付并锁定服务费</button>
+    <button wx:if="{{order.status === 'paid_locked'}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
+    <button class="secondary-button" bindtap="goEvidence">上传证据</button>
+    <button class="secondary-button" bindtap="goDispute">发起争议</button>
+  </view>
+</view>

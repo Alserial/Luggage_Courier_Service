@@ -1,0 +1,19 @@
+.rule-line {
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  color: #374151;
+  font-size: 28rpx;
+}
+
+.total {
+  border-top: 1rpx solid #e5e7eb;
+  color: #111827;
+  font-weight: 800;
+}

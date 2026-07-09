@@ -1,0 +1,20 @@
+<view class="page">
+  <view class="section-title">匹配结果</view>
+  <view class="card warning">
+    <view class="rule-line">只展示已审核、低风险、路线和容量兼容的需求。</view>
+  </view>
+
+  <view class="card match-card">
+    <view class="match-header">
+      <view>
+        <view class="match-title">{{match.route}}</view>
+        <view class="muted">{{match.dateWindow}} · {{match.categoryLabel}}</view>
+      </view>
+      <view class="score">{{match.score}}</view>
+    </view>
+    <view class="tag-row reason-row">
+      <view class="tag tag-active" wx:for="{{match.reasons}}" wx:key="*this">{{item}}</view>
+    </view>
+    <button class="primary-button" bindtap="goOffer">去报价</button>
+  </view>
+</view>

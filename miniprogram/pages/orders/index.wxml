@@ -1,0 +1,14 @@
+<view class="page">
+  <view class="section-title">订单</view>
+  <view class="card order-card" bindtap="goDetail">
+    <view>
+      <view class="empty-title">{{order.itemName}}</view>
+      <view class="muted">{{order.route}} · {{order.statusLabel}}</view>
+    </view>
+    <view class="amount">{{order.totalText}}</view>
+  </view>
+  <view class="card">
+    <view class="timeline-title">MVP 状态机</view>
+    <view class="status-line" wx:for="{{statuses}}" wx:key="value">{{item.label}}</view>
+  </view>
+</view>

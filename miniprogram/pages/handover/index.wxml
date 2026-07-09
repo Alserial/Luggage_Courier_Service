@@ -1,0 +1,22 @@
+<view class="page">
+  <view class="section-title">出发地交接</view>
+  <view class="card warning">
+    <view class="rule-line">请在平台内完成扫码、拍照和双方确认。线下私下确认不作为平台证据闭环。</view>
+  </view>
+
+  <view class="card qr-card">
+    <view class="qr-box">{{handoverCode}}</view>
+    <view class="qr-title">交接确认码</view>
+    <view class="muted">订单：{{orderId}}</view>
+  </view>
+
+  <view class="card checklist">
+    <view class="check-row" wx:for="{{checks}}" wx:key="label" bindtap="toggleCheck" data-index="{{index}}">
+      <view class="checkbox {{item.done ? 'checked' : ''}}"></view>
+      <view>{{item.label}}</view>
+    </view>
+  </view>
+
+  <button class="primary-button" loading="{{submitting}}" bindtap="confirmHandover">确认交接</button>
+  <button class="secondary-button evidence-button" bindtap="goEvidence">上传交接照片/视频</button>
+</view>

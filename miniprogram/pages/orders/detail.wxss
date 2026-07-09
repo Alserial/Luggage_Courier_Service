@@ -1,0 +1,84 @@
+.order-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.order-title {
+  margin-bottom: 8rpx;
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.status-pill {
+  flex-shrink: 0;
+  padding: 10rpx 16rpx;
+  border-radius: 8rpx;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.compact-title {
+  margin-bottom: 18rpx;
+  font-size: 30rpx;
+}
+
+.progress-track {
+  height: 16rpx;
+  overflow: hidden;
+  border-radius: 8rpx;
+  background: #e5e7eb;
+}
+
+.progress-bar {
+  height: 16rpx;
+  background: #0f766e;
+}
+
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding-top: 18rpx;
+  color: #374151;
+  font-size: 26rpx;
+}
+
+.dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #d1d5db;
+}
+
+.dot-done {
+  background: #0f766e;
+}
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  color: #374151;
+  font-size: 28rpx;
+}
+
+.total {
+  border-top: 1rpx solid #e5e7eb;
+  color: #111827;
+  font-weight: 800;
+}
+
+.rule-text {
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.action-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}

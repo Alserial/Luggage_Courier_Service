@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+miniprogram_npm/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local temporary downloads
+.tmp/
+.tmp-*/
+
+# Do not commit user-level Codex config. Project-level .agents/skills is intentionally tracked.
+.codex/

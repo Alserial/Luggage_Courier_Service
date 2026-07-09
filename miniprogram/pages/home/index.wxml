@@ -1,0 +1,35 @@
+<view class="page home-page">
+  <view class="hero">
+    <view class="hero-title">中澳低风险小件顺路帮带</view>
+    <view class="hero-subtitle">发布真实行程或物品需求，平台审核品类并保留关键证据。</view>
+  </view>
+
+  <view class="action-grid">
+    <button class="action-card" bindtap="goCreateTrip">
+      <text class="action-title">发布行程</text>
+      <text class="action-desc">我是携带人，填写路线、时间和可带品类</text>
+    </button>
+    <button class="action-card" bindtap="goCreateRequest">
+      <text class="action-title">发布需求</text>
+      <text class="action-desc">我是需求方，提交物品照片和审核资料</text>
+    </button>
+  </view>
+
+  <view class="section">
+    <view class="section-title">待处理</view>
+    <view class="card status-card">
+      <view>
+        <view class="status-title">先完成实名和规则确认</view>
+        <view class="muted">MVP 阶段，未实名用户不能进入订单确认。</view>
+      </view>
+      <button class="mini-button" bindtap="goProfile">查看</button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">平台边界</view>
+    <view class="card warning">
+      <view class="rule-line" wx:for="{{rules}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,27 @@
+.empty-title,
+.timeline-title {
+  margin-bottom: 10rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.status-line {
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+  color: #374151;
+  font-size: 26rpx;
+}
+
+.order-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.amount {
+  flex-shrink: 0;
+  color: #0f766e;
+  font-size: 28rpx;
+  font-weight: 800;
+}

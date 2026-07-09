@@ -1,0 +1,12 @@
+<view class="page">
+  <view class="section-title">我的行程</view>
+  <view class="card trip-card" bindtap="goDetail">
+    <view>
+      <view class="empty-title">{{trip.route}}</view>
+      <view class="muted">{{trip.departureDate}} · 可用 {{trip.capacityKg}}kg</view>
+    </view>
+    <view class="status-pill">示例</view>
+  </view>
+  <button class="primary-button" bindtap="goCreate">发布行程</button>
+  <button class="secondary-button match-button" bindtap="goMatches">查看匹配</button>
+</view>

@@ -1,0 +1,17 @@
+{
+  "name": "luggage-courier-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cross-border peer carrying WeChat Mini Program MVP.",
+  "scripts": {
+    "check:files": "node scripts/check-project-files.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "tdesign-miniprogram": "^1.9.7"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.7",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,81 @@
+.hero {
+  padding: 36rpx 28rpx;
+  border-radius: 8rpx;
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.hero-title {
+  font-size: 42rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.hero-subtitle {
+  margin-top: 14rpx;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 27rpx;
+  line-height: 1.55;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-top: 22rpx;
+}
+
+.action-card {
+  min-height: 196rpx;
+  padding: 24rpx;
+  border: 1rpx solid #d1d5db;
+  border-radius: 8rpx;
+  background: #ffffff;
+  text-align: left;
+}
+
+.action-title,
+.action-desc {
+  display: block;
+}
+
+.action-title {
+  color: #111827;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.action-desc {
+  margin-top: 12rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.status-title {
+  margin-bottom: 8rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.mini-button {
+  width: 120rpx;
+  height: 64rpx;
+  border-radius: 8rpx;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+
+.rule-line {
+  margin: 8rpx 0;
+  font-size: 26rpx;
+  line-height: 1.5;
+}

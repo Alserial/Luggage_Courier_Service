@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="section-title">发布携带人行程</view>
+  <view class="card warning">请只填写真实路线和可接受品类，不要承诺“什么都能带”。</view>
+
+  <view class="field">
+    <text class="field-label">出发城市</text>
+    <input class="input" placeholder="例如：上海" value="{{form.fromCity}}" data-field="fromCity" bindinput="onInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">到达城市</text>
+    <input class="input" placeholder="例如：墨尔本" value="{{form.toCity}}" data-field="toCity" bindinput="onInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">出发日期</text>
+    <picker mode="date" value="{{form.departureDate}}" data-field="departureDate" bindchange="onDateChange">
+      <view class="input">{{form.departureDate || '选择日期'}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="field-label">到达日期</text>
+    <picker mode="date" value="{{form.arrivalDate}}" data-field="arrivalDate" bindchange="onDateChange">
+      <view class="input">{{form.arrivalDate || '选择日期'}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="field-label">航班号</text>
+    <input class="input" placeholder="订单确认前建议补充" value="{{form.flightNo}}" data-field="flightNo" bindinput="onInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">可用重量 kg</text>
+    <input class="input" type="digit" placeholder="MVP 上限 5kg" value="{{form.luggageCapacityKg}}" data-field="luggageCapacityKg" bindinput="onNumberInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">可接受品类</text>
+    <view class="tag-row">
+      <view wx:for="{{categories}}" wx:key="value" class="tag {{selectedCategoryMap[item.value] ? 'tag-active' : ''}}" data-value="{{item.value}}" bindtap="toggleCategory">
+        {{item.label}}
+      </view>
+    </view>
+  </view>
+  <view class="field">
+    <text class="field-label">备注</text>
+    <textarea class="textarea" placeholder="可写交接偏好、不可接受范围" value="{{form.note}}" data-field="note" bindinput="onInput" />
+  </view>
+  <button class="primary-button" bindtap="submit">提交行程</button>
+</view>

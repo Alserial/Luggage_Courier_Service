@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="section-title">提交报价</view>
+  <view class="card warning">
+    <view class="rule-line">报价只针对帮带服务费，不包含商品货款，也不代表平台保证通关。</view>
+  </view>
+
+  <view class="card">
+    <view class="info-row"><text>需求</text><text>{{request.itemName}}</text></view>
+    <view class="info-row"><text>路线</text><text>{{request.route}}</text></view>
+    <view class="info-row"><text>物品</text><text>{{request.categoryLabel}} · {{request.estimatedWeightKg}}kg</text></view>
+  </view>
+
+  <view class="field">
+    <text class="field-label">帮带服务费 CNY</text>
+    <input class="input" type="digit" placeholder="例如：120" value="{{form.serviceFeeQuote}}" data-field="serviceFeeQuote" bindinput="onNumberInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">报价说明</text>
+    <textarea class="textarea" placeholder="说明可交接时间、地点、条件" value="{{form.message}}" data-field="message" bindinput="onInput" />
+  </view>
+  <view class="field">
+    <text class="field-label">附加条件</text>
+    <textarea class="textarea" placeholder="例如：需提前完成交接照片确认" value="{{form.conditions}}" data-field="conditions" bindinput="onInput" />
+  </view>
+
+  <button class="primary-button" loading="{{submitting}}" bindtap="submitOffer">提交报价</button>
+</view>

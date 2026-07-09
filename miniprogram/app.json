@@ -1,0 +1,59 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/trips/index",
+    "pages/trips/create",
+    "pages/trips/detail",
+    "pages/requests/index",
+    "pages/requests/create",
+    "pages/requests/detail",
+    "pages/matches/index",
+    "pages/offers/create",
+    "pages/orders/index",
+    "pages/orders/detail",
+    "pages/payment/index",
+    "pages/handover/index",
+    "pages/evidence/upload",
+    "pages/disputes/detail",
+    "pages/profile/index",
+    "pages/rules/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "顺路帮带",
+    "navigationBarBackgroundColor": "#f7f8fa",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f8fa",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#6b7280",
+    "selectedColor": "#0f766e",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/trips/index",
+        "text": "行程"
+      },
+      {
+        "pagePath": "pages/requests/index",
+        "text": "需求"
+      },
+      {
+        "pagePath": "pages/orders/index",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "style": "v2"
+}

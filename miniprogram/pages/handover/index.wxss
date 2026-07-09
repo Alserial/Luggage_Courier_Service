@@ -1,0 +1,56 @@
+.rule-line {
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.qr-card {
+  text-align: center;
+}
+
+.qr-box {
+  display: flex;
+  height: 220rpx;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #0f766e;
+  border-radius: 8rpx;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.qr-title {
+  margin-top: 18rpx;
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  padding: 16rpx 0;
+  color: #374151;
+  font-size: 27rpx;
+  line-height: 1.45;
+}
+
+.checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  margin-top: 2rpx;
+  border: 2rpx solid #9ca3af;
+  border-radius: 8rpx;
+  background: #ffffff;
+}
+
+.checked {
+  border-color: #0f766e;
+  background: #0f766e;
+}
+
+.evidence-button {
+  margin-top: 18rpx;
+}
