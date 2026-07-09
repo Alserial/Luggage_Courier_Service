@@ -1,15 +1,32 @@
 <view class="page home-page">
   <view class="hero">
+    <view class="hero-kicker">LOW-RISK CARRYING MVP</view>
     <view class="hero-title">中澳低风险小件顺路帮带</view>
     <view class="hero-subtitle">发布真实行程或物品需求，平台审核品类并保留关键证据。</view>
+    <view class="hero-metrics">
+      <view class="metric">
+        <text class="metric-value">5kg</text>
+        <text class="metric-label">重量上限</text>
+      </view>
+      <view class="metric">
+        <text class="metric-value">CNY 2000</text>
+        <text class="metric-label">价值上限</text>
+      </view>
+      <view class="metric">
+        <text class="metric-value">留痕</text>
+        <text class="metric-label">关键动作</text>
+      </view>
+    </view>
   </view>
 
   <view class="action-grid">
     <button class="action-card" bindtap="goCreateTrip">
+      <text class="action-eyebrow">TRIP</text>
       <text class="action-title">发布行程</text>
       <text class="action-desc">我是携带人，填写路线、时间和可带品类</text>
     </button>
     <button class="action-card" bindtap="goCreateRequest">
+      <text class="action-eyebrow">ITEM</text>
       <text class="action-title">发布需求</text>
       <text class="action-desc">我是需求方，提交物品照片和审核资料</text>
     </button>
@@ -17,7 +34,7 @@
 
   <view class="section">
     <view class="section-title">待处理</view>
-    <view class="card status-card">
+    <view class="card status-card notice-card">
       <view>
         <view class="status-title">先完成实名和规则确认</view>
         <view class="muted">MVP 阶段，未实名用户不能进入订单确认。</view>
@@ -28,8 +45,11 @@
 
   <view class="section">
     <view class="section-title">平台边界</view>
-    <view class="card warning">
-      <view class="rule-line" wx:for="{{rules}}" wx:key="*this">{{item}}</view>
+    <view class="card boundary-card">
+      <view class="rule-line" wx:for="{{rules}}" wx:key="*this">
+        <view class="rule-dot"></view>
+        <text>{{item}}</text>
+      </view>
     </view>
   </view>
 </view>

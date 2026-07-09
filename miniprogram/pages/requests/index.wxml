@@ -1,12 +1,23 @@
 <view class="page">
-  <view class="section-title">我的需求</view>
+  <view class="page-header">
+    <view class="eyebrow">ITEM REQUESTS</view>
+    <view class="page-title">我的需求</view>
+    <view class="page-desc">管理已审核的低风险小件需求，进入详情后可查看报价和生成订单。</view>
+  </view>
+
   <view class="card request-card" bindtap="goDetail">
     <view>
-      <view class="empty-title">{{request.itemName}}</view>
-      <view class="muted">{{request.route}} · {{request.categoryLabel}}</view>
+      <view class="card-title">{{request.itemName}}</view>
+      <view class="meta-line">
+        <text>{{request.route}}</text>
+        <text>{{request.categoryLabel}}</text>
+      </view>
     </view>
     <view class="status-pill">已审核</view>
   </view>
-  <button class="primary-button" bindtap="goCreate">发布需求</button>
-  <button class="secondary-button rule-button" bindtap="goRules">查看品类规则</button>
+
+  <view class="button-row">
+    <button class="primary-button" bindtap="goCreate">发布需求</button>
+    <button class="secondary-button" bindtap="goRules">品类规则</button>
+  </view>
 </view>

@@ -1,24 +1,15 @@
 .order-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18rpx;
 }
 
 .order-title {
-  margin-bottom: 8rpx;
-  font-size: 36rpx;
-  font-weight: 800;
-}
-
-.status-pill {
-  flex-shrink: 0;
-  padding: 10rpx 16rpx;
-  border-radius: 8rpx;
-  background: #ecfdf5;
-  color: #0f766e;
-  font-size: 24rpx;
-  font-weight: 700;
+  color: #111827;
+  font-size: 40rpx;
+  font-weight: 900;
+  line-height: 1.25;
 }
 
 .compact-title {
@@ -27,14 +18,15 @@
 }
 
 .progress-track {
-  height: 16rpx;
+  height: 14rpx;
   overflow: hidden;
-  border-radius: 8rpx;
-  background: #e5e7eb;
+  border-radius: 999rpx;
+  background: #e8eef1;
 }
 
 .progress-bar {
-  height: 16rpx;
+  height: 14rpx;
+  border-radius: 999rpx;
   background: #0f766e;
 }
 
@@ -42,34 +34,41 @@
   display: flex;
   align-items: center;
   gap: 14rpx;
-  padding-top: 18rpx;
+  padding-top: 20rpx;
   color: #374151;
   font-size: 26rpx;
+  line-height: 1.45;
 }
 
 .dot {
-  width: 18rpx;
-  height: 18rpx;
+  width: 20rpx;
+  height: 20rpx;
+  border: 4rpx solid #ffffff;
   border-radius: 50%;
   background: #d1d5db;
+  box-shadow: 0 0 0 1rpx #d1d5db;
+  flex-shrink: 0;
 }
 
 .dot-done {
   background: #0f766e;
+  box-shadow: 0 0 0 1rpx #0f766e;
 }
 
 .fee-row {
   display: flex;
   justify-content: space-between;
-  padding: 12rpx 0;
+  padding: 14rpx 0;
   color: #374151;
   font-size: 28rpx;
 }
 
 .total {
-  border-top: 1rpx solid #e5e7eb;
+  margin-top: 8rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #e8eef1;
   color: #111827;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .rule-text {
@@ -80,5 +79,6 @@
 .action-stack {
   display: flex;
   flex-direction: column;
-  gap: 18rpx;
+  gap: 16rpx;
+  margin-bottom: 0;
 }

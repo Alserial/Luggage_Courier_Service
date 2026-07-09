@@ -1,5 +1,9 @@
 <view class="page">
-  <view class="section-title">发布携带人行程</view>
+  <view class="page-header">
+    <view class="eyebrow">CREATE TRIP</view>
+    <view class="page-title">发布携带人行程</view>
+    <view class="page-desc">填写真实路线、日期和可接受品类，后续匹配只展示低风险需求。</view>
+  </view>
   <view class="card warning">请只填写真实路线和可接受品类，不要承诺“什么都能带”。</view>
 
   <view class="field">

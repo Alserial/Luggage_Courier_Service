@@ -1,12 +1,23 @@
 <view class="page">
-  <view class="section-title">我的行程</view>
+  <view class="page-header">
+    <view class="eyebrow">TRIPS</view>
+    <view class="page-title">我的行程</view>
+    <view class="page-desc">发布真实路线和可接受品类，系统只匹配低风险、容量兼容的需求。</view>
+  </view>
+
   <view class="card trip-card" bindtap="goDetail">
     <view>
-      <view class="empty-title">{{trip.route}}</view>
-      <view class="muted">{{trip.departureDate}} · 可用 {{trip.capacityKg}}kg</view>
+      <view class="card-title">{{trip.route}}</view>
+      <view class="meta-line">
+        <text>{{trip.departureDate}}</text>
+        <text>可用 {{trip.capacityKg}}kg</text>
+      </view>
     </view>
-    <view class="status-pill">示例</view>
+    <view class="status-pill status-neutral">示例</view>
   </view>
-  <button class="primary-button" bindtap="goCreate">发布行程</button>
-  <button class="secondary-button match-button" bindtap="goMatches">查看匹配</button>
+
+  <view class="button-row">
+    <button class="primary-button" bindtap="goCreate">发布行程</button>
+    <button class="secondary-button" bindtap="goMatches">查看匹配</button>
+  </view>
 </view>

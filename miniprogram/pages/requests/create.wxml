@@ -1,5 +1,9 @@
 <view class="page">
-  <view class="section-title">发布物品需求</view>
+  <view class="page-header">
+    <view class="eyebrow">CREATE REQUEST</view>
+    <view class="page-title">发布物品需求</view>
+    <view class="page-desc">请填写低风险个人小件信息，平台会按正向品类和价值重量规则审核。</view>
+  </view>
   <view class="card warning">只允许低风险个人小件。不确定物品默认进入人工审核或拒绝。</view>
 
   <view class="field">

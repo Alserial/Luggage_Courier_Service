@@ -20,13 +20,13 @@
   ],
   "window": {
     "navigationBarTitleText": "顺路帮带",
-    "navigationBarBackgroundColor": "#f7f8fa",
+    "navigationBarBackgroundColor": "#f4f7f8",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f7f8fa",
+    "backgroundColor": "#f4f7f8",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#6b7280",
+    "color": "#667085",
     "selectedColor": "#0f766e",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",

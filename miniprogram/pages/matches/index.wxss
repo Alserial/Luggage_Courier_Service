@@ -9,25 +9,31 @@
   gap: 18rpx;
 }
 
-.match-title {
-  margin-bottom: 8rpx;
-  font-size: 34rpx;
-  font-weight: 800;
-}
-
 .score {
   display: flex;
-  width: 88rpx;
-  height: 88rpx;
+  width: 96rpx;
+  height: 96rpx;
   align-items: center;
   justify-content: center;
-  border-radius: 8rpx;
+  flex-direction: column;
+  border-radius: 18rpx;
   background: #0f766e;
   color: #ffffff;
+  flex-shrink: 0;
+}
+
+.score-value {
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.score-label {
+  margin-top: 6rpx;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 18rpx;
 }
 
 .reason-row {
-  margin: 24rpx 0;
+  margin: 28rpx 0;
 }

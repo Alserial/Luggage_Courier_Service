@@ -1,16 +1,27 @@
 <view class="page">
-  <view class="section-title">匹配结果</view>
-  <view class="card warning">
+  <view class="page-header">
+    <view class="eyebrow">MATCHING</view>
+    <view class="page-title">匹配结果</view>
+    <view class="page-desc">按路线、时间、容量和正向品类筛选，仅展示已审核的低风险需求。</view>
+  </view>
+
+  <view class="card notice-card">
     <view class="rule-line">只展示已审核、低风险、路线和容量兼容的需求。</view>
   </view>
 
   <view class="card match-card">
     <view class="match-header">
       <view>
-        <view class="match-title">{{match.route}}</view>
-        <view class="muted">{{match.dateWindow}} · {{match.categoryLabel}}</view>
+        <view class="card-title">{{match.route}}</view>
+        <view class="meta-line">
+          <text>{{match.dateWindow}}</text>
+          <text>{{match.categoryLabel}}</text>
+        </view>
       </view>
-      <view class="score">{{match.score}}</view>
+      <view class="score">
+        <text class="score-value">{{match.score}}</text>
+        <text class="score-label">匹配</text>
+      </view>
     </view>
     <view class="tag-row reason-row">
       <view class="tag tag-active" wx:for="{{match.reasons}}" wx:key="*this">{{item}}</view>
