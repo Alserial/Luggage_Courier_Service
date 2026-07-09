@@ -30,8 +30,8 @@ The platform only records and processes the carrying service fee. It does not ho
 flowchart TD
   A["Offer accepted"] --> B["Order: pending_payment"]
   B --> C["payment-confirm-mock"]
-  C --> D["payments record: paid + locked"]
-  D --> E["Order transition to paid_locked TODO"]
+  C --> D["payments record + payment_record evidence"]
+  D --> E["Order: paid_locked"]
   E --> F["Handover / transit / delivery"]
   F --> G["Complete or dispute"]
 ```
@@ -41,11 +41,9 @@ Current implementation:
 - `offer-create` records a service-fee quote.
 - `offer-accept` creates an order in `pending_payment`.
 - `payment-confirm-mock` creates a `payments` record with `provider: "mock"`, `paymentStatus: "paid"`, and `lockStatus: "locked"`.
-- `order-transition` supports `pending_payment -> paid_locked`, but `payment-confirm-mock` does not yet call it.
-
-Required next fix:
-
-- After successful mock payment, call an audited backend transition to `paid_locked`, or make `payment-confirm-mock` perform the transition atomically.
+- `payment-confirm-mock` creates a system `payment_record` evidence record.
+- `payment-confirm-mock` writes payment and order-transition audit logs.
+- `payment-confirm-mock` advances the order from `pending_payment` to `paid_locked`.
 
 ## Payment Records
 
@@ -205,7 +203,7 @@ Avoid:
 ## Implementation Checklist
 
 - `payment-confirm-mock` creates payment audit log.
-- `payment-confirm-mock` or a payment callback transitions order to `paid_locked`.
+- `payment-confirm-mock` transitions order to `paid_locked`.
 - Refund cloud function added with state checks.
 - Settlement cloud function added as TODO/admin-only placeholder.
 - Payment provider callback validates signatures.

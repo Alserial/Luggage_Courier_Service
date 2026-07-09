@@ -23,11 +23,11 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 | `offer-create` | Create service-fee quote | `offers`, `audit_logs` |
 | `offer-accept` | Accept offer and create order | `orders`, `offers`, `audit_logs` |
 | `order-get` | Read order detail | none |
-| `payment-confirm-mock` | Create mock service-fee payment record | `payments` |
-| `handover-confirm-scan` | Record handover QR scan/mock scan | `handover_records`, `audit_logs` |
+| `payment-confirm-mock` | Create mock service-fee payment record and lock order | `payments`, `evidence`, `orders`, `audit_logs` |
+| `handover-confirm-scan` | Record handover QR scan/mock scan and advance order | `handover_records`, `orders`, `audit_logs` |
 | `evidence-create` | Create evidence record | `evidence`, `audit_logs` |
 | `order-transition` | Move order through allowed state machine | `orders`, `audit_logs` |
-| `dispute-open` | Open dispute | `disputes`, `audit_logs` |
+| `dispute-open` | Open dispute and advance order | `disputes`, `orders`, `audit_logs` |
 
 ## `auth-login`
 
@@ -335,6 +335,7 @@ Request:
 {
   orderId: string;
   amount: number;
+  operationId?: string;
 }
 ```
 
@@ -344,17 +345,29 @@ Success response:
 {
   ok: true;
   paymentId: string;
+  evidenceId: string;
   lockStatus: "locked";
+  currentStatus: "pending_payment";
+  nextStatus: "paid_locked";
 }
 ```
 
 Error codes:
 
 - `missing_params`
+- `invalid_amount`
+- `order_not_found`
+- `permission_denied`
+- `illegal_transition`
+- `amount_mismatch`
 
 Writes:
 
 - `payments`
+- `evidence` with `evidenceType: "payment_record"`
+- `orders.status: "paid_locked"`
+- `audit_logs` with `action: "payment.mockConfirm"`
+- `audit_logs` with `action: "order.transition"`
 
 Rules:
 
@@ -362,12 +375,13 @@ Rules:
 - Payment status is created as `paid`.
 - Lock status is created as `locked`.
 - Does not process merchandise payments.
+- Caller must be the requester.
+- Payment amount must match `orders.feeBreakdown.total`.
 
-TODO:
+Remaining TODO:
 
 - Add provider callback verification before real payment.
-- Add audit log for payment creation.
-- Couple successful payment to `orders.status: "paid_locked"` through an audited backend transition.
+- Add idempotent duplicate-payment handling with `operationId` or provider payment id.
 
 ## `handover-confirm-scan`
 
@@ -379,6 +393,8 @@ Request:
 {
   orderId: string;
   handoverCode: string;
+  evidenceIds?: string[];
+  operationId?: string;
 }
 ```
 
@@ -388,22 +404,37 @@ Success response:
 {
   ok: true;
   handoverRecordId: string;
+  currentStatus: "paid_locked";
+  nextStatus: "item_handed_to_carrier";
 }
 ```
 
 Error codes:
 
 - `missing_params`
+- `invalid_evidence_ids`
+- `order_not_found`
+- `permission_denied`
+- `illegal_transition`
+- `invalid_handover_code`
 
 Writes:
 
 - `handover_records`
 - `audit_logs` with `action: "handover.confirmScan"`
+- `orders.status: "item_handed_to_carrier"`
+- `audit_logs` with `action: "order.transition"`
 
-TODO:
+Rules:
 
-- Verify handover code ownership and expiry.
-- Link handover confirmation to required evidence and order transition.
+- Caller must be requester or traveller.
+- Order must be `paid_locked`.
+- MVP mock code must match `HANDOVER-{last 6 chars of orderId}`.
+
+Remaining TODO:
+
+- Add expiring server-generated handover codes.
+- Require evidence ids before transition when policy is tightened.
 
 ## `evidence-create`
 
@@ -509,6 +540,8 @@ Request:
   orderId: string;
   reason: string;
   description: string;
+  evidenceIds?: string[];
+  operationId?: string;
 }
 ```
 
@@ -518,6 +551,8 @@ Success response:
 {
   ok: true;
   disputeId: string;
+  currentStatus: OrderStatus;
+  nextStatus: "disputed";
 }
 ```
 
@@ -526,15 +561,26 @@ Error codes:
 - `missing_order_id`
 - `missing_reason`
 - `missing_description`
+- `invalid_evidence_ids`
+- `order_not_found`
+- `permission_denied`
+- `order_already_disputed`
+- `terminal_order_state`
 
 Writes:
 
 - `disputes`
 - `audit_logs` with `action: "dispute.open"`
+- `orders.status: "disputed"`
+- `audit_logs` with `action: "order.transition"`
 
-TODO:
+Rules:
 
-- Verify caller is an order participant.
-- Link uploaded evidence ids.
+- Caller must be requester or traveller.
+- Terminal states `completed`, `cancelled`, and `refunded` cannot open a normal user dispute.
+- Uploaded evidence ids may be linked at open time.
+
+Remaining TODO:
+
 - Add admin decision function.
-- Move order to `disputed` through audited transition.
+- Prevent duplicate open disputes with a database uniqueness/idempotency pattern.

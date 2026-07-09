@@ -56,19 +56,20 @@ flowchart TD
   E --> G["handover-confirm-scan"]
   F --> H["Audit log"]
   G --> H
-  H --> I["Order transition to item_handed_to_carrier TODO"]
+  H --> I["Order: item_handed_to_carrier"]
 ```
 
 Current implementation:
 
 - Handover page collects checklist confirmation.
 - `handover-confirm-scan` creates `handover_records` and an audit log.
+- `handover-confirm-scan` advances the order from `paid_locked` to `item_handed_to_carrier`.
 - Evidence upload can preselect `handover_qr_scan`.
 
 Required follow-up:
 
 - Require evidence ids before transitioning to `item_handed_to_carrier`.
-- Verify handover code ownership and expiry.
+- Replace mock handover code with expiring server-generated code.
 - Ensure both parties can see relevant handover evidence.
 
 ## Delivery And Completion Flow
@@ -96,7 +97,7 @@ flowchart TD
   B --> C["Open dispute"]
   C --> D["disputes: open"]
   C --> E["audit_logs: dispute.open"]
-  D --> F["Order transition to disputed TODO"]
+  D --> F["Order: disputed"]
 ```
 
 Current implementation:
@@ -104,13 +105,12 @@ Current implementation:
 - Dispute page requires reason and description.
 - User can navigate to evidence upload before submission.
 - `dispute-open` creates a `disputes` record and audit log.
+- `dispute-open` advances the order to `disputed`.
 
 Required follow-up:
 
-- Include evidence ids in `disputes.evidenceIds`.
-- Move order to `disputed` through `order-transition`.
+- Pass evidence ids from frontend after upload.
 - Prevent duplicate open disputes for the same active order unless admin allows it.
-- Verify caller is an order participant.
 
 ## Admin Review Flow
 
@@ -199,10 +199,9 @@ Customs/airline proof:
 
 - Evidence upload currently sends `fileCount` fallback and does not upload cloud file ids yet.
 - `in_app_chat` is listed but no chat/evidence extraction model exists.
-- `payment-confirm-mock` does not create `payment_record` evidence yet.
-- `dispute-open` does not pass evidence ids.
+- Frontend does not pass dispute evidence ids yet.
 - Admin decision cloud function does not exist yet.
-- Order state transitions are not yet evidence-gated.
+- Order state transitions are not yet strictly evidence-gated.
 
 ## Implementation Checklist
 

@@ -342,10 +342,8 @@ Actions:
 
 Future backend behavior:
 
-- Create payment record.
-- Create payment audit log.
-- Transition order to `paid_locked`.
-- Create `payment_record` evidence.
+- Real payment provider callback should replace mock confirmation before launch.
+- Duplicate payment callbacks should be idempotent.
 
 ### `pages/handover/index`
 
@@ -368,9 +366,8 @@ Actions:
 
 Future backend behavior:
 
-- Verify code ownership and expiry.
+- Replace current derived mock code with server-generated expiring code.
 - Require evidence ids.
-- Transition order to `item_handed_to_carrier`.
 
 ### `pages/evidence/upload`
 
@@ -419,8 +416,7 @@ Actions:
 Future backend behavior:
 
 - Include evidence ids.
-- Verify caller is participant.
-- Transition order to `disputed`.
+- Prevent duplicate open disputes.
 
 ## State To Action Matrix
 
