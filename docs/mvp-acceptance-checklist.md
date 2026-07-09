@@ -26,11 +26,13 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Traveller can open trip creation page.
 - [ ] Required route fields are validated.
 - [ ] Departure and arrival dates are validated.
+- [ ] Arrival date cannot be earlier than departure date.
 - [ ] Capacity is capped at 5kg.
 - [ ] Acceptable categories must be selected from positive list.
 - [ ] Overbroad notes such as "anything is okay" are rejected.
 - [ ] `trip-create` creates `trips` record.
 - [ ] `trip-create` creates `audit_logs` record.
+- [ ] Missing flight number enters manual review instead of implying verified travel.
 - [ ] Trip list/detail can show the created or demo trip.
 
 ## Publish Item Request
@@ -42,7 +44,10 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Estimated weight is capped at 5kg.
 - [ ] Pickup and delivery cities are required.
 - [ ] Deadline is required.
+- [ ] Deadline must be a valid date.
 - [ ] Risk declaration must be accepted.
+- [ ] Optional item photo ids are validated when provided.
+- [ ] Risk flags are stored for MVP cap/category/photo state.
 - [ ] `item-request-create` creates `item_requests` record.
 - [ ] `item-request-create` creates `audit_logs` record.
 - [ ] Request list/detail can show the created or demo request.
@@ -52,7 +57,10 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Matching page can load with `tripId` or `requestId`.
 - [ ] `match-search` rejects missing target.
 - [ ] Match result shows route, date window, category, capacity, score, and reasons.
-- [ ] Matching excludes unreviewed or high-risk requests in real implementation.
+- [ ] Real matching excludes unreviewed requests.
+- [ ] Real matching excludes inactive trips.
+- [ ] Real matching excludes incompatible route/date/category/capacity candidates.
+- [ ] Real matching rejects non-owners for `tripId` or `requestId` search.
 - [ ] Matching reasons are understandable to both parties.
 
 ## Offer And Acceptance
@@ -61,6 +69,10 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Service fee quote must be positive.
 - [ ] Service fee quote is capped at CNY 500 for MVP.
 - [ ] Offer copy says the quote is service fee only.
+- [ ] `offer-create` rejects non-owners of the trip.
+- [ ] `offer-create` rejects self-offers.
+- [ ] `offer-create` rejects unapproved requests and inactive trips.
+- [ ] `offer-create` rejects incompatible route/date/category/capacity candidates.
 - [ ] `offer-create` creates `offers` record.
 - [ ] `offer-create` creates `audit_logs` record.
 - [ ] Request detail can accept pending offer.

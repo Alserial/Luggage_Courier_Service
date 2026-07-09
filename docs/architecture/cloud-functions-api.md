@@ -73,12 +73,20 @@ Request:
     quantity: number;
     declaredValue: number;
     estimatedWeightKg: number;
+    estimatedSize?: SizeEstimate;
+    purchaseMethod?: "owned_item" | "requester_purchased" | "unknown";
     pickupCity: string;
+    pickupCountry?: string;
+    pickupAddress?: string;
     deliveryCity: string;
+    deliveryCountry?: string;
+    deliveryAddress?: string;
     deadline: string;
+    itemPhotos?: string[];
     note?: string;
     riskDeclarationAccepted: boolean;
   };
+  operationId?: string;
 }
 ```
 
@@ -100,6 +108,8 @@ Error codes:
 - `invalid_weight`
 - `missing_locations`
 - `missing_deadline`
+- `invalid_deadline`
+- `invalid_item_photos`
 - `risk_declaration_required`
 
 Writes:
@@ -112,6 +122,8 @@ Rules:
 - `declaredValue` must be `> 0` and `<= 2000`.
 - `estimatedWeightKg` must be `> 0` and `<= 5`.
 - Category must be in the positive list.
+- Creates risk flags for positive-list category, value cap, weight cap, and item-photo state.
+- Audit log includes `operationId` when provided.
 
 ## `trip-create`
 
@@ -123,14 +135,21 @@ Request:
 {
   form: {
     fromCity: string;
+    fromCountry?: string;
+    fromAirportOrStation?: string;
     toCity: string;
+    toCountry?: string;
+    toAirportOrStation?: string;
     departureDate: string;
     arrivalDate: string;
     flightNo?: string;
     luggageCapacityKg: number;
     acceptableCategories: ItemCategory[];
+    unacceptableCategories?: ItemCategory[];
+    handoverPreference?: string;
     note?: string;
   };
+  operationId?: string;
 }
 ```
 
@@ -148,6 +167,8 @@ Error codes:
 - `missing_route`
 - `same_city`
 - `missing_dates`
+- `invalid_dates`
+- `arrival_before_departure`
 - `invalid_capacity`
 - `missing_categories`
 - `invalid_category`
@@ -163,6 +184,8 @@ Rules:
 - `luggageCapacityKg` must be `> 0` and `<= 5`.
 - `acceptableCategories` must be non-empty and positive-list only.
 - Notes must not claim broad carrying ability such as "anything is okay".
+- `verificationStatus` is `pending` when a flight number is supplied, otherwise `manual_review`.
+- Audit log includes `operationId` when provided.
 
 ## `match-search`
 
@@ -199,6 +222,11 @@ Success response:
 Error codes:
 
 - `missing_search_target`
+- `trip_not_found`
+- `request_not_found`
+- `permission_denied`
+- `trip_not_active`
+- `request_not_approved`
 
 Writes:
 
@@ -207,7 +235,9 @@ Writes:
 Rules:
 
 - Matching must stay explainable.
-- Future implementation should exclude unreviewed, rejected, or high-risk requests.
+- Real matching excludes unreviewed requests, inactive trips, incompatible routes, incompatible dates, incompatible categories, and insufficient capacity.
+- Travellers may search from their own `tripId`; requesters may search from their own `requestId`.
+- Demo ids beginning with `demo_` still return a demo candidate for local frontend fallback.
 
 ## `offer-create`
 
@@ -224,6 +254,7 @@ Request:
     message?: string;
     conditions?: string;
   };
+  operationId?: string;
 }
 ```
 
@@ -241,6 +272,16 @@ Error codes:
 - `missing_refs`
 - `invalid_fee`
 - `fee_too_high_for_mvp`
+- `request_not_found`
+- `trip_not_found`
+- `self_offer_not_allowed`
+- `permission_denied`
+- `request_not_approved`
+- `trip_not_active`
+- `category_not_accepted`
+- `capacity_not_enough`
+- `route_not_compatible`
+- `date_not_compatible`
 
 Writes:
 
@@ -251,6 +292,11 @@ Rules:
 
 - `serviceFeeQuote` must be `> 0` and `<= 500`.
 - Current offer expiry is 48 hours.
+- Caller must be the owner of the trip.
+- Caller cannot quote on their own item request.
+- Request must be approved and trip must be active.
+- Route, date, category, and capacity must be compatible.
+- Audit log includes `operationId` when provided.
 
 ## `offer-accept`
 

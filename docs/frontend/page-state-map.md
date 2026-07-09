@@ -446,5 +446,7 @@ Future backend behavior:
 - List pages currently use demo data.
 - Order detail has only payment, handover, evidence, and dispute actions.
 - Evidence upload uses `fileCount` fallback instead of cloud file ids.
-- Payment page does not transition order after mock payment yet.
+- Trip/request create pages submit real cloud-function payloads but do not yet refresh list pages from CloudBase.
+- Match search supports real owner-scoped matching when `tripId` or `requestId` points to real records.
+- Offer creation supports real backend compatibility checks, but the offer page still displays demo summary text.
 - Dispute page does not pass evidence ids yet.

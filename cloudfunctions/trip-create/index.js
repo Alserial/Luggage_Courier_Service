@@ -11,11 +11,28 @@ const allowedCategories = new Set([
   'daily_items',
 ]);
 
+function text(value) {
+  return String(value || '').trim();
+}
+
+function number(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
 function validate(form) {
-  if (!form.fromCity || !form.toCity) return 'missing_route';
-  if (form.fromCity === form.toCity) return 'same_city';
+  const fromCity = text(form.fromCity);
+  const toCity = text(form.toCity);
+  const departureTime = Date.parse(form.departureDate || form.departureTime);
+  const arrivalTime = Date.parse(form.arrivalDate || form.arrivalTime);
+  const luggageCapacityKg = number(form.luggageCapacityKg);
+
+  if (!fromCity || !toCity) return 'missing_route';
+  if (fromCity === toCity) return 'same_city';
   if (!form.departureDate || !form.arrivalDate) return 'missing_dates';
-  if (!form.luggageCapacityKg || form.luggageCapacityKg <= 0 || form.luggageCapacityKg > 5) return 'invalid_capacity';
+  if (Number.isNaN(departureTime) || Number.isNaN(arrivalTime)) return 'invalid_dates';
+  if (arrivalTime < departureTime) return 'arrival_before_departure';
+  if (!luggageCapacityKg || luggageCapacityKg <= 0 || luggageCapacityKg > 5) return 'invalid_capacity';
   if (!Array.isArray(form.acceptableCategories) || !form.acceptableCategories.length) return 'missing_categories';
   if (!form.acceptableCategories.every((item) => allowedCategories.has(item))) return 'invalid_category';
   if (/什么都|都可以|不限|随便/.test(form.note || '')) return 'overbroad_claim';
@@ -30,24 +47,29 @@ exports.main = async (event) => {
 
   const db = cloud.database();
   const now = new Date();
+  const acceptableCategories = Array.from(new Set(form.acceptableCategories));
+  const flightNo = text(form.flightNo);
+
   const result = await db.collection('trips').add({
     data: {
       travellerOpenid: OPENID,
-      fromCountry: '',
-      fromCity: form.fromCity,
-      fromAirportOrStation: '',
-      toCountry: '',
-      toCity: form.toCity,
-      toAirportOrStation: '',
+      fromCountry: text(form.fromCountry),
+      fromCity: text(form.fromCity),
+      fromAirportOrStation: text(form.fromAirportOrStation),
+      toCountry: text(form.toCountry),
+      toCity: text(form.toCity),
+      toAirportOrStation: text(form.toAirportOrStation),
       departureTime: form.departureDate,
       arrivalTime: form.arrivalDate,
-      flightNo: form.flightNo || '',
-      luggageCapacityKg: Number(form.luggageCapacityKg),
-      acceptableCategories: form.acceptableCategories,
-      unacceptableCategories: [],
-      handoverPreference: '',
-      note: form.note || '',
+      flightNo,
+      luggageCapacityKg: number(form.luggageCapacityKg),
+      acceptableCategories,
+      unacceptableCategories: Array.isArray(form.unacceptableCategories) ? form.unacceptableCategories.filter((item) => allowedCategories.has(item)) : [],
+      handoverPreference: text(form.handoverPreference),
+      note: text(form.note),
       status: 'active',
+      verificationStatus: flightNo ? 'pending' : 'manual_review',
+      verificationEvidenceIds: [],
       createdAt: now,
       updatedAt: now,
     },
@@ -61,7 +83,13 @@ exports.main = async (event) => {
       targetId: result._id,
       action: 'trip.create',
       before: null,
-      after: { status: 'active' },
+      after: {
+        status: 'active',
+        verificationStatus: flightNo ? 'pending' : 'manual_review',
+        luggageCapacityKg: number(form.luggageCapacityKg),
+        acceptableCategories,
+      },
+      operationId: event.operationId || '',
       createdAt: now,
     },
   });
