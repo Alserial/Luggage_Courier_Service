@@ -1,4 +1,9 @@
 export const cloudEnvId = 'replace-with-cloudbase-env-id';
+export const cloudEnvPlaceholder = 'replace-with-cloudbase-env-id';
+
+export function isCloudBaseConfigured(): boolean {
+  return Boolean(cloudEnvId && cloudEnvId !== cloudEnvPlaceholder);
+}
 
 export const appConfig = {
   valueCapCny: 2000,

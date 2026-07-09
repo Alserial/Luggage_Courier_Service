@@ -5,15 +5,19 @@
     <view class="page-desc">跟踪服务费记录、交接、运输、送达和争议证据。</view>
   </view>
 
-  <view class="card order-card" bindtap="goDetail">
+  <view class="card order-card" wx:for="{{orders}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
     <view>
-      <view class="card-title">{{order.itemName}}</view>
+      <view class="card-title">{{item.itemName}}</view>
       <view class="meta-line">
-        <text>{{order.route}}</text>
-        <text>{{order.statusLabel}}</text>
+        <text>{{item.route}}</text>
+        <text>{{item.statusLabel}}</text>
       </view>
     </view>
-    <view class="amount">{{order.totalText}}</view>
+    <view class="amount">{{item.totalText}}</view>
+  </view>
+
+  <view wx:if="{{!hasOrders}}" class="card">
+    <view class="muted">还没有订单，接受报价后会显示在这里。</view>
   </view>
 
   <view class="card">

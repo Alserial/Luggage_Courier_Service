@@ -1,3 +1,5 @@
+import { isCloudBaseConfigured } from '../config/env';
+
 type CloudCallOptions<T> = {
   name: string;
   data?: Record<string, unknown>;
@@ -5,7 +7,7 @@ type CloudCallOptions<T> = {
 };
 
 export async function callCloud<T>(options: CloudCallOptions<T>): Promise<T> {
-  if (!wx.cloud) {
+  if (!wx.cloud || !isCloudBaseConfigured()) {
     return options.fallback;
   }
 

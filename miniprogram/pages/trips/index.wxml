@@ -5,19 +5,23 @@
     <view class="page-desc">发布真实路线和可接受品类，系统只匹配低风险、容量兼容的需求。</view>
   </view>
 
-  <view class="card trip-card" bindtap="goDetail">
+  <view class="card trip-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
     <view>
-      <view class="card-title">{{trip.route}}</view>
+      <view class="card-title">{{item.route}}</view>
       <view class="meta-line">
-        <text>{{trip.departureDate}}</text>
-        <text>可用 {{trip.capacityKg}}kg</text>
+        <text>{{item.departureDate}}</text>
+        <text>可用 {{item.capacityKg}}kg</text>
       </view>
     </view>
-    <view class="status-pill status-neutral">示例</view>
+    <view class="status-pill status-neutral">{{item.verificationStatus}}</view>
+  </view>
+
+  <view wx:if="{{!hasTrips}}" class="card">
+    <view class="muted">还没有行程，发布后会显示在这里。</view>
   </view>
 
   <view class="button-row">
     <button class="primary-button" bindtap="goCreate">发布行程</button>
-    <button class="secondary-button" bindtap="goMatches">查看匹配</button>
+    <button class="secondary-button" data-id="{{trips[0].id}}" bindtap="goMatches">查看匹配</button>
   </view>
 </view>

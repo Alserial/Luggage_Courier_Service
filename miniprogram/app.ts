@@ -1,4 +1,4 @@
-import { cloudEnvId } from './config/env';
+import { cloudEnvId, isCloudBaseConfigured } from './config/env';
 
 App<IAppOption>({
   globalData: {
@@ -7,7 +7,7 @@ App<IAppOption>({
   },
 
   onLaunch() {
-    if (wx.cloud) {
+    if (wx.cloud && isCloudBaseConfigured()) {
       wx.cloud.init({
         env: cloudEnvId,
         traceUser: true,

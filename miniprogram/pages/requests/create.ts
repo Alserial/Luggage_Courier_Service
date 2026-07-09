@@ -53,13 +53,25 @@ Page({
       return;
     }
 
-    await callCloud({
+    const result = await callCloud<{ ok: boolean; requestId?: string; mock?: boolean; error?: string }>({
       name: 'item-request-create',
       data: { form },
       fallback: { ok: true, mock: true },
     });
 
+    if (!result.ok) {
+      wx.showToast({ title: result.error || '需求提交失败', icon: 'none' });
+      return;
+    }
+
     wx.showToast({ title: '已提交审核', icon: 'success' });
-    setTimeout(() => wx.switchTab({ url: '/pages/requests/index' }), 600);
+    const url = result.requestId ? `/pages/requests/detail?id=${result.requestId}` : '/pages/requests/index';
+    setTimeout(() => {
+      if (result.requestId) {
+        wx.navigateTo({ url });
+      } else {
+        wx.switchTab({ url });
+      }
+    }, 600);
   },
 });

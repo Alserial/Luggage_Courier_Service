@@ -62,13 +62,25 @@ Page({
       return;
     }
 
-    await callCloud({
+    const result = await callCloud<{ ok: boolean; tripId?: string; mock?: boolean; error?: string }>({
       name: 'trip-create',
       data: { form },
       fallback: { ok: true, mock: true },
     });
 
+    if (!result.ok) {
+      wx.showToast({ title: result.error || '行程提交失败', icon: 'none' });
+      return;
+    }
+
     wx.showToast({ title: '行程已提交', icon: 'success' });
-    setTimeout(() => wx.switchTab({ url: '/pages/trips/index' }), 600);
+    const url = result.tripId ? `/pages/trips/detail?id=${result.tripId}` : '/pages/trips/index';
+    setTimeout(() => {
+      if (result.tripId) {
+        wx.navigateTo({ url });
+      } else {
+        wx.switchTab({ url });
+      }
+    }, 600);
   },
 });

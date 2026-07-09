@@ -18,10 +18,17 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 |---|---|---|
 | `auth-login` | Create/update user login record | `users` |
 | `item-request-create` | Create item request for review | `item_requests`, `audit_logs` |
+| `item-request-review` | Admin/reviewer review item request | `item_requests`, `audit_logs` |
+| `item-request-list` | List current user's item requests | none |
+| `item-request-get` | Read current user's item request and pending offers | none |
 | `trip-create` | Create traveller trip | `trips`, `audit_logs` |
+| `trip-verify` | Admin/reviewer verify traveller trip | `trips`, `audit_logs` |
+| `trip-list` | List current user's trips | none |
+| `trip-get` | Read current user's trip | none |
 | `match-search` | Return explainable match candidates | none in current MVP |
 | `offer-create` | Create service-fee quote | `offers`, `audit_logs` |
 | `offer-accept` | Accept offer and create order | `orders`, `offers`, `audit_logs` |
+| `order-list` | List current user's orders | none |
 | `order-get` | Read order detail | none |
 | `payment-confirm-mock` | Create mock service-fee payment record and lock order | `payments`, `evidence`, `orders`, `audit_logs` |
 | `handover-confirm-scan` | Record handover QR scan/mock scan and advance order | `handover_records`, `orders`, `audit_logs` |
@@ -186,6 +193,121 @@ Rules:
 - Notes must not claim broad carrying ability such as "anything is okay".
 - `verificationStatus` is `pending` when a flight number is supplied, otherwise `manual_review`.
 - Audit log includes `operationId` when provided.
+
+## Review And Read APIs
+
+### `item-request-review`
+
+Admin/reviewer function to review an item request.
+
+Request:
+
+```ts
+{
+  requestId: string;
+  decision: "approved" | "rejected" | "manual_review";
+  reviewReason?: string;
+  operationId?: string;
+}
+```
+
+Success response:
+
+```ts
+{
+  ok: true;
+  requestId: string;
+  reviewStatus: "approved" | "rejected" | "manual_review";
+}
+```
+
+Error codes:
+
+- `missing_request_id`
+- `invalid_decision`
+- `missing_review_reason`
+- `permission_denied`
+- `request_not_found`
+
+Rules:
+
+- Caller must have `admin` or `reviewer` in `users.roleFlags`.
+- Rejected or manual-review decisions require `reviewReason`.
+- Writes `audit_logs` with `action: "itemRequest.review"`.
+
+### `trip-verify`
+
+Admin/reviewer function to verify a traveller trip.
+
+Request:
+
+```ts
+{
+  tripId: string;
+  decision: "approved" | "rejected" | "manual_review";
+  reviewReason?: string;
+  verificationEvidenceIds?: string[];
+  operationId?: string;
+}
+```
+
+Success response:
+
+```ts
+{
+  ok: true;
+  tripId: string;
+  verificationStatus: "approved" | "rejected" | "manual_review";
+}
+```
+
+Error codes:
+
+- `missing_trip_id`
+- `invalid_decision`
+- `invalid_evidence_ids`
+- `missing_review_reason`
+- `permission_denied`
+- `trip_not_found`
+
+Rules:
+
+- Caller must have `admin` or `reviewer` in `users.roleFlags`.
+- Rejected or manual-review decisions require `reviewReason`.
+- Writes `audit_logs` with `action: "trip.verify"`.
+
+### `trip-list` / `trip-get`
+
+Reads current user's trips.
+
+Requests:
+
+```ts
+{ limit?: number }
+{ tripId: string }
+```
+
+Rules:
+
+- `trip-list` only returns records where `travellerOpenid` is the caller.
+- `trip-get` rejects non-owner reads with `permission_denied`.
+
+### `item-request-list` / `item-request-get`
+
+Reads current user's item requests.
+
+Requests:
+
+```ts
+{ limit?: number }
+{ requestId: string }
+```
+
+Rules:
+
+- `item-request-list` only returns records where `requesterOpenid` is the caller.
+- `item-request-get` rejects non-owner reads with `permission_denied`.
+- `item-request-get` also returns up to 10 pending offers for the request owner.
 
 ## `match-search`
 
@@ -378,6 +500,37 @@ Notes:
 
 - Returns a demo response for `demo_order_001`.
 - Real orders can only be read by requester or traveller.
+- Real order responses include item and route summary when related request/trip records exist.
+
+## `order-list`
+
+Lists orders where current user is requester or traveller.
+
+Request:
+
+```ts
+{
+  limit?: number;
+}
+```
+
+Success response:
+
+```ts
+{
+  ok: true;
+  orders: object[];
+}
+```
+
+Writes:
+
+- none
+
+Rules:
+
+- Returns only orders where `requesterOpenid` or `travellerOpenid` matches caller.
+- Response includes item and route summary when related request/trip records exist.
 
 ## `payment-confirm-mock`
 

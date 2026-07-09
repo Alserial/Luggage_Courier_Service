@@ -5,15 +5,19 @@
     <view class="page-desc">管理已审核的低风险小件需求，进入详情后可查看报价和生成订单。</view>
   </view>
 
-  <view class="card request-card" bindtap="goDetail">
+  <view class="card request-card" wx:for="{{requests}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
     <view>
-      <view class="card-title">{{request.itemName}}</view>
+      <view class="card-title">{{item.itemName}}</view>
       <view class="meta-line">
-        <text>{{request.route}}</text>
-        <text>{{request.categoryLabel}}</text>
+        <text>{{item.route}}</text>
+        <text>{{item.categoryLabel}}</text>
       </view>
     </view>
-    <view class="status-pill">已审核</view>
+    <view class="status-pill">{{item.reviewStatus}}</view>
+  </view>
+
+  <view wx:if="{{!hasRequests}}" class="card">
+    <view class="muted">还没有需求，发布后会显示在这里。</view>
   </view>
 
   <view class="button-row">

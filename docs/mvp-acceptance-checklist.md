@@ -33,7 +33,9 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `trip-create` creates `trips` record.
 - [ ] `trip-create` creates `audit_logs` record.
 - [ ] Missing flight number enters manual review instead of implying verified travel.
-- [ ] Trip list/detail can show the created or demo trip.
+- [ ] `trip-verify` rejects non-admin/non-reviewer callers.
+- [ ] `trip-verify` updates `verificationStatus` and creates `audit_logs` record.
+- [ ] Trip list/detail can show the created or demo trip via `trip-list` and `trip-get`.
 
 ## Publish Item Request
 
@@ -50,7 +52,9 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Risk flags are stored for MVP cap/category/photo state.
 - [ ] `item-request-create` creates `item_requests` record.
 - [ ] `item-request-create` creates `audit_logs` record.
-- [ ] Request list/detail can show the created or demo request.
+- [ ] `item-request-review` rejects non-admin/non-reviewer callers.
+- [ ] `item-request-review` updates `reviewStatus` and creates `audit_logs` record.
+- [ ] Request list/detail can show the created or demo request via `item-request-list` and `item-request-get`.
 
 ## Matching
 
@@ -81,6 +85,8 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `offer-accept` creates `audit_logs` record.
 - [ ] `offer-accept` rejects users who do not own the request.
 - [ ] `offer-accept` rejects requests that are not approved.
+- [ ] Order list can show requester/traveller related real orders via `order-list`.
+- [ ] Order detail action buttons use the current order id, not a fixed demo id.
 
 ## Mock Payment
 
@@ -142,12 +148,14 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 ## CloudBase Setup
 
 - [ ] CloudBase environment id is configured.
+- [ ] Placeholder env id skips cloud initialization and keeps demo fallback working.
 - [ ] All required collections exist.
 - [ ] Required indexes are created.
 - [ ] Direct frontend writes to critical collections are disabled.
 - [ ] Cloud storage folders for evidence exist.
 - [ ] All cloud functions deploy successfully.
 - [ ] Cloud function dependencies are installed/deployed.
+- [ ] First admin/reviewer user is bootstrapped in `users.roleFlags`.
 
 ## Frontend Quality
 

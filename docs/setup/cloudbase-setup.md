@@ -25,22 +25,31 @@ Recommended setup:
 7. Configure restrictive collection permissions.
 8. Create cloud storage folders for evidence files.
 
+The Mini Program keeps `miniprogram/config/env.ts` as a placeholder until the real environment is confirmed. While `cloudEnvId` is `replace-with-cloudbase-env-id`, the frontend intentionally skips `wx.cloud.init()` and uses demo/fallback data.
+
 ## Deploy Order
 
 Deploy lower-level functions first, then order workflow functions.
 
 1. `auth-login`
 2. `item-request-create`
-3. `trip-create`
-4. `match-search`
-5. `offer-create`
-6. `offer-accept`
-7. `order-get`
-8. `payment-confirm-mock`
-9. `handover-confirm-scan`
-10. `evidence-create`
-11. `order-transition`
-12. `dispute-open`
+3. `item-request-review`
+4. `item-request-list`
+5. `item-request-get`
+6. `trip-create`
+7. `trip-verify`
+8. `trip-list`
+9. `trip-get`
+10. `match-search`
+11. `offer-create`
+12. `offer-accept`
+13. `order-list`
+14. `order-get`
+15. `payment-confirm-mock`
+16. `handover-confirm-scan`
+17. `evidence-create`
+18. `order-transition`
+19. `dispute-open`
 
 Each cloud function has its own `package.json`. In WeChat Developer Tools, upload and deploy each function folder under `cloudfunctions/`.
 
@@ -60,6 +69,19 @@ Create these collections before using the real CloudBase backend:
 - `audit_logs`
 
 The field-level schema is defined in `docs/architecture/data-model.md`.
+
+## First Admin Setup
+
+Review functions use `users.roleFlags` for access control.
+
+Bootstrap steps:
+
+1. Log in once from the Mini Program profile page so `auth-login` creates a `users` record.
+2. In CloudBase database console, find the record whose `openid` matches the operator.
+3. Add `admin` or `reviewer` to `roleFlags`.
+4. Use that account to call `item-request-review` and `trip-verify`.
+
+Do not add admin openids to frontend code. Admin/reviewer decisions must remain backend-only and audited.
 
 ## Index Plan
 
@@ -198,16 +220,20 @@ After CloudBase deployment:
 
 1. Run `auth-login` from the Mini Program profile page.
 2. Create an item request and confirm `item_requests` plus `audit_logs` records.
-3. Create a trip and confirm `trips` plus `audit_logs` records.
-4. Create an offer and accept it into an order.
-5. Run mock payment and confirm `payments`.
-6. Upload or mock evidence and confirm `evidence`.
-7. Open a dispute and confirm `disputes` plus `audit_logs`.
+3. Review the item request with `item-request-review` and confirm `reviewStatus: "approved"`.
+4. Create a trip and confirm `trips` plus `audit_logs` records.
+5. Verify the trip with `trip-verify`.
+6. Confirm trip/request/order list pages load real records instead of demo fallback.
+7. Run `match-search` and confirm only approved compatible requests appear.
+8. Create an offer and accept it into an order.
+9. Run mock payment and confirm `payments`.
+10. Upload or mock evidence and confirm `evidence`.
+11. Open a dispute and confirm `disputes` plus `audit_logs`.
 
 ## Known TODOs
 
 - Add scripted collection/index initialization.
 - Add CloudBase permission JSON exports once the target environment is confirmed.
 - Add payment provider callback function before enabling real payment.
-- Add admin review functions for item requests, trips, and disputes.
+- Add admin UI or CloudBase CMS views for item requests, trips, and disputes.
 - Add a storage upload wrapper so frontend stores file ids consistently.

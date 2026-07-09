@@ -9,23 +9,27 @@
     <view class="rule-line">只展示已审核、低风险、路线和容量兼容的需求。</view>
   </view>
 
-  <view class="card match-card">
+  <view class="card match-card" wx:for="{{matches}}" wx:key="id">
     <view class="match-header">
       <view>
-        <view class="card-title">{{match.route}}</view>
+        <view class="card-title">{{item.route}}</view>
         <view class="meta-line">
-          <text>{{match.dateWindow}}</text>
-          <text>{{match.categoryLabel}}</text>
+          <text>{{item.dateWindow}}</text>
+          <text>{{item.categoryLabel}}</text>
         </view>
       </view>
       <view class="score">
-        <text class="score-value">{{match.score}}</text>
+        <text class="score-value">{{item.score}}</text>
         <text class="score-label">匹配</text>
       </view>
     </view>
     <view class="tag-row reason-row">
-      <view class="tag tag-active" wx:for="{{match.reasons}}" wx:key="*this">{{item}}</view>
+      <view class="tag tag-active" wx:for="{{item.reasons}}" wx:for-item="reason" wx:key="*this">{{reason}}</view>
     </view>
-    <button class="primary-button" bindtap="goOffer">去报价</button>
+    <button class="primary-button" data-index="{{index}}" bindtap="goOffer">去报价</button>
+  </view>
+
+  <view wx:if="{{!hasMatches}}" class="card">
+    <view class="muted">暂无兼容匹配。请确认需求已审核通过、路线时间和容量一致。</view>
   </view>
 </view>

@@ -87,7 +87,8 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
-| Open trip detail | trip exists | none, navigates to detail |
+| Load trips | on page show | `trip-list` |
+| Open trip detail | trip exists | `trip-get` on detail page |
 | Publish trip | always visible | none, navigates to create |
 | View matches | trip exists | `match-search` on matches page |
 
@@ -138,6 +139,7 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
+| Load trip detail | on page load with `id` | `trip-get` |
 | View matching requests | trip active | `match-search` on matches page |
 
 ### `pages/requests/index`
@@ -157,7 +159,8 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
-| Open request detail | request exists | none, navigates to detail |
+| Load requests | on page show | `item-request-list` |
+| Open request detail | request exists | `item-request-get` on detail page |
 | Publish request | always visible | none, navigates to create |
 | View category rules | always visible | none |
 
@@ -213,6 +216,7 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
+| Load request detail | on page load with `id` | `item-request-get` |
 | Accept offer | offer status `pending`, request approved | `offer-accept` |
 
 After success:
@@ -287,6 +291,7 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
+| Load orders | on page show | `order-list` |
 | Open order detail | order exists | `order-get` on detail page |
 
 Backend read rule:
@@ -443,10 +448,11 @@ Future backend behavior:
 
 ## Current Gaps
 
-- List pages currently use demo data.
 - Order detail has only payment, handover, evidence, and dispute actions.
 - Evidence upload uses `fileCount` fallback instead of cloud file ids.
-- Trip/request create pages submit real cloud-function payloads but do not yet refresh list pages from CloudBase.
+- Trip/request/order list pages read real CloudBase data when `cloudEnvId` is configured and use demo fallback otherwise.
+- Trip/request create pages navigate to real detail pages when cloud functions return ids.
 - Match search supports real owner-scoped matching when `tripId` or `requestId` points to real records.
 - Offer creation supports real backend compatibility checks, but the offer page still displays demo summary text.
+- Admin/reviewer cloud functions exist, but an operator UI or CMS view is still needed.
 - Dispute page does not pass evidence ids yet.

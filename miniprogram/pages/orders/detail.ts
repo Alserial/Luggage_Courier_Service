@@ -1,12 +1,13 @@
 import { demoOrder } from '../../services/mock';
 import { callCloud } from '../../services/cloud';
 import { formatMoney } from '../../utils/fees';
+import { formatOrderRecord } from '../../utils/records';
 import { getOrderProgress, orderStatusLabels, orderTimeline } from '../../utils/order-state';
 import type { MockOrder } from '../../services/mock';
 
 Page({
   data: {
-    order: demoOrder,
+    order: formatOrderRecord(demoOrder),
     statusLabel: orderStatusLabels[demoOrder.status],
     progress: getOrderProgress(demoOrder.status),
     fee: {
@@ -32,7 +33,7 @@ Page({
       fallback: { ok: true, order: demoOrder },
     });
 
-    const order = result.order || demoOrder;
+    const order = formatOrderRecord((result.order || demoOrder) as unknown as Record<string, unknown>);
     const statusIndex = orderTimeline.indexOf(order.status);
     this.setData({
       order,
@@ -52,18 +53,18 @@ Page({
   },
 
   goPayment() {
-    wx.navigateTo({ url: `/pages/payment/index?orderId=${demoOrder.id}` });
+    wx.navigateTo({ url: `/pages/payment/index?orderId=${this.data.order.id}` });
   },
 
   goHandover() {
-    wx.navigateTo({ url: `/pages/handover/index?orderId=${demoOrder.id}` });
+    wx.navigateTo({ url: `/pages/handover/index?orderId=${this.data.order.id}` });
   },
 
   goEvidence() {
-    wx.navigateTo({ url: `/pages/evidence/upload?orderId=${demoOrder.id}` });
+    wx.navigateTo({ url: `/pages/evidence/upload?orderId=${this.data.order.id}` });
   },
 
   goDispute() {
-    wx.navigateTo({ url: `/pages/disputes/detail?orderId=${demoOrder.id}` });
+    wx.navigateTo({ url: `/pages/disputes/detail?orderId=${this.data.order.id}` });
   },
 });
