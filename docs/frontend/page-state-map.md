@@ -218,6 +218,7 @@ Actions:
 After success:
 
 - Navigate to order detail or show order-created success in future implementation.
+- Backend verifies the caller owns the request for real offers.
 
 ### `pages/matches/index`
 
@@ -287,6 +288,10 @@ Actions:
 | Action | Condition | Cloud function |
 |---|---|---|
 | Open order detail | order exists | `order-get` on detail page |
+
+Backend read rule:
+
+- Real orders can only be returned to requester or traveller.
 
 ### `pages/orders/detail`
 
@@ -393,6 +398,7 @@ Future backend behavior:
 
 - Upload to CloudBase storage first.
 - Pass `fileIds`, not only `fileCount`.
+- Backend already verifies the caller is an order participant.
 
 ### `pages/disputes/detail`
 

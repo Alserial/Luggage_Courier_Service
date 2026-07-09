@@ -13,23 +13,49 @@ const allowedEvidenceTypes = new Set([
   'mutual_confirmation',
 ]);
 
+async function getOrder(db, orderId) {
+  try {
+    return (await db.collection('orders').doc(orderId).get()).data;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getParticipantRole(order, openid) {
+  if (order.requesterOpenid === openid) return 'requester';
+  if (order.travellerOpenid === openid) return 'traveller';
+  return null;
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const { orderId, evidenceType, description = '', fileIds = [], fileCount = 0 } = event;
+  const { orderId, evidenceType, description = '', fileIds = [], fileCount = 0, operationId = '' } = event;
+  const normalizedFileCount = Number(fileCount);
 
   if (!orderId) return { ok: false, error: 'missing_order_id' };
+  if (!Array.isArray(fileIds)) return { ok: false, error: 'invalid_file_ids' };
+  if (!Number.isFinite(normalizedFileCount) || normalizedFileCount < 0) {
+    return { ok: false, error: 'invalid_file_count' };
+  }
   if (!allowedEvidenceTypes.has(evidenceType)) return { ok: false, error: 'invalid_evidence_type' };
-  if (!fileIds.length && !fileCount) return { ok: false, error: 'missing_files' };
+  if (!fileIds.length && !normalizedFileCount) return { ok: false, error: 'missing_files' };
 
   const db = cloud.database();
   const now = new Date();
+  const order = await getOrder(db, orderId);
+
+  if (!order) return { ok: false, error: 'order_not_found' };
+
+  const actorRole = getParticipantRole(order, OPENID);
+  if (!actorRole) return { ok: false, error: 'permission_denied' };
+
   const evidence = await db.collection('evidence').add({
     data: {
       orderId,
       uploaderOpenid: OPENID,
       evidenceType,
       fileIds,
-      fileCount,
+      fileCount: fileIds.length || normalizedFileCount,
       description,
       visibility: 'both_parties',
       metadata: {
@@ -47,7 +73,8 @@ exports.main = async (event) => {
       targetId: evidence._id,
       action: 'evidence.create',
       before: null,
-      after: { orderId, evidenceType, fileCount: fileIds.length || fileCount },
+      after: { orderId, evidenceType, fileCount: fileIds.length || normalizedFileCount },
+      operationId,
       createdAt: now,
     },
   });

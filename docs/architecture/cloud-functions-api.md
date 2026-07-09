@@ -261,6 +261,7 @@ Request:
 ```ts
 {
   offerId: string;
+  operationId?: string;
 }
 ```
 
@@ -278,6 +279,9 @@ Error codes:
 - `missing_offer_id`
 - `offer_not_found`
 - `offer_not_pending`
+- `request_not_found`
+- `permission_denied`
+- `request_not_approved`
 
 Writes:
 
@@ -290,6 +294,8 @@ Rules:
 - Creates service-fee `feeBreakdown`.
 - Does not create or hold merchandise payment.
 - Demo fallback exists for `demo_offer_001`.
+- Real offers can only be accepted by the request owner.
+- Real requests must be `approved`.
 
 ## `order-get`
 
@@ -315,6 +321,8 @@ Success response:
 Error codes:
 
 - `missing_order_id`
+- `order_not_found`
+- `permission_denied`
 
 Writes:
 
@@ -323,7 +331,7 @@ Writes:
 Notes:
 
 - Returns a demo response for `demo_order_001`.
-- Future implementation should verify the caller is an order participant or admin before returning a real order.
+- Real orders can only be read by requester or traveller.
 
 ## `payment-confirm-mock`
 
@@ -449,6 +457,7 @@ Request:
   description?: string;
   fileIds?: string[];
   fileCount?: number;
+  operationId?: string;
 }
 ```
 
@@ -464,8 +473,12 @@ Success response:
 Error codes:
 
 - `missing_order_id`
+- `invalid_file_ids`
+- `invalid_file_count`
 - `invalid_evidence_type`
 - `missing_files`
+- `order_not_found`
+- `permission_denied`
 
 Writes:
 
@@ -477,6 +490,7 @@ Rules:
 - `evidenceType` must be in the required evidence type list.
 - At least one file id or mock file count is required.
 - Evidence must not be overwritten.
+- Caller must be requester or traveller on the order.
 
 ## `order-transition`
 
@@ -489,6 +503,8 @@ Request:
   orderId: string;
   nextStatus: OrderStatus;
   reason?: string;
+  evidenceIds?: string[];
+  operationId?: string;
 }
 ```
 
@@ -505,6 +521,9 @@ Success response:
 Error codes:
 
 - `missing_params`
+- `invalid_evidence_ids`
+- `order_not_found`
+- `permission_denied`
 - `illegal_transition`
 
 Writes:
@@ -523,10 +542,14 @@ Allowed transitions:
 - `delivered -> completed | disputed`
 - `disputed -> refunded | completed | cancelled`
 
-TODO:
+Rules:
 
-- Add actor role checks.
-- Require evidence ids for evidence-gated transitions.
+- Caller must be requester or traveller on the order.
+- Audit log includes `evidenceIds` and `operationId` when provided.
+
+Remaining TODO:
+
+- Require evidence ids for stricter evidence-gated transitions.
 - Add idempotency via `operationId`.
 
 ## `dispute-open`

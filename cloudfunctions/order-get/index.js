@@ -2,7 +2,12 @@ const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
+function isParticipant(order, openid) {
+  return order.requesterOpenid === openid || order.travellerOpenid === openid;
+}
+
 exports.main = async (event) => {
+  const { OPENID } = cloud.getWXContext();
   const { orderId } = event;
   if (!orderId) return { ok: false, error: 'missing_order_id' };
 
@@ -32,6 +37,14 @@ exports.main = async (event) => {
   }
 
   const db = cloud.database();
-  const order = await db.collection('orders').doc(orderId).get();
-  return { ok: true, order: order.data };
+  let order;
+  try {
+    order = (await db.collection('orders').doc(orderId).get()).data;
+  } catch (error) {
+    return { ok: false, error: 'order_not_found' };
+  }
+
+  if (!isParticipant(order, OPENID)) return { ok: false, error: 'permission_denied' };
+
+  return { ok: true, order };
 };

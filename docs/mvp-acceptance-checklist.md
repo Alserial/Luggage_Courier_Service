@@ -67,6 +67,8 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `offer-accept` creates `orders` record in `pending_payment`.
 - [ ] `offer-accept` updates real offer to `accepted`.
 - [ ] `offer-accept` creates `audit_logs` record.
+- [ ] `offer-accept` rejects users who do not own the request.
+- [ ] `offer-accept` rejects requests that are not approved.
 
 ## Mock Payment
 
@@ -96,6 +98,7 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] User can choose image/video.
 - [ ] User cannot submit evidence without files.
 - [ ] `evidence-create` validates evidence type.
+- [ ] `evidence-create` rejects non-participants.
 - [ ] `evidence-create` creates `evidence` record.
 - [ ] `evidence-create` creates `audit_logs` record.
 - [ ] CloudBase storage file id upload is implemented or tracked as explicit TODO.
@@ -105,7 +108,9 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 
 - [ ] Order state labels match canonical `OrderStatus`.
 - [ ] `order-transition` rejects illegal transitions.
+- [ ] `order-transition` rejects non-participants.
 - [ ] Every transition creates `audit_logs` record.
+- [ ] Transition audit logs can include `evidenceIds` and `operationId`.
 - [ ] Evidence-gated transitions are implemented or tracked as explicit TODO.
 - [ ] Active dispute blocks completion.
 - [ ] Cancel/refund behavior is explicit before launch.

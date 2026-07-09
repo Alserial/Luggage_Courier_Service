@@ -13,14 +13,33 @@ const allowedTransitions = {
   disputed: ['refunded', 'completed', 'cancelled'],
 };
 
+async function getOrder(db, orderId) {
+  try {
+    return (await db.collection('orders').doc(orderId).get()).data;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getParticipantRole(order, openid) {
+  if (order.requesterOpenid === openid) return 'requester';
+  if (order.travellerOpenid === openid) return 'traveller';
+  return null;
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const { orderId, nextStatus, reason = '' } = event;
+  const { orderId, nextStatus, reason = '', evidenceIds = [], operationId = '' } = event;
   if (!orderId || !nextStatus) return { ok: false, error: 'missing_params' };
+  if (!Array.isArray(evidenceIds)) return { ok: false, error: 'invalid_evidence_ids' };
 
   const db = cloud.database();
-  const orderDoc = await db.collection('orders').doc(orderId).get();
-  const order = orderDoc.data;
+  const order = await getOrder(db, orderId);
+  if (!order) return { ok: false, error: 'order_not_found' };
+
+  const actorRole = getParticipantRole(order, OPENID);
+  if (!actorRole) return { ok: false, error: 'permission_denied' };
+
   const currentStatus = order.status;
   const allowed = allowedTransitions[currentStatus] || [];
 
@@ -46,6 +65,8 @@ exports.main = async (event) => {
       before: { status: currentStatus },
       after: { status: nextStatus },
       reason,
+      evidenceIds,
+      operationId,
       createdAt: now,
     },
   });

@@ -12,9 +12,17 @@ function feeBreakdown(serviceFee) {
   };
 }
 
+async function getItemRequest(db, requestId) {
+  try {
+    return (await db.collection('item_requests').doc(requestId).get()).data;
+  } catch (error) {
+    return null;
+  }
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
-  const { offerId } = event;
+  const { offerId, operationId = '' } = event;
   if (!offerId) return { ok: false, error: 'missing_offer_id' };
 
   const db = cloud.database();
@@ -36,6 +44,13 @@ exports.main = async (event) => {
   }
 
   if (offer.status !== 'pending') return { ok: false, error: 'offer_not_pending' };
+
+  if (offerId !== 'demo_offer_001') {
+    const request = await getItemRequest(db, offer.requestId);
+    if (!request) return { ok: false, error: 'request_not_found' };
+    if (request.requesterOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
+    if (request.reviewStatus !== 'approved') return { ok: false, error: 'request_not_approved' };
+  }
 
   const order = await db.collection('orders').add({
     data: {
@@ -81,6 +96,7 @@ exports.main = async (event) => {
       action: 'offer.accept',
       before: null,
       after: { status: 'pending_payment', offerId },
+      operationId,
       createdAt: now,
     },
   });
