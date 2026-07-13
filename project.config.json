@@ -50,8 +50,8 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.8.7",
-  "appid": "wx37f3903e010f93ae",
+  "libVersion": "3.16.2",
+  "appid": "wx33ac8ad40bb5bc66",
   "projectname": "Luggage_Courier_Service",
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",

@@ -3,10 +3,11 @@
   <view class="card profile-card">
     <view class="avatar">用</view>
     <view>
-      <view class="profile-name">未登录用户</view>
+      <view class="profile-name">{{loggedIn ? '已登录用户' : '未登录用户'}}</view>
       <view class="muted">实名状态：未认证</view>
+      <view wx:if="{{userId}}" class="muted">用户ID：{{userId}}</view>
     </view>
   </view>
-  <button class="primary-button" bindtap="mockLogin">微信登录 Mock</button>
+  <button class="primary-button" loading="{{loginLoading}}" bindtap="mockLogin">微信登录 Mock</button>
   <button class="secondary-button rule-button" bindtap="goRules">查看平台规则</button>
 </view>

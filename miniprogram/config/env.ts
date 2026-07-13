@@ -1,4 +1,4 @@
-export const cloudEnvId = 'replace-with-cloudbase-env-id';
+export const cloudEnvId: string = 'luggage-d1ghv33fy2cb9ef96';
 export const cloudEnvPlaceholder = 'replace-with-cloudbase-env-id';
 
 export function isCloudBaseConfigured(): boolean {

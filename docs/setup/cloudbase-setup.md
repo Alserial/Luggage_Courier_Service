@@ -8,10 +8,10 @@ The MVP uses CloudBase for cloud functions, database collections, cloud storage,
 
 | Item | Value |
 |---|---|
-| Mini Program appid | `wx37f3903e010f93ae` |
+| Mini Program appid | `wx33ac8ad40bb5bc66` |
 | Mini Program root | `miniprogram/` |
 | Cloud function root | `cloudfunctions/` |
-| CloudBase environment id | TODO: set in WeChat Developer Tools |
+| CloudBase environment id | `luggage-d1ghv33fy2cb9ef96` |
 | Runtime | Node.js cloud functions using `wx-server-sdk` |
 
 Recommended setup:
