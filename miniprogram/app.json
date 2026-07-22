@@ -11,11 +11,13 @@
     "pages/offers/create",
     "pages/orders/index",
     "pages/orders/detail",
+    "pages/chat/index",
     "pages/payment/index",
     "pages/handover/index",
     "pages/evidence/upload",
     "pages/disputes/detail",
     "pages/profile/index",
+    "pages/reviews/index",
     "pages/rules/index"
   ],
   "window": {

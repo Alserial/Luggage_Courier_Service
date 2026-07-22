@@ -43,3 +43,25 @@
   font-size: 30rpx;
   font-weight: 900;
 }
+
+.detail-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14rpx;
+}
+
+.detail-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10rpx;
+  background: #eef2f4;
+}
+
+.detail-error {
+  color: #b42318;
+  font-size: 28rpx;
+}
+
+.public-notice {
+  border-left: 6rpx solid #0f766e;
+}

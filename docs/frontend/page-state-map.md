@@ -39,7 +39,7 @@ Actions:
 Purpose:
 
 - Show user identity and verification status.
-- Trigger mock login.
+- Trigger formal WeChat identity login through `wx.login` plus `auth-login`.
 
 Displayed data:
 
@@ -51,7 +51,7 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
-| WeChat login mock | when not logged in or for refresh | `auth-login` |
+| WeChat one-tap login / refresh | when not logged in or for refresh | `auth-login` |
 | View rules | always visible | none, navigates to `pages/rules/index` |
 
 ### `pages/rules/index`
@@ -74,7 +74,7 @@ Actions:
 
 Purpose:
 
-- Show traveller's trip list/summary.
+- Show the verified public trip marketplace and the caller's own trip list.
 
 Displayed data:
 
@@ -88,9 +88,13 @@ Actions:
 | Action | Condition | Cloud function |
 |---|---|---|
 | Load trips | on page show | `trip-list` |
+| Switch public/my scope | always visible | `trip-list` with `scope` |
+| Pull down to refresh | user gesture | `trip-list` for current scope |
 | Open trip detail | trip exists | `trip-get` on detail page |
 | Publish trip | always visible | none, navigates to create |
-| View matches | trip exists | `match-search` on matches page |
+| View matches | own trip exists | `match-search` on matches page |
+
+Refresh policy: cache public and own scopes independently. Re-entering the tab or switching to an already loaded scope does not call the backend. Invalidate and reload the current scope after a successful WeChat login; also refresh on pull-down or explicit retry.
 
 ### `pages/trips/create`
 
@@ -140,13 +144,15 @@ Actions:
 | Action | Condition | Cloud function |
 |---|---|---|
 | Load trip detail | on page load with `id` | `trip-get` |
-| View matching requests | trip active | `match-search` on matches page |
+| View matching requests | caller owns active trip | `match-search` on matches page |
+
+Public detail omits the carrier OpenID and owner-only note/review fields.
 
 ### `pages/requests/index`
 
 Purpose:
 
-- Show requester's item requests.
+- Show the approved public request marketplace and the caller's own request list.
 
 Displayed data:
 
@@ -160,9 +166,15 @@ Actions:
 | Action | Condition | Cloud function |
 |---|---|---|
 | Load requests | on page show | `item-request-list` |
+| Switch public/my scope | always visible | `item-request-list` with `scope` |
+| Pull down to refresh | user gesture | `item-request-list` for current scope |
 | Open request detail | request exists | `item-request-get` on detail page |
 | Publish request | always visible | none, navigates to create |
 | View category rules | always visible | none |
+
+Public detail omits the requester OpenID, owner-only note/review fields, and private offers. Accepting an offer remains owner-only.
+
+Refresh policy: cache public and own scopes independently. Re-entering the tab or switching to an already loaded scope does not call the backend. Invalidate and reload the current scope after a successful WeChat login; also refresh on pull-down or explicit retry.
 
 ### `pages/requests/create`
 
@@ -179,6 +191,7 @@ Displayed/input data:
 - estimated weight
 - pickup/delivery city
 - deadline
+- item photos
 - note
 - risk declaration
 
@@ -186,13 +199,26 @@ Actions:
 
 | Action | Condition | Cloud function |
 |---|---|---|
+| Select photos | fewer than 6 selected and not submitting | none; camera/album picker |
+| Preview photo | photo selected | none |
+| Remove photo | photo selected and not submitting | none |
 | Submit request | local validation passes | `item-request-create` |
+
+Submit sequence:
+
+1. Validate the full form and require at least one photo.
+2. Upload pending images to CloudBase storage with progress feedback.
+3. Preserve successful upload file ids when a partial upload fails so retry does not duplicate them.
+4. Call `item-request-create` with 1 to 6 `cloud://` file ids.
+5. Lock the form action while uploading/submitting and show an actionable error on failure.
 
 Local validation:
 
 - category must be positive-list
 - value `> 0` and `<= 2000`
 - weight `> 0` and `<= 5`
+- 1 to 6 image files
+- each selected image `<= 5 MB`
 - risk declaration accepted
 
 ### `pages/requests/detail`
@@ -209,6 +235,7 @@ Displayed data:
 - declared value
 - estimated weight
 - deadline
+- item-photo gallery with tap-to-preview
 - risk flags
 - offer quote
 
@@ -320,6 +347,7 @@ Actions:
 |---|---|---|
 | Mock payment | `order.status === "pending_payment"` | navigates to payment page, then `payment-confirm-mock` |
 | Handover confirmation | `order.status === "paid_locked"` | navigates to handover page, then `handover-confirm-scan` |
+| Open supervised chat | accepted order and caller is participant | navigates to `pages/chat/index` |
 | Upload evidence | all active states | `evidence-create` on evidence page |
 | Open dispute | all active states | `dispute-open` on dispute page |
 
@@ -330,6 +358,41 @@ Future state-gated actions:
 - Mark delivered
 - Mutual confirmation
 - Complete order
+
+### `pages/chat/index`
+
+Purpose:
+
+- Provide supervised, append-only text communication between the two order participants.
+
+Displayed data/states:
+
+- order item/route context
+- supervision and record-retention notice
+- paged message history
+- sender, server timestamp, system messages, and read-only state
+- loading, empty, reconnecting, sending, visible, under-review, blocked, and send-error states
+- report action for individual messages
+
+Actions:
+
+| Action | Condition | Cloud function |
+|---|---|---|
+| Load/get conversation | accepted order and caller is participant | `chat-conversation-get` |
+| Load history | conversation available | `chat-message-list` |
+| Send text | non-empty, <= 500 characters, conversation active | `chat-message-send` |
+| Mark read | visible message received/viewed | `chat-mark-read` |
+| Report message | caller is participant | `chat-message-report` |
+| Upload transaction proof | user needs to share an item/handover/delivery file | navigate to `pages/evidence/upload` |
+
+Realtime behavior:
+
+- Use a participant-scoped CloudBase `watch()` only after read permissions are deployed and tested.
+- Close the watcher in `onUnload` and before opening a replacement watcher.
+- Fall back to bounded foreground polling when watch is unavailable.
+- Initial release is text-only; images/videos remain in the evidence workflow.
+
+The page and backend are implemented. CloudBase deployment must include the documented collections, indexes, participant-scoped read rules, content-security permission, and all chat functions. See `docs/architecture/in-app-chat.md`.
 
 ### `pages/payment/index`
 
@@ -454,5 +517,6 @@ Future backend behavior:
 - Trip/request create pages navigate to real detail pages when cloud functions return ids.
 - Match search supports real owner-scoped matching when `tripId` or `requestId` points to real records.
 - Offer creation supports real backend compatibility checks, but the offer page still displays demo summary text.
-- Admin/reviewer cloud functions exist, but an operator UI or CMS view is still needed.
+- Minimal operator review page exists at `pages/reviews/index` for pending item requests and trip verification. Broader order/dispute admin handling is still needed.
 - Dispute page does not pass evidence ids yet.
+- Supervised order chat is implemented with realtime-watch fallback polling, server moderation, reporting, admin review, and evidence snapshots; production deployment/privacy/retention validation remains.

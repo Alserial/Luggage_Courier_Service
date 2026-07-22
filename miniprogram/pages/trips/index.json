@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "行程"
+  "navigationBarTitleText": "行程",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f4f7f8"
 }

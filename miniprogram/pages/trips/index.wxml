@@ -1,11 +1,25 @@
 <view class="page">
   <view class="page-header">
     <view class="eyebrow">TRIPS</view>
-    <view class="page-title">我的行程</view>
-    <view class="page-desc">发布真实路线和可接受品类，系统只匹配低风险、容量兼容的需求。</view>
+    <view class="page-title">同行行程</view>
+    <view class="page-desc">公开大厅只展示平台已核验的有效行程；“我的发布”可管理自己的路线。</view>
   </view>
 
-  <view class="card trip-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+  <view class="scope-tabs" role="tablist">
+    <view class="scope-tab {{scope === 'market' ? 'scope-tab-active' : ''}}" data-scope="market" bindtap="switchScope">公开大厅</view>
+    <view class="scope-tab {{scope === 'mine' ? 'scope-tab-active' : ''}}" data-scope="mine" bindtap="switchScope">我的发布</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card list-state">
+    <view class="muted">正在加载行程...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card list-state">
+    <view class="error-text">{{errorText}}</view>
+    <button class="secondary-button retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <view wx:if="{{!loading && !errorText}}" class="card trip-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
     <view>
       <view class="card-title">{{item.route}}</view>
       <view class="meta-line">
@@ -13,15 +27,15 @@
         <text>可用 {{item.capacityKg}}kg</text>
       </view>
     </view>
-    <view class="status-pill status-neutral">{{item.verificationStatus}}</view>
+    <view class="status-pill status-neutral">{{scope === 'market' ? '已核验' : item.verificationStatus}}</view>
   </view>
 
-  <view wx:if="{{!hasTrips}}" class="card">
-    <view class="muted">还没有行程，发布后会显示在这里。</view>
+  <view wx:if="{{!loading && !errorText && !hasTrips}}" class="card list-state">
+    <view class="muted">{{scope === 'market' ? '暂时没有其他用户已核验的有效行程。' : '你还没有发布行程。'}}</view>
   </view>
 
   <view class="button-row">
     <button class="primary-button" bindtap="goCreate">发布行程</button>
-    <button class="secondary-button" data-id="{{trips[0].id}}" bindtap="goMatches">查看匹配</button>
+    <button wx:if="{{scope === 'mine'}}" class="secondary-button" data-id="{{trips[0].id}}" bindtap="goMatches">查看匹配</button>
   </view>
 </view>

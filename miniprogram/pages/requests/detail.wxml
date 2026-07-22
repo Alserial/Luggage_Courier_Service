@@ -1,10 +1,26 @@
 <view class="page">
+  <view wx:if="{{loading}}" class="card">
+    <view class="muted">正在加载需求详情...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card">
+    <view class="detail-error">{{errorText}}</view>
+  </view>
+
+  <block wx:if="{{!loading && !errorText}}">
   <view class="card">
     <view class="eyebrow">REQUEST DETAIL</view>
     <view class="detail-title">{{request.itemName}}</view>
     <view class="meta-line">
       <text>{{request.route}}</text>
       <text>{{request.categoryLabel}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{request.itemPhotos.length}}" class="card">
+    <view class="section-title compact-title">物品图片</view>
+    <view class="detail-photo-grid">
+      <image wx:for="{{request.itemPhotos}}" wx:key="*this" class="detail-photo" src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewItemPhoto" />
     </view>
   </view>
 
@@ -21,7 +37,7 @@
     </view>
   </view>
 
-  <view wx:if="{{hasOffer}}" class="card offer-card">
+  <view wx:if="{{isOwner && hasOffer}}" class="card offer-card">
     <view>
       <view class="offer-title">{{offer.travellerName}} 的报价</view>
       <view class="muted">{{offer.conditions}}</view>
@@ -29,9 +45,15 @@
     <view class="offer-fee">CNY {{offer.serviceFeeQuote}}</view>
   </view>
 
-  <view wx:else class="card">
+  <view wx:elif="{{isOwner}}" class="card">
     <view class="muted">暂无待处理报价。</view>
   </view>
 
-  <button class="primary-button" loading="{{accepting}}" bindtap="acceptOffer">接受报价并生成订单</button>
+  <view wx:else class="card public-notice">
+    <view class="section-title compact-title">公开需求</view>
+    <view class="muted">该需求已通过平台审核。发布者身份和报价记录不会在公开页面展示。</view>
+  </view>
+
+  <button wx:if="{{isOwner}}" class="primary-button" loading="{{accepting}}" bindtap="acceptOffer">接受报价并生成订单</button>
+  </block>
 </view>

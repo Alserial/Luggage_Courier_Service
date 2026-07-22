@@ -22,3 +22,13 @@ export async function callCloud<T>(options: CloudCallOptions<T>): Promise<T> {
     return options.fallback;
   }
 }
+
+export async function uploadCloudFile(cloudPath: string, filePath: string): Promise<string> {
+  if (!wx.cloud || !isCloudBaseConfigured()) {
+    throw new Error('cloud_not_configured');
+  }
+
+  const result = await wx.cloud.uploadFile({ cloudPath, filePath });
+  if (!result.fileID) throw new Error('missing_file_id');
+  return result.fileID;
+}

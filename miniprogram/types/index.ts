@@ -50,6 +50,9 @@ export type DisputeDecisionAction = 'none' | 'refund' | 'complete' | 'cancel_ord
 export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 export type UserRoleFlag = 'requester' | 'traveller' | 'admin' | 'reviewer';
 export type ActorRole = 'user' | 'traveller' | 'requester' | 'admin' | 'system';
+export type ConversationStatus = 'active' | 'read_only' | 'closed';
+export type MessageType = 'text' | 'system';
+export type MessageModerationStatus = 'visible' | 'under_review' | 'blocked' | 'admin_hidden';
 export type AuditTargetType =
   | 'user'
   | 'item_request'
@@ -58,6 +61,9 @@ export type AuditTargetType =
   | 'order'
   | 'payment'
   | 'evidence'
+  | 'conversation'
+  | 'message'
+  | 'message_report'
   | 'handover_record'
   | 'dispute';
 
@@ -140,6 +146,7 @@ export interface ItemRequestDraft {
   pickupCity: string;
   deliveryCity: string;
   deadline: string;
+  itemPhotos: string[];
   note: string;
   riskDeclarationAccepted: boolean;
 }
@@ -231,11 +238,64 @@ export interface EvidenceRecord {
   uploaderOpenid: string;
   evidenceType: EvidenceType;
   fileIds: string[];
+  storagePath: string;
   fileCount: number;
   description: string;
   visibility: EvidenceVisibility;
   metadata: Record<string, unknown>;
   createdAt: CloudDate;
+}
+
+export interface ConversationRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  participantOpenids: string[];
+  status: ConversationStatus;
+  lastMessageId: EntityId | '';
+  lastMessagePreview: string;
+  lastMessageAt: CloudDate | null;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface MessageRecord {
+  _id: EntityId;
+  conversationId: EntityId;
+  orderId: EntityId;
+  participantOpenids: string[];
+  senderOpenid: string;
+  senderRole: 'requester' | 'traveller' | 'system' | 'admin';
+  messageType: MessageType;
+  content: string;
+  moderationStatus: MessageModerationStatus;
+  moderationReason: string;
+  clientMessageId: string;
+  orderStatusAtSend: OrderStatus;
+  createdAt: CloudDate;
+}
+
+export interface MessageReceiptRecord {
+  _id: EntityId;
+  conversationId: EntityId;
+  orderId: EntityId;
+  readerOpenid: string;
+  lastReadMessageId: EntityId | '';
+  lastReadAt: CloudDate;
+  updatedAt: CloudDate;
+}
+
+export interface MessageReportRecord {
+  _id: EntityId;
+  orderId: EntityId;
+  conversationId: EntityId;
+  messageId: EntityId;
+  reporterOpenid: string;
+  reason: string;
+  description: string;
+  status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
+  decision: Record<string, unknown> | null;
+  createdAt: CloudDate;
+  updatedAt: CloudDate;
 }
 
 export interface PaymentRecord {

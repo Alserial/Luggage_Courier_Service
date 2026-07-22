@@ -23,6 +23,16 @@
   font-weight: 800;
 }
 
-.rule-button {
+.rule-button,
+.review-button {
   margin-top: 18rpx;
+}
+
+.login-note {
+  margin-top: 24rpx;
+}
+
+.login-title {
+  margin-bottom: 12rpx;
+  font-size: 30rpx;
 }

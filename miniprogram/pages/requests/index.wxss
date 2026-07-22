@@ -4,3 +4,40 @@
   justify-content: space-between;
   gap: 18rpx;
 }
+
+.scope-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8rpx;
+  margin-bottom: 24rpx;
+  padding: 8rpx;
+  border-radius: 12rpx;
+  background: #e7edef;
+}
+
+.scope-tab {
+  padding: 18rpx 12rpx;
+  border-radius: 8rpx;
+  color: #667085;
+  font-size: 28rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.scope-tab-active {
+  background: #ffffff;
+  color: #0f766e;
+}
+
+.list-state {
+  text-align: center;
+}
+
+.error-text {
+  color: #b42318;
+  font-size: 28rpx;
+}
+
+.retry-button {
+  margin-top: 20rpx;
+}

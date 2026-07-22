@@ -15,4 +15,12 @@
     <view class="rule-line">通关、查验、税费、退运或没收结果以海关和航空公司要求为准。</view>
     <view class="rule-line">用户不得虚假申报、隐藏物品信息或诱导站外交易。</view>
   </view>
+
+  <view class="section-title">站内沟通规则</view>
+  <view class="card notice-card">
+    <view class="rule-line">订单沟通内容由平台保存并进行安全检查，可用于履约核对、风险审核和争议处理。</view>
+    <view class="rule-line">不得发送手机号、微信号、二维码、站外支付指引或协商禁限品。</view>
+    <view class="rule-line">违规或不确定内容可能被拦截、暂缓展示或由管理员隐藏，处理动作会保留审计记录。</view>
+    <view class="rule-line">物品、交接、送达和异常证明请使用证据上传，不要仅依赖聊天文字。</view>
+  </view>
 </view>

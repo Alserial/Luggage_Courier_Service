@@ -64,6 +64,10 @@ Page({
     wx.navigateTo({ url: `/pages/evidence/upload?orderId=${this.data.order.id}` });
   },
 
+  goChat() {
+    wx.navigateTo({ url: `/pages/chat/index?orderId=${this.data.order.id}` });
+  },
+
   goDispute() {
     wx.navigateTo({ url: `/pages/disputes/detail?orderId=${this.data.order.id}` });
   },

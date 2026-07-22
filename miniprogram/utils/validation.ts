@@ -22,6 +22,8 @@ export function validateItemRequestDraft(draft: ItemRequestDraft): string | null
   if (draft.estimatedWeightKg > appConfig.weightCapKg) return `MVP 阶段重量上限为 ${appConfig.weightCapKg}kg`;
   if (!draft.pickupCity || !draft.deliveryCity) return '请填写交接城市和交付城市';
   if (!draft.deadline) return '请选择最晚送达日期';
+  if (!draft.itemPhotos.length) return '请至少上传一张清晰的物品图片';
+  if (draft.itemPhotos.length > 6) return '物品图片最多上传 6 张';
   if (!draft.riskDeclarationAccepted) return '请先确认风险和海关责任声明';
   return null;
 }

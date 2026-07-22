@@ -30,6 +30,16 @@ const requiredPaths = [
   'cloudfunctions/offer-create/index.js',
   'cloudfunctions/offer-accept/index.js',
   'cloudfunctions/order-get/index.js',
+  'miniprogram/pages/chat/index.ts',
+  'miniprogram/pages/chat/index.wxml',
+  'cloudfunctions/chat-conversation-get/index.js',
+  'cloudfunctions/chat-message-list/index.js',
+  'cloudfunctions/chat-message-send/index.js',
+  'cloudfunctions/chat-mark-read/index.js',
+  'cloudfunctions/chat-message-report/index.js',
+  'cloudfunctions/chat-review-queue-list/index.js',
+  'cloudfunctions/chat-admin-review/index.js',
+  'cloudfunctions/chat-evidence-snapshot/index.js',
 ];
 
 const missing = requiredPaths.filter((item) => !fs.existsSync(path.join(process.cwd(), item)));

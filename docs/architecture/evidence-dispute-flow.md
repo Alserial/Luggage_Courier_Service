@@ -7,7 +7,7 @@ Evidence is the platform's main trust mechanism. Every critical user action shou
 ## Evidence Rules
 
 - Evidence records are append-only.
-- Evidence must include `orderId`, uploader, type, file ids or file count, visibility, metadata, and timestamp.
+- Evidence must include `orderId`, uploader, type, canonical storage path (or an explicit non-file system marker), file ids/count, visibility, metadata, and timestamp.
 - Users must not overwrite previous evidence.
 - Important communications should stay inside the platform where possible.
 - Dispute decisions must reference evidence ids and be logged.
@@ -172,7 +172,10 @@ Default:
 Item photo:
 
 - Show full item, packaging, quantity, and visible condition.
-- Should be uploaded before or at handover.
+- Request publication requires 1 to 6 images; each selected image is limited to 5 MB.
+- The request page uploads images to CloudBase before calling `item-request-create`, which accepts only `cloud://` file ids.
+- Request detail shows the submitted images for review and later comparison.
+- New handover-condition photos should still be uploaded as append-only `item_photo` evidence before or at handover; the original request image must not be overwritten.
 
 Handover proof:
 
@@ -195,20 +198,37 @@ Customs/airline proof:
 - Upload only when there is inspection, delay, loss, damage, tax, or airline issue.
 - Use as supporting evidence, not as a platform customs guarantee.
 
+## In-App Chat Evidence
+
+Chat is bound to an accepted order and stored as append-only messages. A normal message does not create a separate `evidence` record.
+
+When a dispute is opened or an authorized reviewer requests a transcript, `chat-evidence-snapshot` will:
+
+1. Verify the order participant/admin and conversation ownership.
+2. Select a bounded message-id/time range.
+3. Create an immutable JSON or PDF transcript in CloudBase storage.
+4. Record file id/storage path, message ids, time range, content hash, visibility, system uploader, and timestamp.
+5. Create `evidence` with `evidenceType: "in_app_chat"` and write a metadata-only audit log.
+6. Return the evidence id so it can be referenced by `disputes.evidenceIds`.
+
+Admin-hidden or blocked messages remain available only according to admin evidence visibility. Generating a later snapshot creates a new evidence record and never modifies an earlier snapshot. See `docs/architecture/in-app-chat.md` for the complete design.
+
 ## Current Gaps
 
-- Evidence upload currently sends `fileCount` fallback and does not upload cloud file ids yet.
-- `in_app_chat` is listed but no chat/evidence extraction model exists.
+- Item-request image upload now stores real cloud file ids, but the general evidence upload page still sends `fileCount` fallback instead of uploading every evidence file.
+- Generic evidence producers do not yet persist canonical `storagePath` consistently.
+- `in_app_chat` snapshot generation is implemented; deployment still requires CloudBase storage permission, collections/indexes, and end-to-end authorization testing.
 - Frontend does not pass dispute evidence ids yet.
 - Admin decision cloud function does not exist yet.
 - Order state transitions are not yet strictly evidence-gated.
 
 ## Implementation Checklist
 
-- Add cloud file upload wrapper and persist `fileIds`.
+- Reuse the existing cloud file upload wrapper in the general evidence page and persist `fileIds`.
 - Add evidence picker shortcuts from order detail by evidence type.
 - Add `payment_record` evidence on payment confirmation.
 - Add active-dispute guard to completion.
 - Add admin dispute decision cloud function.
 - Add evidence requirements to `order-transition`.
 - Add audit logs with `evidenceIds` and `operationId`.
+- Deploy and test supervised order chat and `chat-evidence-snapshot` according to `docs/architecture/in-app-chat.md`.

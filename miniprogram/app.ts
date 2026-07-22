@@ -4,6 +4,7 @@ App<IAppOption>({
   globalData: {
     cloudReady: false,
     userProfile: null,
+    authVersion: 0,
   },
 
   onLaunch() {

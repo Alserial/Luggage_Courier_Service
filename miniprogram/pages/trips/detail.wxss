@@ -23,3 +23,12 @@
 .info-row:last-child {
   border-bottom: 0;
 }
+
+.detail-error {
+  color: #b42318;
+  font-size: 28rpx;
+}
+
+.public-notice {
+  border-left: 6rpx solid #0f766e;
+}

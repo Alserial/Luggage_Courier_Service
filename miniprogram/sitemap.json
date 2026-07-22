@@ -1,6 +1,10 @@
 {
   "rules": [
     {
+      "action": "disallow",
+      "page": "pages/chat/index"
+    },
+    {
       "action": "allow",
       "page": "*"
     }

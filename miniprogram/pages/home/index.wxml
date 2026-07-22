@@ -36,8 +36,8 @@
     <view class="section-title">待处理</view>
     <view class="card status-card notice-card">
       <view>
-        <view class="status-title">先完成实名和规则确认</view>
-        <view class="muted">MVP 阶段，未实名用户不能进入订单确认。</view>
+        <view class="status-title">先完成登录和规则确认</view>
+        <view class="muted">内测阶段暂不启用实名门槛，订单流程以审核和证据留痕为准。</view>
       </view>
       <button class="mini-button" bindtap="goProfile">查看</button>
     </view>

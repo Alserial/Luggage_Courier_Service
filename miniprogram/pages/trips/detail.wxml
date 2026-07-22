@@ -1,4 +1,13 @@
 <view class="page">
+  <view wx:if="{{loading}}" class="card">
+    <view class="muted">正在加载行程详情...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card">
+    <view class="detail-error">{{errorText}}</view>
+  </view>
+
+  <block wx:if="{{!loading && !errorText}}">
   <view class="card">
     <view class="eyebrow">TRIP DETAIL</view>
     <view class="detail-title">{{trip.route}}</view>
@@ -20,5 +29,10 @@
     </view>
   </view>
 
-  <button class="primary-button" bindtap="goMatches">查看匹配需求</button>
+  <button wx:if="{{isOwner}}" class="primary-button" bindtap="goMatches">查看匹配需求</button>
+  <view wx:else class="card public-notice">
+    <view class="section-title compact-title">公开行程</view>
+    <view class="muted">该行程已通过平台核验。携带者身份和私密资料不会在公开页面展示。</view>
+  </view>
+  </block>
 </view>

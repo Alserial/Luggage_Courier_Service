@@ -1,0 +1,102 @@
+<view class="page">
+  <view class="page-header">
+    <view class="eyebrow">REVIEW</view>
+    <view class="page-title">审核后台</view>
+    <view class="page-desc">内测使用的最小审核台，处理低风险需求、行程核验和站内沟通举报。</view>
+  </view>
+
+  <view class="review-tabs">
+    <button class="tab-button {{activeTab === 'requests' ? 'tab-active' : ''}}" data-tab="requests" bindtap="switchTab">需求 {{requests.length}}</button>
+    <button class="tab-button {{activeTab === 'trips' ? 'tab-active' : ''}}" data-tab="trips" bindtap="switchTab">行程 {{trips.length}}</button>
+    <button class="tab-button {{activeTab === 'messages' ? 'tab-active' : ''}}" data-tab="messages" bindtap="switchTab">沟通举报 {{messageReports.length}}</button>
+  </view>
+
+  <view class="card reason-card">
+    <view class="field-label">审核原因</view>
+    <textarea class="textarea" value="{{reviewReason}}" placeholder="需求/行程通过可留空；其他处理请写明原因" bindinput="onReasonInput" />
+  </view>
+
+  <view wx:if="{{errorText}}" class="card warning">{{errorText}}</view>
+
+  <view wx:if="{{loading}}" class="card">
+    <view class="muted">正在读取审核队列...</view>
+  </view>
+
+  <block wx:if="{{activeTab === 'requests'}}">
+    <view class="card review-card" wx:for="{{requests}}" wx:key="id">
+      <view class="review-main" data-id="{{item.id}}" bindtap="goRequestDetail">
+        <view class="surface-row">
+          <view class="card-title">{{item.itemName}}</view>
+          <view class="status-pill status-warning">{{item.reviewStatus}}</view>
+        </view>
+        <view class="meta-line">
+          <text>{{item.route}}</text>
+          <text>{{item.categoryLabel}}</text>
+          <text>{{item.estimatedWeightKg}}kg</text>
+        </view>
+      </view>
+      <view class="review-actions">
+        <button class="small-button primary-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="approved" bindtap="reviewRequest">通过</button>
+        <button class="small-button secondary-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="manual_review" bindtap="reviewRequest">转人工</button>
+        <button class="small-button danger-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="rejected" bindtap="reviewRequest">拒绝</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && !hasRequests && !errorText}}" class="card">
+      <view class="muted">暂无待审核需求。</view>
+    </view>
+  </block>
+
+  <block wx:if="{{activeTab === 'trips'}}">
+    <view class="card review-card" wx:for="{{trips}}" wx:key="id">
+      <view class="review-main" data-id="{{item.id}}" bindtap="goTripDetail">
+        <view class="surface-row">
+          <view class="card-title">{{item.route}}</view>
+          <view class="status-pill status-warning">{{item.verificationStatus}}</view>
+        </view>
+        <view class="meta-line">
+          <text>{{item.departureDate}}</text>
+          <text>{{item.flightNo}}</text>
+          <text>可用 {{item.capacityKg}}kg</text>
+        </view>
+      </view>
+      <view class="review-actions">
+        <button class="small-button primary-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="approved" bindtap="verifyTrip">通过</button>
+        <button class="small-button secondary-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="manual_review" bindtap="verifyTrip">转人工</button>
+        <button class="small-button danger-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-decision="rejected" bindtap="verifyTrip">拒绝</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && !hasTrips && !errorText}}" class="card">
+      <view class="muted">暂无待核验行程。</view>
+    </view>
+  </block>
+
+  <block wx:if="{{activeTab === 'messages'}}">
+    <view class="card review-card" wx:for="{{messageReports}}" wx:key="id">
+      <view class="review-main" data-order-id="{{item.orderId}}" bindtap="goOrderChat">
+        <view class="surface-row">
+          <view class="card-title">站内沟通举报</view>
+          <view class="status-pill status-warning">{{item.status}}</view>
+        </view>
+        <view class="reported-message">{{item.messageContent}}</view>
+        <view class="meta-line">
+          <text>原因：{{item.reason}}</text>
+          <text>发送角色：{{item.senderRole}}</text>
+          <text>审核状态：{{item.moderationStatus}}</text>
+        </view>
+        <view wx:if="{{item.description}}" class="report-description">{{item.description}}</view>
+      </view>
+      <view class="message-review-actions">
+        <button class="small-button {{item.systemGenerated ? 'primary-small' : 'danger-small'}}" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-action="{{item.systemGenerated ? 'restore' : 'hide'}}" bindtap="reviewMessage">{{item.systemGenerated ? '通过并显示' : '隐藏消息'}}</button>
+        <button class="small-button secondary-small" loading="{{submittingId === item.id}}" data-id="{{item.id}}" data-action="{{item.systemGenerated ? 'hide' : 'dismiss'}}" bindtap="reviewMessage">{{item.systemGenerated ? '保持隐藏' : '驳回举报'}}</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && !hasMessageReports && !errorText}}" class="card">
+      <view class="muted">暂无待处理沟通举报。</view>
+    </view>
+  </block>
+
+  <button class="secondary-button refresh-button" loading="{{loading}}" bindtap="loadQueue">刷新审核队列</button>
+</view>

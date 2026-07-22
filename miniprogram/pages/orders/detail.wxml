@@ -38,6 +38,7 @@
     <view class="section-title compact-title">下一步</view>
     <button wx:if="{{order.status === 'pending_payment'}}" class="primary-button" bindtap="goPayment">Mock 支付并锁定服务费</button>
     <button wx:if="{{order.status === 'paid_locked'}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
+    <button class="secondary-button" bindtap="goChat">订单内沟通</button>
     <button class="secondary-button" bindtap="goEvidence">上传证据</button>
     <button class="secondary-button" bindtap="goDispute">发起争议</button>
   </view>

@@ -48,7 +48,14 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Deadline is required.
 - [ ] Deadline must be a valid date.
 - [ ] Risk declaration must be accepted.
-- [ ] Optional item photo ids are validated when provided.
+- [ ] Requester must select 1 to 6 item images; each image is no larger than 5 MB.
+- [ ] Selected images can be previewed and removed before submission.
+- [ ] Submit uploads images to CloudBase, shows progress, and prevents duplicate taps.
+- [ ] Partial upload failure preserves successful file ids for retry.
+- [ ] `item-request-create` rejects missing photos, more than 6 photos, local paths, and non-`cloud://` ids.
+- [ ] `item_requests.itemPhotos` contains only CloudBase file ids.
+- [ ] Request detail renders and previews stored item images.
+- [ ] Request-create audit log records `itemPhotoCount` without duplicating image content.
 - [ ] Risk flags are stored for MVP cap/category/photo state.
 - [ ] `item-request-create` creates `item_requests` record.
 - [ ] `item-request-create` creates `audit_logs` record.
@@ -120,6 +127,7 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `evidence-create` creates `evidence` record.
 - [ ] `evidence-create` creates `audit_logs` record.
 - [ ] CloudBase storage file id upload is implemented or tracked as explicit TODO.
+- [ ] Every evidence record stores a canonical `storagePath` or an explicit non-file system marker.
 - [ ] Evidence records are append-only.
 
 ## Order Lifecycle
@@ -145,6 +153,21 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Admin dispute decision function is implemented or tracked as explicit TODO.
 - [ ] Refund decision applies only to service fee.
 
+## Supervised In-App Chat
+
+- [ ] Chat is available only after an accepted offer creates an order.
+- [ ] Conversation is unique per `orderId` and accessible only to requester, traveller, and authorized admin/reviewer roles.
+- [ ] Initial chat supports text/system messages only; transaction images/videos use evidence upload.
+- [ ] `chat-message-send` validates participant, conversation state, <= 500 characters, rate limit, idempotency, and content safety server-side.
+- [ ] Messages use server time and remain append-only; users cannot edit, recall, overwrite, or physically delete them.
+- [ ] Realtime `watch()` is participant-scoped, closes on page unload, and has a bounded polling fallback.
+- [ ] Loading, empty, reconnecting, sending, blocked, under-review, error, and read-only states are visible.
+- [ ] A participant can report a message; a third party cannot.
+- [ ] Admin review records admin, reason, action, target ids, and timestamp without deleting the source message.
+- [ ] `chat-evidence-snapshot` creates immutable `in_app_chat` evidence with order, uploader/system identity, storage path/file id, visibility, message range, hash, and timestamp.
+- [ ] Chat evidence can be linked to `disputes.evidenceIds` and later moderation does not mutate old snapshots.
+- [ ] Chat UI displays platform storage/moderation notice and never exposes raw openids or admin-only notes.
+
 ## CloudBase Setup
 
 - [ ] CloudBase environment id is configured.
@@ -152,7 +175,7 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] All required collections exist.
 - [ ] Required indexes are created.
 - [ ] Direct frontend writes to critical collections are disabled.
-- [ ] Cloud storage folders for evidence exist.
+- [ ] Cloud storage folders for `item-requests/`, evidence, and chat transcript snapshots exist as applicable.
 - [ ] All cloud functions deploy successfully.
 - [ ] Cloud function dependencies are installed/deployed.
 - [ ] First admin/reviewer user is bootstrapped in `users.roleFlags`.

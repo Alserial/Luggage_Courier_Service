@@ -1,11 +1,25 @@
 <view class="page">
   <view class="page-header">
     <view class="eyebrow">ITEM REQUESTS</view>
-    <view class="page-title">我的需求</view>
-    <view class="page-desc">管理已审核的低风险小件需求，进入详情后可查看报价和生成订单。</view>
+    <view class="page-title">帮带需求</view>
+    <view class="page-desc">公开大厅只展示审核通过的低风险小件；“我的发布”可查看自己的审核进度。</view>
   </view>
 
-  <view class="card request-card" wx:for="{{requests}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+  <view class="scope-tabs" role="tablist">
+    <view class="scope-tab {{scope === 'market' ? 'scope-tab-active' : ''}}" data-scope="market" bindtap="switchScope">公开大厅</view>
+    <view class="scope-tab {{scope === 'mine' ? 'scope-tab-active' : ''}}" data-scope="mine" bindtap="switchScope">我的发布</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card list-state">
+    <view class="muted">正在加载需求...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card list-state">
+    <view class="error-text">{{errorText}}</view>
+    <button class="secondary-button retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <view wx:if="{{!loading && !errorText}}" class="card request-card" wx:for="{{requests}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
     <view>
       <view class="card-title">{{item.itemName}}</view>
       <view class="meta-line">
@@ -13,11 +27,11 @@
         <text>{{item.categoryLabel}}</text>
       </view>
     </view>
-    <view class="status-pill">{{item.reviewStatus}}</view>
+    <view class="status-pill">{{scope === 'market' ? '已审核' : item.reviewStatus}}</view>
   </view>
 
-  <view wx:if="{{!hasRequests}}" class="card">
-    <view class="muted">还没有需求，发布后会显示在这里。</view>
+  <view wx:if="{{!loading && !errorText && !hasRequests}}" class="card list-state">
+    <view class="muted">{{scope === 'market' ? '暂时没有其他用户已审核通过的需求。' : '你还没有发布需求。'}}</view>
   </view>
 
   <view class="button-row">

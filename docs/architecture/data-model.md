@@ -62,6 +62,14 @@ See `docs/architecture/order-state-machine.md` for transition rules.
 - `delivery_photo_or_video`
 - `mutual_confirmation`
 
+### Chat Statuses
+
+- Conversation: `active`, `read_only`, `closed`
+- Message moderation: `visible`, `under_review`, `blocked`, `admin_hidden`
+- Message type in the first release: `text`, `system`
+
+See `docs/architecture/in-app-chat.md` for the complete chat contract.
+
 ## Collections
 
 ### `users`
@@ -119,6 +127,13 @@ Stores requester demand for low-risk personal items.
 | `note` | string | no | Packaging, receipt, handover preference |
 | `createdAt` | Date | yes | Server time |
 | `updatedAt` | Date | yes | Server time |
+
+Item-photo rules:
+
+- `itemPhotos` is required and contains 1 to 6 CloudBase `cloud://` file ids.
+- The Mini Program accepts images only, limits each selected image to 5 MB, uploads before request creation, and submits only cloud file ids to the backend.
+- `item-request-create` validates the count and file-id format again server-side.
+- Request creation records `itemPhotoCount` in the audit log without copying image content into the log.
 
 Indexes:
 
@@ -215,6 +230,60 @@ Indexes:
 - `requestId`
 - `tripId`
 
+### `conversations`
+
+Stores one supervised chat conversation per accepted order.
+
+| Field | Type | Required | Notes |
+|---|---|---:|---|
+| `_id` | string | yes | Conversation id |
+| `orderId` | string | yes | Unique order reference |
+| `participantOpenids` | string[] | yes | Requester and traveller |
+| `status` | string | yes | `active`, `read_only`, `closed` |
+| `lastMessageId` | string | no | Latest visible message |
+| `lastMessagePreview` | string | no | Short non-sensitive preview |
+| `lastMessageAt` | Date | no | Server time |
+| `createdAt` | Date | yes | Server time |
+| `updatedAt` | Date | yes | Server time |
+
+Indexes:
+
+- unique `orderId`
+- `participantOpenids`, `lastMessageAt`
+
+### `messages`
+
+Stores append-only text/system messages. User messages cannot be edited, recalled, overwritten, or physically deleted.
+
+| Field | Type | Required | Notes |
+|---|---|---:|---|
+| `_id` | string | yes | Message id |
+| `conversationId` | string | yes | Conversation reference |
+| `orderId` | string | yes | Related order |
+| `participantOpenids` | string[] | yes | Denormalized for scoped reads |
+| `senderOpenid` | string | yes | From server context |
+| `senderRole` | string | yes | requester/traveller/system/admin |
+| `messageType` | string | yes | MVP: `text` or `system` |
+| `content` | string | yes | User text max 500 characters |
+| `moderationStatus` | string | yes | visible/review/blocked/admin hidden |
+| `moderationReason` | string | no | Stable user-safe reason code |
+| `clientMessageId` | string | yes | Send idempotency key |
+| `orderStatusAtSend` | OrderStatus | yes | Server-observed order state |
+| `createdAt` | Date | yes | Server time |
+
+Indexes:
+
+- unique `conversationId`, `clientMessageId`
+- `conversationId`, `createdAt`
+- `orderId`, `createdAt`
+- `moderationStatus`, `createdAt`
+
+### `message_receipts` / `message_reports`
+
+- `message_receipts` stores participant read cursors without mutating messages; use a unique index on `conversationId`, `readerOpenid`.
+- `message_reports` stores reported message, reporter, reason, status, admin decision, and timestamps; index by `status`, `createdAt`, and by `messageId`, `reporterOpenid`, `status`.
+- Full field definitions and lifecycle rules are in `docs/architecture/in-app-chat.md`.
+
 ### `payments`
 
 Stores service-fee payment records only. It must not store or imply merchandise payment custody.
@@ -251,6 +320,7 @@ Stores append-only proof records.
 | `uploaderOpenid` | string | yes | Uploader |
 | `evidenceType` | EvidenceType | yes | Positive-list only |
 | `fileIds` | string[] | yes | Cloud file ids |
+| `storagePath` | string | yes | Canonical primary CloudBase storage path; empty only for explicitly non-file system evidence |
 | `fileCount` | number | yes | Allows mock count before storage integration |
 | `description` | string | no | User note |
 | `visibility` | string | yes | `both_parties`, `requester_only`, `traveller_only`, `admin_only` |
@@ -344,8 +414,9 @@ Indexes:
 CloudBase collection permissions should stay restrictive:
 
 - Mini Program frontend should not directly write critical collections.
-- Create/update actions for `item_requests`, `trips`, `offers`, `orders`, `payments`, `evidence`, `handover_records`, `disputes`, and `audit_logs` should go through cloud functions.
+- Create/update actions for `item_requests`, `trips`, `offers`, `orders`, `payments`, `evidence`, `handover_records`, `disputes`, `messages`, `message_receipts`, `message_reports`, and `audit_logs` should go through cloud functions.
 - Users may read their own related records: requester, traveller, uploader, dispute opener, or order participant.
+- Planned realtime chat may allow direct read-only `watch()` access to `messages` only after participant-scoped permission rules are deployed and tested. It never permits frontend writes.
 - Admin/reviewer reads and decisions must be backend-gated.
 - Raw identity, payment provider callbacks, settlement decisions, and dispute decisions must never be trusted from frontend-only code.
 
@@ -364,11 +435,19 @@ Current cloud functions already create these collections:
 - `disputes`: `dispute-open`
 - `audit_logs`: create/request/trip/offer/order/evidence/dispute/handover actions
 
+- `conversations`: `chat-conversation-get`
+- `messages`: `chat-message-send`, `chat-message-list`, `chat-admin-review`
+- `message_receipts`: `chat-mark-read`
+- `message_reports`: `chat-message-report`, `chat-review-queue-list`, `chat-admin-review`
+- `in_app_chat` evidence/storage: `chat-evidence-snapshot`
+
 ## Required Follow-Ups
 
 - Add CloudBase collection initialization and index setup scripts.
 - Normalize `reviewStatus` and `verificationStatus` defaults in cloud functions.
 - Add `operationId` and `evidenceIds` to critical audit records.
+- Update every evidence producer to persist canonical `storagePath`; the current generic `evidence-create` implementation does not do this consistently yet.
 - Add admin review functions for item requests, trip verification, and dispute decisions.
 - Add provider-facing payment callback functions before any real payment launch.
 - Add read models or join helpers for list/detail pages so frontend does not duplicate derived fields.
+- Deploy and test chat indexes, participant-scoped read permissions, WeChat content-security permission, and retention/privacy policy defined in `docs/architecture/in-app-chat.md`.

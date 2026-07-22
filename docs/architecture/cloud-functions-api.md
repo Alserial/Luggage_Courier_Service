@@ -16,15 +16,16 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 
 | Function | Purpose | Writes |
 |---|---|---|
-| `auth-login` | Create/update user login record | `users` |
+| `auth-login` | Create/update formal WeChat login record | `users`, `audit_logs` |
 | `item-request-create` | Create item request for review | `item_requests`, `audit_logs` |
 | `item-request-review` | Admin/reviewer review item request | `item_requests`, `audit_logs` |
-| `item-request-list` | List current user's item requests | none |
-| `item-request-get` | Read current user's item request and pending offers | none |
+| `review-queue-list` | List pending admin/reviewer review queue | none |
+| `item-request-list` | List approved public or current user's item requests | none |
+| `item-request-get` | Read owner or approved public request detail | none |
 | `trip-create` | Create traveller trip | `trips`, `audit_logs` |
 | `trip-verify` | Admin/reviewer verify traveller trip | `trips`, `audit_logs` |
-| `trip-list` | List current user's trips | none |
-| `trip-get` | Read current user's trip | none |
+| `trip-list` | List verified public or current user's trips | none |
+| `trip-get` | Read owner or verified public trip detail | none |
 | `match-search` | Return explainable match candidates | none in current MVP |
 | `offer-create` | Create service-fee quote | `offers`, `audit_logs` |
 | `offer-accept` | Accept offer and create order | `orders`, `offers`, `audit_logs` |
@@ -35,10 +36,18 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 | `evidence-create` | Create evidence record | `evidence`, `audit_logs` |
 | `order-transition` | Move order through allowed state machine | `orders`, `audit_logs` |
 | `dispute-open` | Open dispute and advance order | `disputes`, `orders`, `audit_logs` |
+| `chat-conversation-get` | Get/create participant order conversation and initial system notice | `conversations`, `messages` when missing |
+| `chat-message-list` | Read participant-gated message history | none |
+| `chat-message-send` | Moderate and append order chat message | `messages`, `conversations`, moderation `audit_logs` |
+| `chat-mark-read` | Update participant read cursor | `message_receipts` |
+| `chat-message-report` | Report a message | `message_reports`, `audit_logs` |
+| `chat-review-queue-list` | List pending message reports for reviewer/admin | none |
+| `chat-admin-review` | Review reports and hide/restore messages | `messages`, `message_reports`, `audit_logs` |
+| `chat-evidence-snapshot` | Create immutable transcript evidence | cloud storage, `evidence`, optional `disputes`, `audit_logs` |
 
 ## `auth-login`
 
-Creates a `users` record on first login or updates `lastLoginAt` for returning users.
+Creates a `users` record on first formal WeChat login or updates `lastLoginAt` for returning users. The frontend refreshes the WeChat session with `wx.login`; the cloud function obtains identity from `cloud.getWXContext()` and never trusts an OpenID supplied by the frontend.
 
 Request:
 
@@ -53,18 +62,24 @@ Response:
   ok: true;
   userId: string;
   isNew: boolean;
+  roleFlags: string[];
+  verificationStatus: string;
+  completedOrders: number;
+  ratingAvg: number;
 }
 ```
 
 Writes:
 
 - `users`
+- `audit_logs` with `action: "user.wechatLogin"`
 
 Notes:
 
 - Uses `OPENID` and optional `UNIONID` from `cloud.getWXContext()`.
 - Initializes `verificationStatus` as `unverified`.
-- Does not generate an audit log in the current MVP.
+- Returns `wechat_identity_unavailable` when the trusted WeChat context has no `OPENID`.
+- The Mini Program does not implement username/password storage. All privileged functions continue to derive identity and roles server-side.
 
 ## `item-request-create`
 
@@ -89,7 +104,7 @@ Request:
     deliveryCountry?: string;
     deliveryAddress?: string;
     deadline: string;
-    itemPhotos?: string[];
+    itemPhotos: string[];
     note?: string;
     riskDeclarationAccepted: boolean;
   };
@@ -116,6 +131,8 @@ Error codes:
 - `missing_locations`
 - `missing_deadline`
 - `invalid_deadline`
+- `item_photos_required`
+- `too_many_item_photos`
 - `invalid_item_photos`
 - `risk_declaration_required`
 
@@ -129,8 +146,10 @@ Rules:
 - `declaredValue` must be `> 0` and `<= 2000`.
 - `estimatedWeightKg` must be `> 0` and `<= 5`.
 - Category must be in the positive list.
+- `itemPhotos` is required, contains 1 to 6 entries, and every entry must be a CloudBase `cloud://` file id.
+- The current Mini Program accepts images only, limits each selected image to 5 MB, and uploads them before calling this function.
 - Creates risk flags for positive-list category, value cap, weight cap, and item-photo state.
-- Audit log includes `operationId` when provided.
+- Audit log includes `itemPhotoCount` and `operationId` when provided; it does not duplicate image content.
 
 ## `trip-create`
 
@@ -195,6 +214,39 @@ Rules:
 - Audit log includes `operationId` when provided.
 
 ## Review And Read APIs
+
+### `review-queue-list`
+
+Admin/reviewer function to list pending review work for the Mini Program review page.
+
+Request:
+
+```ts
+{
+  limit?: number;
+}
+```
+
+Success response:
+
+```ts
+{
+  ok: true;
+  requests: ItemRequestRecord[];
+  trips: TripRecord[];
+}
+```
+
+Error codes:
+
+- `permission_denied`
+
+Rules:
+
+- Caller must have `admin` or `reviewer` in `users.roleFlags`.
+- Returns `item_requests` where `reviewStatus` is `pending` or `manual_review`.
+- Returns `trips` where `verificationStatus` is `pending` or `manual_review`.
+- This function does not make decisions and does not write audit logs.
 
 ### `item-request-review`
 
@@ -278,35 +330,39 @@ Rules:
 
 ### `trip-list` / `trip-get`
 
-Reads current user's trips.
+Reads either the verified public trip marketplace or the current user's trips.
 
 Requests:
 
 ```ts
-{ limit?: number }
+{ limit?: number; scope?: "market" | "mine" }
 { tripId: string }
 ```
 
 Rules:
 
-- `trip-list` only returns records where `travellerOpenid` is the caller.
-- `trip-get` rejects non-owner reads with `permission_denied`.
+- `trip-list` defaults to `market`; it returns only `verificationStatus: "approved"`, `status: "active"`, non-self records.
+- `scope: "mine"` returns the caller's own records, including non-approved states.
+- `trip-get` permits the owner or a non-owner reading an approved active trip.
+- List/detail responses omit `travellerOpenid`; owner-only notes and verification reasons are not returned publicly.
 
 ### `item-request-list` / `item-request-get`
 
-Reads current user's item requests.
+Reads either the approved public request marketplace or the current user's item requests.
 
 Requests:
 
 ```ts
-{ limit?: number }
+{ limit?: number; scope?: "market" | "mine" }
 { requestId: string }
 ```
 
 Rules:
 
-- `item-request-list` only returns records where `requesterOpenid` is the caller.
-- `item-request-get` rejects non-owner reads with `permission_denied`.
+- `item-request-list` defaults to `market`; it returns only `reviewStatus: "approved"`, non-self records.
+- `scope: "mine"` returns the caller's own records, including pending/rejected states.
+- `item-request-get` permits the owner or a non-owner reading an approved request.
+- List/detail responses omit `requesterOpenid`; owner notes, review reasons, and offers are not returned publicly.
 - `item-request-get` also returns up to 10 pending offers for the request owner.
 
 ## `match-search`
@@ -691,6 +747,10 @@ Rules:
 - Evidence must not be overwritten.
 - Caller must be requester or traveller on the order.
 
+Remaining TODO:
+
+- Upload real files from the general evidence page and persist a canonical `storagePath` on every evidence record. The current `fileCount` fallback is not sufficient for production proof.
+
 ## `order-transition`
 
 Moves an order through the explicit state machine.
@@ -806,3 +866,130 @@ Remaining TODO:
 
 - Add admin decision function.
 - Prevent duplicate open disputes with a database uniqueness/idempotency pattern.
+
+## In-App Chat APIs
+
+These functions are implemented under `cloudfunctions/`. They require CloudBase collection/index creation, restrictive permissions, deployment, and content-security configuration described in `docs/setup/cloudbase-setup.md`. The complete architecture is defined in `docs/architecture/in-app-chat.md`.
+
+### `chat-conversation-get`
+
+Request: `{ orderId: string }`.
+
+Returns the conversation only when the caller is the order requester/traveller or an authorized admin. It creates one conversation per order when none exists and free chat is allowed for that order.
+
+### `chat-message-list`
+
+Request:
+
+```ts
+{
+  conversationId: string;
+  cursor?: { createdAt: string; messageId: string };
+  limit?: number;
+}
+```
+
+Returns a bounded page of participant-visible messages and the next cursor. It must verify order participation on every call.
+
+### `chat-message-send`
+
+Request:
+
+```ts
+{
+  conversationId: string;
+  clientMessageId: string;
+  messageType: "text";
+  content: string;
+}
+```
+
+Success response:
+
+```ts
+{
+  ok: true;
+  messageId: string;
+  moderationStatus: "visible" | "under_review" | "blocked";
+}
+```
+
+Required error codes:
+
+- `missing_params`
+- `conversation_not_found`
+- `order_not_found`
+- `permission_denied`
+- `conversation_read_only`
+- `invalid_message_type`
+- `invalid_message_length`
+- `rate_limited`
+- `content_under_review`
+- `content_blocked`
+
+Rules:
+
+- Caller identity and sender role come only from server context/order data.
+- User text is limited to 500 characters in the first release.
+- `clientMessageId` is unique within the conversation and makes retry idempotent.
+- The backend performs contact-sharing, off-platform payment, prohibited-item, rate, and WeChat text-content checks before making a message visible.
+- `under_review` messages create a system-generated review queue item for explicit admin approval/hiding.
+- Messages are append-only and use server time. Users cannot edit, recall, overwrite, or physically delete them.
+
+### `chat-mark-read`
+
+Request: `{ conversationId: string; lastReadMessageId: string }`.
+
+Upserts only the caller's `message_receipts` record after participant and message/conversation checks.
+
+### `chat-message-report`
+
+Request:
+
+```ts
+{
+  messageId: string;
+  reason: string;
+  description?: string;
+  operationId?: string;
+}
+```
+
+Creates `message_reports` and `audit_logs` after verifying that the reporter participates in the order.
+
+### `chat-review-queue-list`
+
+Admin/reviewer-only request: `{ limit?: number }`.
+
+Returns open/reviewing reports with sanitized message content, sender role, moderation status, reason, description, and timestamps. It does not expose raw participant openids to the frontend.
+
+### `chat-admin-review`
+
+Admin/reviewer-only request:
+
+```ts
+{
+  reportId: string;
+  action: "hide" | "restore" | "dismiss";
+  reason: string;
+  operationId?: string;
+}
+```
+
+Updates moderation/report status and writes an audit record containing the admin, reason, action, target ids, and timestamp. It does not physically delete message content.
+
+### `chat-evidence-snapshot`
+
+Request:
+
+```ts
+{
+  orderId: string;
+  fromMessageId?: string;
+  toMessageId?: string;
+  disputeId?: string;
+  operationId?: string;
+}
+```
+
+Creates an immutable transcript file in CloudBase storage, then creates `evidence` with `evidenceType: "in_app_chat"`, uploader/system identity, file id/storage path, message range, content hash, visibility, and timestamp. The evidence id can be attached to a dispute. The full transcript must not be duplicated into `audit_logs`.

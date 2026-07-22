@@ -57,6 +57,7 @@ export function formatRequestRecord(record: Record<string, unknown> = demoReques
   const pickupCity = city(record.pickupLocation) || text(record.pickupCity, '上海');
   const deliveryCity = city(record.deliveryLocation) || text(record.deliveryCity, '墨尔本');
   const riskFlags = Array.isArray(record.riskFlags) ? record.riskFlags.map(String) : demoRequest.riskFlags;
+  const itemPhotos = Array.isArray(record.itemPhotos) ? record.itemPhotos.map(String) : [];
 
   return {
     id: getId(record, demoRequest.id),
@@ -67,6 +68,7 @@ export function formatRequestRecord(record: Record<string, unknown> = demoReques
     estimatedWeightKg: Number(record.estimatedWeightKg || demoRequest.estimatedWeightKg),
     deadline: formatDate(record.deadline || demoRequest.deadline),
     reviewStatus: text(record.reviewStatus, demoRequest.reviewStatus),
+    itemPhotos,
     riskFlags,
   };
 }

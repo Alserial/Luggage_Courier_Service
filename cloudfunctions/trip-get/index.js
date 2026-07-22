@@ -2,6 +2,37 @@ const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
+function toSafeTrip(trip, isOwner) {
+  const safeTrip = {
+    _id: trip._id,
+    fromCountry: trip.fromCountry,
+    fromCity: trip.fromCity,
+    fromAirportOrStation: trip.fromAirportOrStation,
+    toCountry: trip.toCountry,
+    toCity: trip.toCity,
+    toAirportOrStation: trip.toAirportOrStation,
+    departureTime: trip.departureTime,
+    arrivalTime: trip.arrivalTime,
+    flightNo: trip.flightNo,
+    luggageCapacityKg: trip.luggageCapacityKg,
+    acceptableCategories: trip.acceptableCategories || [],
+    unacceptableCategories: trip.unacceptableCategories || [],
+    handoverPreference: trip.handoverPreference,
+    status: trip.status,
+    verificationStatus: trip.verificationStatus,
+    createdAt: trip.createdAt,
+    updatedAt: trip.updatedAt,
+    isOwner,
+  };
+
+  if (isOwner) {
+    safeTrip.note = trip.note || '';
+    safeTrip.verificationReason = trip.verificationReason || '';
+  }
+
+  return safeTrip;
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { tripId } = event;
@@ -15,7 +46,10 @@ exports.main = async (event) => {
     return { ok: false, error: 'trip_not_found' };
   }
 
-  if (trip.travellerOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
+  const isOwner = trip.travellerOpenid === OPENID;
+  if (!isOwner && (trip.verificationStatus !== 'approved' || trip.status !== 'active')) {
+    return { ok: false, error: 'permission_denied' };
+  }
 
-  return { ok: true, trip };
+  return { ok: true, trip: toSafeTrip(trip, isOwner), isOwner };
 };

@@ -4,10 +4,16 @@
     <view class="avatar">用</view>
     <view>
       <view class="profile-name">{{loggedIn ? '已登录用户' : '未登录用户'}}</view>
-      <view class="muted">实名状态：未认证</view>
+      <view class="muted">认证状态：{{loggedIn ? verificationStatus : '登录后查看'}}</view>
+      <view class="muted">已完成订单：{{loggedIn ? completedOrders : '-'}}</view>
       <view wx:if="{{userId}}" class="muted">用户ID：{{userId}}</view>
     </view>
   </view>
-  <button class="primary-button" loading="{{loginLoading}}" bindtap="mockLogin">微信登录 Mock</button>
+  <view class="card login-note">
+    <view class="section-title login-title">微信身份登录</view>
+    <view class="muted">登录凭证由微信和云函数校验，小程序前端不保存密码，也不会展示你的 OpenID。</view>
+  </view>
+  <button class="primary-button" loading="{{loginLoading}}" disabled="{{loginLoading}}" bindtap="wechatLogin">{{loggedIn ? '刷新微信登录状态' : '微信一键登录'}}</button>
+  <button wx:if="{{canReview}}" class="secondary-button review-button" bindtap="goReviews">审核后台</button>
   <button class="secondary-button rule-button" bindtap="goRules">查看平台规则</button>
 </view>

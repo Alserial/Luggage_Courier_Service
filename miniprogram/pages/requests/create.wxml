@@ -45,6 +45,24 @@
     </picker>
   </view>
   <view class="field">
+    <view class="field-heading">
+      <text class="field-label photo-label">物品图片</text>
+      <text class="photo-count">{{selectedPhotos.length}}/{{maxPhotoCount}}</text>
+    </view>
+    <view class="photo-helper">至少上传 1 张实物清晰照片，用于品类审核和后续交接核对；单张不超过 5MB。</view>
+    <view class="photo-grid">
+      <view class="photo-item" wx:for="{{selectedPhotos}}" wx:key="tempFilePath">
+        <image class="photo-image" src="{{item.tempFilePath}}" mode="aspectFill" data-src="{{item.tempFilePath}}" bindtap="previewItemPhoto" />
+        <view class="photo-remove" data-index="{{index}}" catchtap="removeItemPhoto">×</view>
+      </view>
+      <view wx:if="{{selectedPhotos.length < maxPhotoCount}}" class="photo-add" bindtap="chooseItemPhotos">
+        <view class="photo-add-icon">＋</view>
+        <view>拍照/相册</view>
+      </view>
+    </view>
+    <view wx:if="{{uploading}}" class="upload-progress">{{uploadProgressText}}</view>
+  </view>
+  <view class="field">
     <text class="field-label">补充说明</text>
     <textarea class="textarea" placeholder="说明包装、购买凭证、交接偏好" value="{{form.note}}" data-field="note" bindinput="onInput" />
   </view>
@@ -52,5 +70,5 @@
     <view class="checkbox {{form.riskDeclarationAccepted ? 'checked' : ''}}"></view>
     <view class="risk-text">我确认物品属于平台允许品类，并了解通关、查验、税费和退运风险。</view>
   </view>
-  <button class="primary-button" bindtap="submit">提交审核</button>
+  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{uploading ? '正在上传图片' : '提交审核'}}</button>
 </view>

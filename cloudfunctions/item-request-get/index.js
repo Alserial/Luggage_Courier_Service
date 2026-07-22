@@ -2,6 +2,36 @@ const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
+function toSafeRequest(request, isOwner) {
+  const safeRequest = {
+    _id: request._id,
+    itemName: request.itemName,
+    category: request.category,
+    quantity: request.quantity,
+    declaredValue: request.declaredValue,
+    currency: request.currency,
+    estimatedWeightKg: request.estimatedWeightKg,
+    estimatedSize: request.estimatedSize || {},
+    purchaseMethod: request.purchaseMethod,
+    pickupLocation: request.pickupLocation,
+    deliveryLocation: request.deliveryLocation,
+    deadline: request.deadline,
+    itemPhotos: request.itemPhotos || [],
+    riskFlags: request.riskFlags || [],
+    reviewStatus: request.reviewStatus,
+    createdAt: request.createdAt,
+    updatedAt: request.updatedAt,
+    isOwner,
+  };
+
+  if (isOwner) {
+    safeRequest.reviewReason = request.reviewReason || '';
+    safeRequest.note = request.note || '';
+  }
+
+  return safeRequest;
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { requestId } = event;
@@ -15,7 +45,12 @@ exports.main = async (event) => {
     return { ok: false, error: 'request_not_found' };
   }
 
-  if (request.requesterOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
+  const isOwner = request.requesterOpenid === OPENID;
+  if (!isOwner && request.reviewStatus !== 'approved') return { ok: false, error: 'permission_denied' };
+
+  if (!isOwner) {
+    return { ok: true, request: toSafeRequest(request, false), offers: [], isOwner: false };
+  }
 
   const offers = await db
     .collection('offers')
@@ -24,5 +59,5 @@ exports.main = async (event) => {
     .limit(10)
     .get();
 
-  return { ok: true, request, offers: offers.data || [] };
+  return { ok: true, request: toSafeRequest(request, true), offers: offers.data || [], isOwner: true };
 };

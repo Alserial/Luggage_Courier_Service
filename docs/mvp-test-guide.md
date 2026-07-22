@@ -10,6 +10,7 @@ Current test environment:
 - Cloud functions: deployed
 - Database collection permissions: recommended as no direct frontend read/write
 - Admin user: `users.roleFlags` should include `admin` or `reviewer`
+- Real-name verification gate: disabled for this internal test build. Use login, item/trip review, order states, and evidence records as the active controls.
 
 ## 1. Pre-Test Checklist
 
@@ -32,6 +33,10 @@ evidence
 handover_records
 disputes
 audit_logs
+conversations
+messages
+message_receipts
+message_reports
 ```
 
 - Confirm these cloud functions are deployed:
@@ -40,6 +45,7 @@ audit_logs
 auth-login
 item-request-create
 item-request-review
+review-queue-list
 item-request-list
 item-request-get
 trip-create
@@ -51,6 +57,14 @@ offer-create
 offer-accept
 order-list
 order-get
+chat-conversation-get
+chat-message-list
+chat-message-send
+chat-mark-read
+chat-message-report
+chat-review-queue-list
+chat-admin-review
+chat-evidence-snapshot
 payment-confirm-mock
 handover-confirm-scan
 evidence-create
@@ -61,7 +75,7 @@ dispute-open
 ## 2. Admin Bootstrap
 
 1. Open the Mini Program `我的` page.
-2. Tap `微信登录 Mock`.
+2. Tap `微信一键登录`.
 3. Confirm a record appears in `users`.
 4. Edit that record:
 
@@ -75,7 +89,10 @@ Expected result:
 
 - The profile page shows logged-in state.
 - `users.lastLoginAt` updates after repeated login.
+- `audit_logs` contains `action: "user.wechatLogin"`.
+- Returning to `需求` or `行程` after login performs one refresh because the identity version changed.
 - Admin/reviewer functions no longer return `permission_denied`.
+- `users.verificationStatus` may remain `unverified`; this should not block the internal MVP test flow.
 
 ## 3. Happy Path Test
 
@@ -94,19 +111,33 @@ In the Mini Program:
    - Pickup city: `上海`
    - Delivery city: `墨尔本`
    - Deadline: later than the trip arrival date
+   - Item photos: select 1 clear image from camera/album
    - Risk declaration: checked
-4. Submit.
+4. Preview the selected image, optionally remove/reselect it, then submit.
+5. Confirm the button shows upload/submitting progress and cannot be tapped repeatedly.
 
 Expected database result:
 
 - `item_requests` has a new record.
 - `requesterOpenid` matches the current user.
 - `reviewStatus` is `pending`.
+- `itemPhotos` contains 1 to 6 `cloud://` file ids and no local temporary path.
+- Request detail renders the submitted image and supports full-screen preview.
 - `audit_logs` has `action: "itemRequest.create"`.
+- The create audit record includes `itemPhotoCount` without duplicating image data.
 
 ### 3.2 Review Item Request
 
-Call cloud function `item-request-review` with:
+In the Mini Program:
+
+1. Open `我的`.
+2. Tap `刷新微信登录状态` again after admin bootstrap.
+3. Tap `审核后台`.
+4. Keep the `需求` tab selected.
+5. Fill review reason if needed.
+6. Tap `通过` on the pending item request.
+
+The page calls cloud function `item-request-review` with an equivalent payload:
 
 ```json
 {
@@ -148,7 +179,15 @@ Expected database result:
 
 ### 3.4 Verify Trip
 
-Call cloud function `trip-verify` with:
+In the Mini Program:
+
+1. Open `我的`.
+2. Tap `审核后台`.
+3. Switch to the `行程` tab.
+4. Fill review reason if needed.
+5. Tap `通过` on the pending trip.
+
+The page calls cloud function `trip-verify` with an equivalent payload:
 
 ```json
 {
@@ -299,6 +338,9 @@ Try to publish:
 
 - Declared value above `2000`.
 - Weight above `5`.
+- No item photo.
+- More than 6 item photos.
+- An image above 5 MB.
 - Missing risk declaration.
 
 Expected result:
@@ -360,6 +402,7 @@ The first MVP test pass is successful when:
 - Mock payment advances order to `paid_locked`.
 - Handover advances order to `item_handed_to_carrier`.
 - Evidence and dispute records are created.
+- Item request images are uploaded to CloudBase, stored as cloud file ids, and visible on request detail.
 - Critical actions create `audit_logs`.
 
 ## 7. What Not To Test Yet
@@ -369,7 +412,47 @@ These are intentionally not complete in the current MVP:
 - Real WeChat Pay or real refund.
 - Real settlement or payout.
 - Real-name verification.
-- Real cloud storage file id upload for every evidence path.
+- Real cloud storage file id upload for every general evidence path; item-request image upload is implemented and should be tested.
 - Admin dispute decision.
-- In-app chat.
+- Deployed in-app chat end-to-end testing until the new collections, indexes, permissions, functions, and content-security permission are configured; use the test matrix below after deployment.
 - Subscription notifications.
+
+## 8. In-App Chat Test Matrix
+
+The page, cloud functions, and admin review path are implemented. Run this section after the collections, indexes, participant-scoped permissions, functions, and content-security configuration in `docs/architecture/in-app-chat.md` are deployed.
+
+### 8.1 Authorization
+
+- Requester and traveller can open the conversation for their accepted order.
+- A third user receives `permission_denied` for conversation, list, send, report, and evidence-snapshot calls.
+- Admin/reviewer access succeeds only through the authorized moderation path.
+- No user can read a different conversation by changing `conversationId` or `orderId`.
+
+### 8.2 Send, Idempotency And Realtime
+
+- Valid text up to 500 characters is stored once with sender from server context and server timestamp.
+- Retrying the same `clientMessageId` does not create a duplicate.
+- Empty/oversized payloads, unsupported media types, and excessive send rate are rejected.
+- The other participant receives visible messages through `watch()` or the polling fallback.
+- Leaving and reopening the page does not create duplicate watchers; reconnect preserves pagination order.
+
+### 8.3 Moderation And Reporting
+
+- External contact/payment instructions and prohibited-item negotiation are blocked or held for review according to policy.
+- Content security failure does not publish the message as visible.
+- A participant can report a message; a third user cannot.
+- Admin hide/restore/dismiss actions record admin, reason, action, target ids, and timestamp without physically deleting the message.
+
+### 8.4 Evidence Snapshot
+
+- `chat-evidence-snapshot` creates a CloudBase transcript file and append-only `in_app_chat` evidence.
+- Evidence contains `orderId`, uploader/system identity, file id/storage path, visibility, message-id/time range, hash, and timestamp.
+- The returned evidence id can be linked to `disputes.evidenceIds`.
+- Hiding a message later does not alter an earlier snapshot; a second snapshot creates a new evidence record.
+
+### 8.5 Privacy And UI
+
+- Chat shows the platform-recording/moderation notice and order context.
+- Loading, empty, reconnecting, sending, blocked, under-review, error, and read-only states are visible and actionable.
+- Frontend never displays raw openids, moderation internals, payment secrets, or admin-only notes.
+- Initial chat does not accept image/video messages and directs transaction files to the evidence upload page.

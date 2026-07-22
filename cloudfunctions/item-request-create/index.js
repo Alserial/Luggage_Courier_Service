@@ -44,7 +44,9 @@ function validate(form) {
   if (!form.deadline) return 'missing_deadline';
   if (Number.isNaN(Date.parse(form.deadline))) return 'invalid_deadline';
   if (!form.riskDeclarationAccepted) return 'risk_declaration_required';
-  if (Array.isArray(form.itemPhotos) && !form.itemPhotos.every((item) => typeof item === 'string')) return 'invalid_item_photos';
+  if (!Array.isArray(form.itemPhotos) || !form.itemPhotos.length) return 'item_photos_required';
+  if (form.itemPhotos.length > 6) return 'too_many_item_photos';
+  if (!form.itemPhotos.every((item) => typeof item === 'string' && item.startsWith('cloud://'))) return 'invalid_item_photos';
   return null;
 }
 
@@ -112,6 +114,7 @@ exports.main = async (event) => {
         category: form.category,
         declaredValue,
         estimatedWeightKg,
+        itemPhotoCount: itemPhotos.length,
         riskFlags,
       },
       operationId: event.operationId || '',
