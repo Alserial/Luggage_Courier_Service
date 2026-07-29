@@ -1,7 +1,7 @@
 <view class="page">
   <view class="section-title">服务费确认</view>
   <view class="card warning">
-    <view class="rule-line">当前为 Mock 支付，只模拟服务费锁定状态。</view>
+    <view class="rule-line">当前为支付占位，仅模拟服务费记录进入锁定状态。</view>
     <view class="rule-line">真实微信支付、分账、退款和放款必须等待支付服务商与合规确认。</view>
   </view>
 
@@ -11,5 +11,5 @@
     <view class="fee-row total"><text>合计</text><text>{{fee.total}}</text></view>
   </view>
 
-  <button class="primary-button" loading="{{submitting}}" bindtap="confirmMockPayment">确认 Mock 支付</button>
+  <button class="primary-button" loading="{{submitting}}" bindtap="confirmMockPayment">确认支付占位（演示）</button>
 </view>

@@ -1,45 +1,72 @@
 <view class="page safe-bottom">
-  <view class="card order-summary">
-    <view>
-      <view class="eyebrow">ORDER DETAIL</view>
-      <view class="order-title">{{order.itemName}}</view>
-      <view class="meta-line">
-        <text>{{order.route}}</text>
-        <text>以平台记录为准</text>
-      </view>
+  <view class="order-hero">
+    <view class="order-hero-top">
+      <view class="hero-eyebrow">ORDER DETAIL</view>
+      <view class="hero-status">{{statusLabel}}</view>
     </view>
-    <view class="status-pill">{{statusLabel}}</view>
+    <view class="order-title">{{order.itemName}}</view>
+    <view class="order-route">{{order.route}}</view>
+    <view class="order-caption">订单号 {{order.id}} · 以平台记录为准</view>
+  </view>
+
+  <view class="next-card">
+    <view class="next-kicker">NEXT ACTION</view>
+    <view wx:if="{{order.status === 'pending_payment'}}" class="next-title">确认服务费支付占位</view>
+    <view wx:elif="{{order.status === 'paid_locked'}}" class="next-title">完成出发地交接确认</view>
+    <view wx:else class="next-title">继续按当前订单状态留痕</view>
+    <view class="next-desc">支付、交接、送达和异常处理都应通过平台入口操作并形成记录。</view>
+    <button wx:if="{{order.status === 'pending_payment'}}" class="primary-button" bindtap="goPayment">服务费支付占位（Mock）</button>
+    <button wx:if="{{order.status === 'paid_locked'}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
+    <view class="quick-actions">
+      <button class="secondary-button" bindtap="goChat">订单内沟通</button>
+      <button class="secondary-button" bindtap="goEvidence">上传证据</button>
+    </view>
   </view>
 
   <view class="card">
-    <view class="section-title compact-title">履约进度</view>
+    <view class="card-section-head">
+      <view>
+        <view class="section-title compact-title">履约进度</view>
+        <view class="section-helper">已完成状态会保留在订单审计记录中</view>
+      </view>
+      <view class="progress-number">{{progress}}%</view>
+    </view>
     <view class="progress-track">
       <view class="progress-bar" style="width: {{progress}}%;"></view>
     </view>
-    <view class="timeline-row" wx:for="{{timeline}}" wx:key="value">
-      <view class="dot {{item.done ? 'dot-done' : ''}}"></view>
-      <view>{{item.label}}</view>
+    <view class="timeline-list">
+      <view class="timeline-row" wx:for="{{timeline}}" wx:key="value">
+        <view class="dot {{item.done ? 'dot-done' : ''}}">
+          <text wx:if="{{item.done}}">✓</text>
+        </view>
+        <view class="timeline-label {{item.done ? 'timeline-label-done' : ''}}">{{item.label}}</view>
+      </view>
     </view>
   </view>
 
   <view class="card">
-    <view class="section-title compact-title">费用</view>
+    <view class="section-title compact-title">服务费记录</view>
     <view class="fee-row"><text>帮带服务费</text><text>{{fee.serviceFee}}</text></view>
     <view class="fee-row"><text>平台服务费</text><text>{{fee.platformFee}}</text></view>
     <view class="fee-row total"><text>合计</text><text>{{fee.total}}</text></view>
+    <view class="payment-boundary">当前仅为支付占位；真实支付、分账、退款和放款需接入合规支付服务。</view>
+  </view>
+
+  <view class="card evidence-summary">
+    <view>
+      <view class="section-title compact-title">证据记录</view>
+      <view class="section-helper">物品、交接、沟通、服务费和送达等关键动作应保留凭证。</view>
+    </view>
+    <view class="evidence-count">
+      <view class="evidence-number">{{order.evidenceCount}}</view>
+      <view class="evidence-label">份记录</view>
+    </view>
   </view>
 
   <view class="card warning">
-    <view class="section-title compact-title">税费规则</view>
+    <view class="section-title compact-title">税费与通关提示</view>
     <view class="rule-text">{{order.taxRule}}</view>
   </view>
 
-  <view class="action-stack card">
-    <view class="section-title compact-title">下一步</view>
-    <button wx:if="{{order.status === 'pending_payment'}}" class="primary-button" bindtap="goPayment">Mock 支付并锁定服务费</button>
-    <button wx:if="{{order.status === 'paid_locked'}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
-    <button class="secondary-button" bindtap="goChat">订单内沟通</button>
-    <button class="secondary-button" bindtap="goEvidence">上传证据</button>
-    <button class="secondary-button" bindtap="goDispute">发起争议</button>
-  </view>
+  <button class="dispute-button" bindtap="goDispute">出现问题，提交争议与证据</button>
 </view>

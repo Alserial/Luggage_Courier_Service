@@ -4,15 +4,21 @@ import type { MatchCandidate } from '../../types/index';
 
 Page({
   data: {
-    matches: [buildDemoMatchCandidate()],
-    hasMatches: true,
+    matches: [] as MatchCandidate[],
+    hasMatches: false,
+    loading: true,
+    errorText: '',
+    tripId: '',
+    requestId: '',
   },
 
   onLoad(query) {
+    this.setData({ tripId: query.tripId || '', requestId: query.requestId || '' });
     this.loadMatches(query.tripId, query.requestId);
   },
 
   async loadMatches(tripId?: string, requestId?: string) {
+    this.setData({ loading: true, errorText: '' });
     const demo = buildDemoMatchCandidate();
     const result = await callCloud<{ ok: boolean; matches?: MatchCandidate[]; error?: string }>({
       name: 'match-search',
@@ -20,8 +26,22 @@ Page({
       fallback: { ok: true, matches: [demo] },
     });
 
-    const matches = result.matches || [demo];
-    this.setData({ matches, hasMatches: matches.length > 0 });
+    if (!result.ok) {
+      this.setData({
+        matches: [],
+        hasMatches: false,
+        loading: false,
+        errorText: result.error || '匹配结果加载失败，请稍后重试',
+      });
+      return;
+    }
+
+    const matches = result.matches || [];
+    this.setData({ matches, hasMatches: matches.length > 0, loading: false });
+  },
+
+  retryLoad() {
+    this.loadMatches(this.data.tripId, this.data.requestId);
   },
 
   goOffer(event: WechatMiniprogram.TouchEvent) {

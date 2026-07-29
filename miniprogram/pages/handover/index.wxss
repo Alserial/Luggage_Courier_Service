@@ -12,17 +12,17 @@
   height: 220rpx;
   align-items: center;
   justify-content: center;
-  border: 2rpx dashed #0f766e;
+  border: 2rpx dashed #7f9070;
   border-radius: 8rpx;
-  background: #ecfdf5;
-  color: #0f766e;
+  background: #eef3ea;
+  color: #5f6e54;
   font-size: 32rpx;
   font-weight: 800;
 }
 
 .qr-title {
   margin-top: 18rpx;
-  color: #111827;
+  color: #3d4634;
   font-size: 30rpx;
   font-weight: 800;
 }
@@ -32,7 +32,7 @@
   align-items: flex-start;
   gap: 18rpx;
   padding: 16rpx 0;
-  color: #374151;
+  color: #5f6658;
   font-size: 27rpx;
   line-height: 1.45;
 }
@@ -41,14 +41,14 @@
   width: 36rpx;
   height: 36rpx;
   margin-top: 2rpx;
-  border: 2rpx solid #9ca3af;
+  border: 2rpx solid #9ea895;
   border-radius: 8rpx;
-  background: #ffffff;
+  background: #fffdf7;
 }
 
 .checked {
-  border-color: #0f766e;
-  background: #0f766e;
+  border-color: #7f9070;
+  background: #7f9070;
 }
 
 .evidence-button {

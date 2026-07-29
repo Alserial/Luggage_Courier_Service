@@ -20,18 +20,30 @@
   </view>
 
   <view wx:if="{{!loading && !errorText}}" class="card trip-card" wx:for="{{trips}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-    <view>
-      <view class="card-title">{{item.route}}</view>
-      <view class="meta-line">
-        <text>{{item.departureDate}}</text>
-        <text>可用 {{item.capacityKg}}kg</text>
+    <view class="list-card-head">
+      <view class="route-title">{{item.route}}</view>
+      <view class="status-pill status-neutral">{{scope === 'market' ? '已核验' : item.verificationStatus}}</view>
+    </view>
+    <view class="trip-facts">
+      <view class="fact">
+        <view class="fact-label">出发日期</view>
+        <view class="fact-value">{{item.departureDate}}</view>
+      </view>
+      <view class="fact">
+        <view class="fact-label">可用重量</view>
+        <view class="fact-value">{{item.capacityKg}} kg</view>
       </view>
     </view>
-    <view class="status-pill status-neutral">{{scope === 'market' ? '已核验' : item.verificationStatus}}</view>
+    <view class="category-row">
+      <view class="category-chip" wx:for="{{item.categories}}" wx:for-item="category" wx:key="*this">{{category}}</view>
+    </view>
+    <view class="card-link">查看行程详情 →</view>
   </view>
 
   <view wx:if="{{!loading && !errorText && !hasTrips}}" class="card list-state">
-    <view class="muted">{{scope === 'market' ? '暂时没有其他用户已核验的有效行程。' : '你还没有发布行程。'}}</view>
+    <view class="empty-mark">TRIP</view>
+    <view class="empty-title">{{scope === 'market' ? '暂时没有有效行程' : '你还没有发布行程'}}</view>
+    <view class="muted">{{scope === 'market' ? '稍后再来看看已核验的公开路线。' : '填写真实路线和容量后，才能开始匹配。'}}</view>
   </view>
 
   <view class="button-row">

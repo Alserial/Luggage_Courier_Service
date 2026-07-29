@@ -19,6 +19,7 @@ Page({
     categories: allowedCategories,
     selectedCategoryMap: {} as Record<string, boolean>,
     form: { ...emptyForm },
+    submitting: false,
   },
 
   onInput(event: WechatMiniprogram.Input) {
@@ -55,6 +56,7 @@ Page({
   },
 
   async submit() {
+    if (this.data.submitting) return;
     const form = this.data.form as TripDraft;
     const error = validateTripDraft(form);
     if (error) {
@@ -62,11 +64,13 @@ Page({
       return;
     }
 
+    this.setData({ submitting: true });
     const result = await callCloud<{ ok: boolean; tripId?: string; mock?: boolean; error?: string }>({
       name: 'trip-create',
       data: { form },
       fallback: { ok: true, mock: true },
     });
+    this.setData({ submitting: false });
 
     if (!result.ok) {
       wx.showToast({ title: result.error || '行程提交失败', icon: 'none' });

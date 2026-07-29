@@ -19,4 +19,12 @@ Page({
   goProfile() {
     wx.switchTab({ url: '/pages/profile/index' });
   },
+
+  goOrders() {
+    wx.switchTab({ url: '/pages/orders/index' });
+  },
+
+  goRules() {
+    wx.navigateTo({ url: '/pages/rules/index' });
+  },
 });

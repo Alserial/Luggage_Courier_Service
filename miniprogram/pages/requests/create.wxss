@@ -1,28 +1,149 @@
+.form-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  border: 1rpx solid #ead9b3;
+  border-radius: 18rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.notice-mark {
+  display: flex;
+  width: 42rpx;
+  height: 42rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  background: #c99a3f;
+  color: #fffdf7;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.form-section {
+  margin-bottom: 22rpx;
+  padding: 28rpx;
+  border: 1rpx solid #e1d8c3;
+  border-radius: 20rpx;
+  background: #fffdf7;
+}
+
+.form-section-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
+  padding-bottom: 22rpx;
+  border-bottom: 1rpx solid #eee6d4;
+}
+
+.section-index {
+  display: flex;
+  width: 48rpx;
+  height: 48rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13rpx;
+  background: #eef1e7;
+  color: #5f6e54;
+  font-size: 18rpx;
+  font-weight: 800;
+}
+
+.form-section-title {
+  color: #3d4634;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.form-section-desc {
+  margin-top: 4rpx;
+  color: #8b9382;
+  font-size: 21rpx;
+}
+
+.form-section .input,
+.form-section .textarea {
+  background: #fdfaf2;
+}
+
+.value-grid,
+.route-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14rpx;
+}
+
+.money-input {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  color: #7f9070;
+  font-size: 31rpx;
+  font-weight: 800;
+}
+
+.money-input input {
+  min-width: 0;
+  flex: 1;
+  color: #3d4634;
+  font-size: 28rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.picker-value {
+  color: #5f6658;
+}
+
+.optional {
+  color: #9da392;
+  font-size: 21rpx;
+  font-weight: 400;
+}
+
+.field-last {
+  margin-bottom: 0;
+}
+
 .risk-check {
   display: flex;
   gap: 18rpx;
   align-items: flex-start;
+  margin-bottom: 22rpx;
+  padding: 26rpx;
+  border: 1rpx solid #d5dfcf;
+  border-radius: 18rpx;
+  background: #eef3ea;
 }
 
 .checkbox {
-  width: 36rpx;
-  height: 36rpx;
-  margin-top: 4rpx;
-  border: 2rpx solid #9ca3af;
-  border-radius: 8rpx;
-  background: #ffffff;
+  display: flex;
+  width: 38rpx;
+  height: 38rpx;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rpx;
+  border: 2rpx solid #9ea895;
+  border-radius: 9rpx;
+  background: #fffdf7;
+  color: #fffdf7;
+  font-size: 24rpx;
+  line-height: 1;
 }
 
 .checked {
-  border-color: #0f766e;
-  background: #0f766e;
+  border-color: #7f9070;
+  background: #7f9070;
 }
 
 .risk-text {
   flex: 1;
-  color: #374151;
-  font-size: 26rpx;
-  line-height: 1.5;
+  color: #4f624a;
+  font-size: 24rpx;
+  line-height: 1.55;
 }
 
 .field-heading {
@@ -37,21 +158,22 @@
 }
 
 .photo-count {
-  color: #667085;
-  font-size: 24rpx;
+  color: #7f8778;
+  font-size: 23rpx;
+  font-variant-numeric: tabular-nums;
 }
 
 .photo-helper {
   margin: 10rpx 0 18rpx;
-  color: #667085;
-  font-size: 24rpx;
+  color: #7f8778;
+  font-size: 23rpx;
   line-height: 1.5;
 }
 
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16rpx;
+  gap: 14rpx;
 }
 
 .photo-item,
@@ -60,11 +182,11 @@
   width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 12rpx;
+  border-radius: 14rpx;
 }
 
 .photo-item {
-  background: #eef2f4;
+  background: #eee8d9;
 }
 
 .photo-image {
@@ -82,8 +204,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(17, 24, 39, 0.76);
-  color: #ffffff;
+  background: rgba(61, 70, 52, 0.78);
+  color: #fffdf7;
   font-size: 30rpx;
   line-height: 1;
 }
@@ -94,20 +216,20 @@
   align-items: center;
   justify-content: center;
   gap: 8rpx;
-  border: 1rpx dashed #9fb3bd;
-  background: #f8fafb;
-  color: #52636d;
-  font-size: 23rpx;
+  border: 2rpx dashed #b9c0ae;
+  background: #f7f3e9;
+  color: #6f7769;
+  font-size: 22rpx;
 }
 
 .photo-add-icon {
-  color: #0f766e;
-  font-size: 44rpx;
+  color: #7f9070;
+  font-size: 42rpx;
   line-height: 1;
 }
 
 .upload-progress {
   margin-top: 14rpx;
-  color: #0f766e;
+  color: #5f6e54;
   font-size: 24rpx;
 }

@@ -1,1 +1,106 @@
-/* Page-specific styles intentionally use global form classes. */
+.form-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  border: 1rpx solid #ead9b3;
+  border-radius: 18rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.notice-mark {
+  display: flex;
+  width: 42rpx;
+  height: 42rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  background: #c99a3f;
+  color: #fffdf7;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.form-section {
+  margin-bottom: 22rpx;
+  padding: 28rpx;
+  border: 1rpx solid #e1d8c3;
+  border-radius: 20rpx;
+  background: #fffdf7;
+}
+
+.form-section-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
+  padding-bottom: 22rpx;
+  border-bottom: 1rpx solid #eee6d4;
+}
+
+.section-index {
+  display: flex;
+  width: 48rpx;
+  height: 48rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13rpx;
+  background: #eef1e7;
+  color: #5f6e54;
+  font-size: 18rpx;
+  font-weight: 800;
+}
+
+.form-section-title {
+  color: #3d4634;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.form-section-desc {
+  margin-top: 4rpx;
+  color: #8b9382;
+  font-size: 21rpx;
+}
+
+.form-section .input,
+.form-section .textarea {
+  background: #fdfaf2;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14rpx;
+}
+
+.picker-value {
+  overflow: hidden;
+  color: #5f6658;
+  font-size: 25rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optional {
+  color: #9da392;
+  font-size: 21rpx;
+  font-weight: 400;
+}
+
+.numeric-input {
+  font-variant-numeric: tabular-nums;
+}
+
+.field-last {
+  margin-bottom: 0;
+}
+
+.submit-note {
+  margin: 6rpx 4rpx 20rpx;
+  color: #7f8778;
+  font-size: 22rpx;
+  line-height: 1.55;
+}

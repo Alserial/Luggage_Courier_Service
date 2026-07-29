@@ -1,50 +1,77 @@
-<view class="page">
+<view class="page form-page safe-bottom">
   <view class="page-header">
     <view class="eyebrow">CREATE TRIP</view>
     <view class="page-title">发布携带人行程</view>
-    <view class="page-desc">填写真实路线、日期和可接受品类，后续匹配只展示低风险需求。</view>
+    <view class="page-desc">填写真实路线、日期和可接受品类，后续只匹配审核通过的低风险需求。</view>
   </view>
-  <view class="card warning">请只填写真实路线和可接受品类，不要承诺“什么都能带”。</view>
 
-  <view class="field">
-    <text class="field-label">出发城市</text>
-    <input class="input" placeholder="例如：上海" value="{{form.fromCity}}" data-field="fromCity" bindinput="onInput" />
+  <view class="form-notice warning">
+    <view class="notice-mark">!</view>
+    <view>请只填写真实路线和可接受品类，不要承诺“什么都能带”。</view>
   </view>
-  <view class="field">
-    <text class="field-label">到达城市</text>
-    <input class="input" placeholder="例如：墨尔本" value="{{form.toCity}}" data-field="toCity" bindinput="onInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">出发日期</text>
-    <picker mode="date" value="{{form.departureDate}}" data-field="departureDate" bindchange="onDateChange">
-      <view class="input">{{form.departureDate || '选择日期'}}</view>
-    </picker>
-  </view>
-  <view class="field">
-    <text class="field-label">到达日期</text>
-    <picker mode="date" value="{{form.arrivalDate}}" data-field="arrivalDate" bindchange="onDateChange">
-      <view class="input">{{form.arrivalDate || '选择日期'}}</view>
-    </picker>
-  </view>
-  <view class="field">
-    <text class="field-label">航班号</text>
-    <input class="input" placeholder="订单确认前建议补充" value="{{form.flightNo}}" data-field="flightNo" bindinput="onInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">可用重量 kg</text>
-    <input class="input" type="digit" placeholder="MVP 上限 5kg" value="{{form.luggageCapacityKg}}" data-field="luggageCapacityKg" bindinput="onNumberInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">可接受品类</text>
-    <view class="tag-row">
-      <view wx:for="{{categories}}" wx:key="value" class="tag {{selectedCategoryMap[item.value] ? 'tag-active' : ''}}" data-value="{{item.value}}" bindtap="toggleCategory">
-        {{item.label}}
+
+  <view class="form-section">
+    <view class="form-section-head">
+      <view class="section-index">01</view>
+      <view>
+        <view class="form-section-title">路线与日期</view>
+        <view class="form-section-desc">用于筛选同方向且时间兼容的需求</view>
       </view>
     </view>
+    <view class="field">
+      <text class="field-label">出发城市</text>
+      <input class="input" placeholder="例如：上海" value="{{form.fromCity}}" data-field="fromCity" bindinput="onInput" />
+    </view>
+    <view class="field">
+      <text class="field-label">到达城市</text>
+      <input class="input" placeholder="例如：墨尔本" value="{{form.toCity}}" data-field="toCity" bindinput="onInput" />
+    </view>
+    <view class="date-grid">
+      <view class="field">
+        <text class="field-label">出发日期</text>
+        <picker mode="date" value="{{form.departureDate}}" data-field="departureDate" bindchange="onDateChange">
+          <view class="input picker-value">{{form.departureDate || '选择日期'}}</view>
+        </picker>
+      </view>
+      <view class="field">
+        <text class="field-label">到达日期</text>
+        <picker mode="date" value="{{form.arrivalDate}}" data-field="arrivalDate" bindchange="onDateChange">
+          <view class="input picker-value">{{form.arrivalDate || '选择日期'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="field field-last">
+      <text class="field-label">航班号 <text class="optional">选填，订单确认前建议补充</text></text>
+      <input class="input" placeholder="例如：MU737" value="{{form.flightNo}}" data-field="flightNo" bindinput="onInput" />
+    </view>
   </view>
-  <view class="field">
-    <text class="field-label">备注</text>
-    <textarea class="textarea" placeholder="可写交接偏好、不可接受范围" value="{{form.note}}" data-field="note" bindinput="onInput" />
+
+  <view class="form-section">
+    <view class="form-section-head">
+      <view class="section-index">02</view>
+      <view>
+        <view class="form-section-title">容量与品类</view>
+        <view class="form-section-desc">MVP 仅支持 5kg 内正向品类</view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field-label">可用重量 kg</text>
+      <input class="input numeric-input" type="digit" placeholder="上限 5kg" value="{{form.luggageCapacityKg}}" data-field="luggageCapacityKg" bindinput="onNumberInput" />
+    </view>
+    <view class="field">
+      <text class="field-label">可接受品类</text>
+      <view class="tag-row">
+        <view wx:for="{{categories}}" wx:key="value" class="tag {{selectedCategoryMap[item.value] ? 'tag-active' : ''}}" data-value="{{item.value}}" bindtap="toggleCategory">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+    <view class="field field-last">
+      <text class="field-label">备注 <text class="optional">选填</text></text>
+      <textarea class="textarea" placeholder="可写交接偏好、时间限制和不可接受范围" value="{{form.note}}" data-field="note" bindinput="onInput" />
+    </view>
   </view>
-  <button class="primary-button" bindtap="submit">提交行程</button>
+
+  <view class="submit-note">提交后进入行程核验；航班凭证等敏感资料不会在公开列表展示。</view>
+  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '正在提交' : '提交行程'}}</button>
 </view>

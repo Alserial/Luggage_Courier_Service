@@ -1,36 +1,237 @@
-.timeline-title {
-  margin-bottom: 10rpx;
-  color: #111827;
-  font-size: 31rpx;
-  font-weight: 800;
+.order-overview {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 22rpx;
+  background: #3d4634;
+  color: #efe8d8;
 }
 
-.status-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12rpx;
-  margin-top: 18rpx;
+.overview-label {
+  color: #aeb9a3;
+  font-size: 18rpx;
+  font-weight: 700;
+  letter-spacing: 0.13em;
 }
 
-.status-line {
-  padding: 14rpx 16rpx;
-  border-radius: 999rpx;
-  background: #f5f8fa;
-  color: #475467;
-  font-size: 24rpx;
+.overview-title {
+  margin-top: 12rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.overview-count {
+  min-width: 110rpx;
+  padding: 18rpx;
+  border: 1rpx solid rgba(239, 232, 216, 0.2);
+  border-radius: 16rpx;
+  background: rgba(239, 232, 216, 0.08);
   text-align: center;
 }
 
+.count-value {
+  font-size: 34rpx;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.count-label {
+  margin-top: 4rpx;
+  color: #bfc5b6;
+  font-size: 19rpx;
+}
+
 .order-card {
+  padding: 30rpx;
+}
+
+.order-card-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18rpx;
 }
 
+.order-item {
+  min-width: 0;
+}
+
+.order-number {
+  overflow: hidden;
+  color: #9aa18f;
+  font-size: 19rpx;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-name {
+  margin-top: 7rpx;
+  color: #3d4634;
+  font-size: 31rpx;
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.order-route {
+  margin-top: 12rpx;
+  color: #5f6e54;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.order-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.order-meta {
+  padding: 17rpx 18rpx;
+  border-radius: 14rpx;
+  background: #f4f1e8;
+}
+
+.meta-label {
+  color: #8b9382;
+  font-size: 20rpx;
+}
+
+.meta-value {
+  overflow: hidden;
+  margin-top: 5rpx;
+  color: #4a5142;
+  font-size: 24rpx;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .amount {
-  flex-shrink: 0;
-  color: #0f766e;
-  font-size: 30rpx;
-  font-weight: 900;
+  color: #5f6e54;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 22rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #eee6d4;
+  color: #7f8778;
+  font-size: 22rpx;
+}
+
+.detail-link {
+  color: #5f6e54;
+  font-weight: 700;
+}
+
+.status-pending_payment,
+.status-pending_review {
+  border-color: #ead9b3;
+  background: #f7edd7;
+  color: #8a681f;
+}
+
+.status-disputed {
+  border-color: #efd3ca;
+  background: #fbefeb;
+  color: #a64d3b;
+}
+
+.flow-note {
+  margin-top: 30rpx;
+  padding: 28rpx;
+  border: 1rpx solid #ddd5c4;
+  border-radius: 20rpx;
+  background: #e7deca;
+}
+
+.flow-note-title {
+  color: #4a5142;
+  font-size: 27rpx;
+  font-weight: 800;
+}
+
+.flow-note-desc {
+  margin-top: 8rpx;
+  color: #747c6c;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.status-scroll {
+  margin-top: 22rpx;
+  white-space: nowrap;
+}
+
+.status-flow {
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-node {
+  padding: 10rpx 16rpx;
+  border: 1rpx solid #d4cbb6;
+  border-radius: 999rpx;
+  background: #fffdf7;
+  color: #666e5f;
+  font-size: 21rpx;
+}
+
+.status-arrow {
+  margin: 0 8rpx;
+  color: #aeb3a4;
+  font-size: 20rpx;
+}
+
+.empty-state {
+  padding: 42rpx 28rpx;
+  text-align: center;
+}
+
+.empty-mark {
+  display: inline-flex;
+  height: 52rpx;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18rpx;
+  padding: 0 16rpx;
+  border-radius: 14rpx;
+  background: #eef1e7;
+  color: #7f9070;
+  font-size: 18rpx;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.empty-title {
+  margin-bottom: 8rpx;
+  color: #3d4634;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.list-state {
+  padding: 36rpx 28rpx;
+  text-align: center;
+}
+
+.error-text {
+  color: #a64d3b;
+  font-size: 26rpx;
+}
+
+.retry-button {
+  margin-top: 20rpx;
 }

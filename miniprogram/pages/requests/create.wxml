@@ -1,73 +1,116 @@
-<view class="page">
+<view class="page form-page safe-bottom">
   <view class="page-header">
     <view class="eyebrow">CREATE REQUEST</view>
     <view class="page-title">发布物品需求</view>
-    <view class="page-desc">请填写低风险个人小件信息，平台会按正向品类和价值重量规则审核。</view>
+    <view class="page-desc">提交低风险个人小件信息，平台会按正向品类、价值和重量规则审核。</view>
   </view>
-  <view class="card warning">只允许低风险个人小件。不确定物品默认进入人工审核或拒绝。</view>
 
-  <view class="field">
-    <text class="field-label">物品名称</text>
-    <input class="input" placeholder="例如：普通外套" value="{{form.itemName}}" data-field="itemName" bindinput="onInput" />
+  <view class="form-notice warning">
+    <view class="notice-mark">!</view>
+    <view>不确定物品会进入人工审核或被拒绝，请勿隐藏真实品类、数量与价值。</view>
   </view>
-  <view class="field">
-    <text class="field-label">品类</text>
-    <view class="tag-row">
-      <view wx:for="{{categories}}" wx:key="value" class="tag {{form.category === item.value ? 'tag-active' : ''}}" data-value="{{item.value}}" bindtap="selectCategory">
-        {{item.label}}
+
+  <view class="form-section">
+    <view class="form-section-head">
+      <view class="section-index">01</view>
+      <view>
+        <view class="form-section-title">物品信息</view>
+        <view class="form-section-desc">品类、重量和价值会影响审核结果</view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field-label">物品名称</text>
+      <input class="input" placeholder="例如：普通外套" value="{{form.itemName}}" data-field="itemName" bindinput="onInput" />
+    </view>
+    <view class="field">
+      <text class="field-label">品类</text>
+      <view class="tag-row">
+        <view wx:for="{{categories}}" wx:key="value" class="tag {{form.category === item.value ? 'tag-active' : ''}}" data-value="{{item.value}}" bindtap="selectCategory">
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+    <view class="value-grid">
+      <view class="field">
+        <text class="field-label">数量</text>
+        <input class="input" type="number" placeholder="合理数量" value="{{form.quantity}}" data-field="quantity" bindinput="onNumberInput" />
+      </view>
+      <view class="field">
+        <text class="field-label">重量 kg</text>
+        <input class="input" type="digit" placeholder="上限 5" value="{{form.estimatedWeightKg}}" data-field="estimatedWeightKg" bindinput="onNumberInput" />
+      </view>
+    </view>
+    <view class="field field-last">
+      <text class="field-label">申报价值 CNY</text>
+      <view class="money-input input">
+        <text>¥</text>
+        <input type="digit" placeholder="MVP 上限 2000" value="{{form.declaredValue}}" data-field="declaredValue" bindinput="onNumberInput" />
       </view>
     </view>
   </view>
-  <view class="field">
-    <text class="field-label">数量</text>
-    <input class="input" type="number" placeholder="个人合理数量" value="{{form.quantity}}" data-field="quantity" bindinput="onNumberInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">申报价值 CNY</text>
-    <input class="input" type="digit" placeholder="MVP 上限 2000" value="{{form.declaredValue}}" data-field="declaredValue" bindinput="onNumberInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">预估重量 kg</text>
-    <input class="input" type="digit" placeholder="MVP 上限 5kg" value="{{form.estimatedWeightKg}}" data-field="estimatedWeightKg" bindinput="onNumberInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">交接城市</text>
-    <input class="input" placeholder="例如：上海" value="{{form.pickupCity}}" data-field="pickupCity" bindinput="onInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">交付城市</text>
-    <input class="input" placeholder="例如：墨尔本" value="{{form.deliveryCity}}" data-field="deliveryCity" bindinput="onInput" />
-  </view>
-  <view class="field">
-    <text class="field-label">最晚送达日期</text>
-    <picker mode="date" value="{{form.deadline}}" data-field="deadline" bindchange="onDateChange">
-      <view class="input">{{form.deadline || '选择日期'}}</view>
-    </picker>
-  </view>
-  <view class="field">
-    <view class="field-heading">
-      <text class="field-label photo-label">物品图片</text>
-      <text class="photo-count">{{selectedPhotos.length}}/{{maxPhotoCount}}</text>
-    </view>
-    <view class="photo-helper">至少上传 1 张实物清晰照片，用于品类审核和后续交接核对；单张不超过 5MB。</view>
-    <view class="photo-grid">
-      <view class="photo-item" wx:for="{{selectedPhotos}}" wx:key="tempFilePath">
-        <image class="photo-image" src="{{item.tempFilePath}}" mode="aspectFill" data-src="{{item.tempFilePath}}" bindtap="previewItemPhoto" />
-        <view class="photo-remove" data-index="{{index}}" catchtap="removeItemPhoto">×</view>
-      </view>
-      <view wx:if="{{selectedPhotos.length < maxPhotoCount}}" class="photo-add" bindtap="chooseItemPhotos">
-        <view class="photo-add-icon">＋</view>
-        <view>拍照/相册</view>
+
+  <view class="form-section">
+    <view class="form-section-head">
+      <view class="section-index">02</view>
+      <view>
+        <view class="form-section-title">交接路线</view>
+        <view class="form-section-desc">用于匹配同方向且日期兼容的行程</view>
       </view>
     </view>
-    <view wx:if="{{uploading}}" class="upload-progress">{{uploadProgressText}}</view>
+    <view class="route-grid">
+      <view class="field">
+        <text class="field-label">交接城市</text>
+        <input class="input" placeholder="例如：上海" value="{{form.pickupCity}}" data-field="pickupCity" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <text class="field-label">交付城市</text>
+        <input class="input" placeholder="例如：墨尔本" value="{{form.deliveryCity}}" data-field="deliveryCity" bindinput="onInput" />
+      </view>
+    </view>
+    <view class="field field-last">
+      <text class="field-label">最晚送达日期</text>
+      <picker mode="date" value="{{form.deadline}}" data-field="deadline" bindchange="onDateChange">
+        <view class="input picker-value">{{form.deadline || '选择日期'}}</view>
+      </picker>
+    </view>
   </view>
-  <view class="field">
-    <text class="field-label">补充说明</text>
-    <textarea class="textarea" placeholder="说明包装、购买凭证、交接偏好" value="{{form.note}}" data-field="note" bindinput="onInput" />
+
+  <view class="form-section">
+    <view class="form-section-head">
+      <view class="section-index">03</view>
+      <view>
+        <view class="form-section-title">照片与说明</view>
+        <view class="form-section-desc">清晰实物照用于审核和后续交接核对</view>
+      </view>
+    </view>
+    <view class="field">
+      <view class="field-heading">
+        <text class="field-label photo-label">物品图片</text>
+        <text class="photo-count">{{selectedPhotos.length}} / {{maxPhotoCount}}</text>
+      </view>
+      <view class="photo-helper">至少上传 1 张实物照片，单张不超过 5MB。</view>
+      <view class="photo-grid">
+        <view class="photo-item" wx:for="{{selectedPhotos}}" wx:key="tempFilePath">
+          <image class="photo-image" src="{{item.tempFilePath}}" mode="aspectFill" data-src="{{item.tempFilePath}}" bindtap="previewItemPhoto" />
+          <view class="photo-remove" data-index="{{index}}" catchtap="removeItemPhoto">×</view>
+        </view>
+        <view wx:if="{{selectedPhotos.length < maxPhotoCount}}" class="photo-add" bindtap="chooseItemPhotos">
+          <view class="photo-add-icon">＋</view>
+          <view>拍照 / 相册</view>
+        </view>
+      </view>
+      <view wx:if="{{uploading}}" class="upload-progress">{{uploadProgressText}}</view>
+    </view>
+    <view class="field field-last">
+      <text class="field-label">补充说明 <text class="optional">选填</text></text>
+      <textarea class="textarea" placeholder="说明包装、购买凭证、交接偏好" value="{{form.note}}" data-field="note" bindinput="onInput" />
+    </view>
   </view>
-  <view class="card risk-check" bindtap="toggleRiskDeclaration">
-    <view class="checkbox {{form.riskDeclarationAccepted ? 'checked' : ''}}"></view>
+
+  <view class="risk-check" bindtap="toggleRiskDeclaration">
+    <view class="checkbox {{form.riskDeclarationAccepted ? 'checked' : ''}}">
+      <text wx:if="{{form.riskDeclarationAccepted}}">✓</text>
+    </view>
     <view class="risk-text">我确认物品属于平台允许品类，并了解通关、查验、税费和退运风险。</view>
   </view>
   <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{uploading ? '正在上传图片' : '提交审核'}}</button>

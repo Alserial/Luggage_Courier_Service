@@ -7,14 +7,14 @@ page {
   display: flex;
   height: 100vh;
   flex-direction: column;
-  background: #f4f7f8;
+  background: #efe8d8;
 }
 
 .chat-header {
   flex-shrink: 0;
   padding: 22rpx 24rpx 18rpx;
-  border-bottom: 1rpx solid #e3e9ec;
-  background: #ffffff;
+  border-bottom: 1rpx solid #e1d8c3;
+  background: #fffdf7;
 }
 
 .context-row {
@@ -31,7 +31,7 @@ page {
 
 .context-title {
   overflow: hidden;
-  color: #17202a;
+  color: #3d4634;
   font-size: 30rpx;
   font-weight: 800;
   line-height: 1.35;
@@ -42,7 +42,7 @@ page {
 .context-route {
   margin-top: 6rpx;
   overflow: hidden;
-  color: #667085;
+  color: #7f8778;
   font-size: 24rpx;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -53,8 +53,8 @@ page {
   flex-shrink: 0;
   padding: 8rpx 14rpx;
   border-radius: 999rpx;
-  background: #edf7f5;
-  color: #0f766e;
+  background: #eef3ea;
+  color: #5f6e54;
   font-size: 22rpx;
   font-weight: 700;
 }
@@ -63,8 +63,8 @@ page {
   margin-top: 16rpx;
   padding: 16rpx 18rpx;
   border-radius: 12rpx;
-  background: #fff8e8;
-  color: #805b1b;
+  background: #f7edd7;
+  color: #765b22;
   font-size: 23rpx;
   line-height: 1.5;
 }
@@ -76,10 +76,10 @@ page {
   justify-content: center;
   margin: 14rpx 0 0;
   padding: 0 18rpx;
-  border: 1rpx solid rgba(15, 118, 110, 0.22);
+  border: 1rpx solid rgba(127, 144, 112, 0.3);
   border-radius: 10rpx;
-  background: #ffffff;
-  color: #0f766e;
+  background: #fffdf7;
+  color: #5f6e54;
   font-size: 23rpx;
   font-weight: 700;
   line-height: 1;
@@ -104,8 +104,8 @@ page {
   margin: 0 auto 22rpx;
   padding: 0 24rpx;
   border-radius: 10rpx;
-  background: #ffffff;
-  color: #0f766e;
+  background: #fffdf7;
+  color: #5f6e54;
   font-size: 23rpx;
 }
 
@@ -113,20 +113,20 @@ page {
   margin: 80rpx 24rpx 0;
   padding: 32rpx;
   border-radius: 14rpx;
-  background: #ffffff;
-  color: #667085;
+  background: #fffdf7;
+  color: #7f8778;
   font-size: 25rpx;
   line-height: 1.55;
   text-align: center;
 }
 
 .error-state {
-  color: #9f2d2d;
+  color: #a64d3b;
 }
 
 .empty-title {
   margin-bottom: 8rpx;
-  color: #344054;
+  color: #4a5142;
   font-size: 28rpx;
   font-weight: 800;
 }
@@ -161,7 +161,7 @@ page {
   display: flex;
   gap: 12rpx;
   margin-bottom: 8rpx;
-  color: #7a8791;
+  color: #8b9382;
   font-size: 21rpx;
   line-height: 1.3;
 }
@@ -169,10 +169,10 @@ page {
 .message-bubble {
   max-width: 100%;
   padding: 18rpx 20rpx;
-  border: 1rpx solid #e2e8ec;
+  border: 1rpx solid #e1d8c3;
   border-radius: 6rpx 14rpx 14rpx;
-  background: #ffffff;
-  color: #263443;
+  background: #fffdf7;
+  color: #4a5142;
   font-size: 28rpx;
   line-height: 1.55;
   overflow-wrap: anywhere;
@@ -180,36 +180,36 @@ page {
 }
 
 .message-mine .message-bubble {
-  border-color: rgba(15, 118, 110, 0.14);
+  border-color: rgba(127, 144, 112, 0.22);
   border-radius: 14rpx 6rpx 14rpx 14rpx;
-  background: #dff4ef;
-  color: #164e48;
+  background: #e5ecdf;
+  color: #42513f;
 }
 
 .message-muted {
   border-style: dashed;
-  background: #f7f8f9 !important;
-  color: #667085 !important;
+  background: #f4f1e8 !important;
+  color: #7f8778 !important;
 }
 
 .moderation-label,
 .report-action {
   margin-top: 8rpx;
-  color: #b45309;
+  color: #8a681f;
   font-size: 21rpx;
   line-height: 1.35;
 }
 
 .report-action {
-  color: #667085;
+  color: #7f8778;
 }
 
 .system-message {
   max-width: 86%;
   padding: 12rpx 18rpx;
   border-radius: 10rpx;
-  background: #e9eef1;
-  color: #52636d;
+  background: #e7deca;
+  color: #687064;
   font-size: 23rpx;
   line-height: 1.5;
   text-align: center;
@@ -217,7 +217,7 @@ page {
 
 .message-time {
   margin-top: 5rpx;
-  color: #83909a;
+  color: #9da392;
   font-size: 20rpx;
 }
 
@@ -228,8 +228,8 @@ page {
 .composer-bar {
   flex-shrink: 0;
   padding: 16rpx 20rpx calc(16rpx + env(safe-area-inset-bottom));
-  border-top: 1rpx solid #dfe6e9;
-  background: #ffffff;
+  border-top: 1rpx solid #e1d8c3;
+  background: #fffdf7;
 }
 
 .composer-row {
@@ -249,10 +249,10 @@ page {
   min-height: 72rpx;
   max-height: 176rpx;
   padding: 16rpx 58rpx 16rpx 18rpx;
-  border: 1rpx solid #d7e0e4;
+  border: 1rpx solid #ded5c1;
   border-radius: 12rpx;
-  background: #f8fafb;
-  color: #17202a;
+  background: #f7f3e9;
+  color: #3d4634;
   font-size: 27rpx;
   line-height: 1.45;
 }
@@ -261,7 +261,7 @@ page {
   position: absolute;
   right: 14rpx;
   bottom: 12rpx;
-  color: #98a2a9;
+  color: #9da392;
   font-size: 20rpx;
 }
 
@@ -274,8 +274,8 @@ page {
   margin: 0;
   padding: 0;
   border-radius: 12rpx;
-  background: #0f766e;
-  color: #ffffff;
+  background: #7f9070;
+  color: #fffdf7;
   font-size: 26rpx;
   font-weight: 700;
   line-height: 1;
@@ -284,8 +284,8 @@ page {
 .read-only-notice {
   padding: 16rpx 20rpx;
   border-radius: 10rpx;
-  background: #f2f4f5;
-  color: #667085;
+  background: #f4f1e8;
+  color: #7f8778;
   font-size: 24rpx;
   line-height: 1.45;
   text-align: center;

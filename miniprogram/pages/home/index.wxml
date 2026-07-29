@@ -1,16 +1,27 @@
 <view class="page home-page">
+  <view class="brand-bar">
+    <view class="brand-lockup">
+      <view class="brand-mark"></view>
+      <view>
+        <view class="brand-word">Kargo</view>
+        <view class="brand-caption">顺路帮带 · 过程留痕</view>
+      </view>
+    </view>
+    <button class="profile-chip" bindtap="goProfile">我的</button>
+  </view>
+
   <view class="hero">
-    <view class="hero-kicker">LOW-RISK CARRYING MVP</view>
-    <view class="hero-title">中澳低风险小件顺路帮带</view>
-    <view class="hero-subtitle">发布真实行程或物品需求，平台审核品类并保留关键证据。</view>
+    <view class="hero-eyebrow">LOW-RISK CARRYING</view>
+    <view class="hero-title">让顺路的人，<br />帮你捎带低风险小件。</view>
+    <view class="hero-subtitle">平台提供匹配、审核与关键动作记录；不提供清关、物流或商品货款托管。</view>
     <view class="hero-metrics">
       <view class="metric">
-        <text class="metric-value">5kg</text>
+        <text class="metric-value">5 kg</text>
         <text class="metric-label">重量上限</text>
       </view>
       <view class="metric">
-        <text class="metric-value">CNY 2000</text>
-        <text class="metric-label">价值上限</text>
+        <text class="metric-value">¥2,000</text>
+        <text class="metric-label">申报上限</text>
       </view>
       <view class="metric">
         <text class="metric-value">留痕</text>
@@ -19,33 +30,46 @@
     </view>
   </view>
 
-  <view class="action-grid">
-    <button class="action-card" bindtap="goCreateTrip">
-      <text class="action-eyebrow">TRIP</text>
-      <text class="action-title">发布行程</text>
-      <text class="action-desc">我是携带人，填写路线、时间和可带品类</text>
-    </button>
-    <button class="action-card" bindtap="goCreateRequest">
-      <text class="action-eyebrow">ITEM</text>
-      <text class="action-title">发布需求</text>
-      <text class="action-desc">我是需求方，提交物品照片和审核资料</text>
-    </button>
+  <view class="pending-strip" bindtap="goOrders">
+    <view class="pending-mark">!</view>
+    <view class="pending-copy">
+      <view class="pending-title">查看待处理事项</view>
+      <view class="pending-desc">登录后查看需确认、交接或补充凭证的订单。</view>
+    </view>
+    <text class="pending-link">订单 ›</text>
   </view>
 
-  <view class="section">
-    <view class="section-title">待处理</view>
-    <view class="card status-card notice-card">
-      <view>
-        <view class="status-title">先完成登录和规则确认</view>
-        <view class="muted">内测阶段暂不启用实名门槛，订单流程以审核和证据留痕为准。</view>
-      </view>
-      <button class="mini-button" bindtap="goProfile">查看</button>
+  <view class="section-heading">
+    <view>
+      <view class="section-title">从这里开始</view>
+      <view class="section-subtitle">选择你今天要做的事</view>
     </view>
   </view>
 
+  <view class="action-grid">
+    <button class="action-card action-card-primary" bindtap="goCreateTrip">
+      <view class="action-index">01</view>
+      <view class="action-title">发布行程</view>
+      <view class="action-desc">填写路线、日期、可用重量和可接受品类</view>
+      <view class="action-link">我是携带人 →</view>
+    </button>
+    <button class="action-card" bindtap="goCreateRequest">
+      <view class="action-index">02</view>
+      <view class="action-title">发布需求</view>
+      <view class="action-desc">提交物品、照片、路线和风险声明</view>
+      <view class="action-link">我是需求方 →</view>
+    </button>
+  </view>
+
   <view class="section">
-    <view class="section-title">平台边界</view>
-    <view class="card boundary-card">
+    <view class="section-heading">
+      <view>
+        <view class="section-title">平台边界</view>
+        <view class="section-subtitle">下单前请先确认范围</view>
+      </view>
+      <view class="rules-link" bindtap="goRules">完整规则 ›</view>
+    </view>
+    <view class="boundary-card">
       <view class="rule-line" wx:for="{{rules}}" wx:key="*this">
         <view class="rule-dot"></view>
         <text>{{item}}</text>

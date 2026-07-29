@@ -1,18 +1,31 @@
-<view class="page">
+<view class="page safe-bottom">
   <view class="page-header">
     <view class="eyebrow">MATCHING</view>
     <view class="page-title">匹配结果</view>
-    <view class="page-desc">按路线、时间、容量和正向品类筛选，仅展示已审核的低风险需求。</view>
+    <view class="page-desc">按路线、时间、容量和正向品类筛选，匹配理由保持可解释。</view>
   </view>
 
-  <view class="card notice-card">
-    <view class="rule-line">只展示已审核、低风险、路线和容量兼容的需求。</view>
+  <view class="match-notice">
+    <view class="notice-check">✓</view>
+    <view>
+      <view class="notice-title">已启用低风险筛选</view>
+      <view class="notice-desc">只展示审核通过、路线日期与容量兼容的需求。</view>
+    </view>
   </view>
 
-  <view class="card match-card" wx:for="{{matches}}" wx:key="id">
+  <view wx:if="{{loading}}" class="card list-state">
+    <view class="muted">正在计算路线、日期、品类与容量匹配...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card list-state">
+    <view class="error-text">{{errorText}}</view>
+    <button class="secondary-button retry-button" bindtap="retryLoad">重新匹配</button>
+  </view>
+
+  <view wx:if="{{!loading && !errorText}}" class="card match-card" wx:for="{{matches}}" wx:key="id">
     <view class="match-header">
-      <view>
-        <view class="card-title">{{item.route}}</view>
+      <view class="match-main">
+        <view class="route-title">{{item.route}}</view>
         <view class="meta-line">
           <text>{{item.dateWindow}}</text>
           <text>{{item.categoryLabel}}</text>
@@ -20,16 +33,23 @@
       </view>
       <view class="score">
         <text class="score-value">{{item.score}}</text>
-        <text class="score-label">匹配</text>
+        <text class="score-label">匹配分</text>
       </view>
     </view>
-    <view class="tag-row reason-row">
-      <view class="tag tag-active" wx:for="{{item.reasons}}" wx:for-item="reason" wx:key="*this">{{reason}}</view>
+    <view class="capacity-line">
+      <text>所需容量</text>
+      <text class="capacity-value">{{item.capacityKg}} kg</text>
     </view>
-    <button class="primary-button" data-index="{{index}}" bindtap="goOffer">去报价</button>
+    <view class="reason-title">为什么匹配</view>
+    <view class="tag-row reason-row">
+      <view class="reason-chip" wx:for="{{item.reasons}}" wx:for-item="reason" wx:key="*this"><text>✓</text> {{reason}}</view>
+    </view>
+    <button class="primary-button" data-index="{{index}}" bindtap="goOffer">查看需求并报价</button>
   </view>
 
-  <view wx:if="{{!hasMatches}}" class="card">
-    <view class="muted">暂无兼容匹配。请确认需求已审核通过、路线时间和容量一致。</view>
+  <view wx:if="{{!loading && !errorText && !hasMatches}}" class="card empty-state">
+    <view class="empty-mark">MATCH</view>
+    <view class="empty-title">暂无兼容匹配</view>
+    <view class="muted">请确认需求已审核通过，并检查路线、时间和容量是否一致。</view>
   </view>
 </view>

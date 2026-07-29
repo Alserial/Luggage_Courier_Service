@@ -20,18 +20,35 @@
   </view>
 
   <view wx:if="{{!loading && !errorText}}" class="card request-card" wx:for="{{requests}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-    <view>
-      <view class="card-title">{{item.itemName}}</view>
-      <view class="meta-line">
-        <text>{{item.route}}</text>
-        <text>{{item.categoryLabel}}</text>
+    <view class="list-card-head">
+      <view class="request-name">{{item.itemName}}</view>
+      <view class="status-pill">{{scope === 'market' ? '已审核' : item.reviewStatus}}</view>
+    </view>
+    <view class="route-line">{{item.route}}</view>
+    <view class="request-facts">
+      <view class="fact">
+        <view class="fact-label">品类</view>
+        <view class="fact-value">{{item.categoryLabel}}</view>
+      </view>
+      <view class="fact">
+        <view class="fact-label">重量</view>
+        <view class="fact-value">{{item.estimatedWeightKg}} kg</view>
+      </view>
+      <view class="fact">
+        <view class="fact-label">申报价值</view>
+        <view class="fact-value">¥{{item.declaredValue}}</view>
       </view>
     </view>
-    <view class="status-pill">{{scope === 'market' ? '已审核' : item.reviewStatus}}</view>
+    <view class="deadline-row">
+      <text>期望最晚 {{item.deadline}}</text>
+      <text class="card-link">查看详情 →</text>
+    </view>
   </view>
 
   <view wx:if="{{!loading && !errorText && !hasRequests}}" class="card list-state">
-    <view class="muted">{{scope === 'market' ? '暂时没有其他用户已审核通过的需求。' : '你还没有发布需求。'}}</view>
+    <view class="empty-mark">ITEM</view>
+    <view class="empty-title">{{scope === 'market' ? '暂时没有低风险需求' : '你还没有发布需求'}}</view>
+    <view class="muted">{{scope === 'market' ? '稍后再来看看审核通过的公开需求。' : '准备物品照片和路线信息后即可提交审核。'}}</view>
   </view>
 
   <view class="button-row">

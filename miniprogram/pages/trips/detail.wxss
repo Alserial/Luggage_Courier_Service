@@ -1,5 +1,5 @@
 .detail-title {
-  color: #111827;
+  color: #3d4634;
   font-size: 38rpx;
   font-weight: 900;
   line-height: 1.25;
@@ -15,8 +15,8 @@
   justify-content: space-between;
   gap: 24rpx;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #f0f3f5;
-  color: #374151;
+  border-bottom: 1rpx solid #eee6d4;
+  color: #5f6658;
   font-size: 28rpx;
 }
 
@@ -25,10 +25,10 @@
 }
 
 .detail-error {
-  color: #b42318;
+  color: #a64d3b;
   font-size: 28rpx;
 }
 
 .public-notice {
-  border-left: 6rpx solid #0f766e;
+  border-left: 6rpx solid #7f9070;
 }

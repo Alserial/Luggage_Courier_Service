@@ -1,29 +1,71 @@
 <view class="page">
   <view class="page-header">
     <view class="eyebrow">ORDERS</view>
-    <view class="page-title">订单</view>
-    <view class="page-desc">跟踪服务费记录、交接、运输、送达和争议证据。</view>
+    <view class="page-title">订单记录</view>
+    <view class="page-desc">跟踪服务费记录、交接、运输、送达和争议证据；状态以平台审计记录为准。</view>
   </view>
 
-  <view class="card order-card" wx:for="{{orders}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+  <view class="order-overview">
     <view>
-      <view class="card-title">{{item.itemName}}</view>
-      <view class="meta-line">
-        <text>{{item.route}}</text>
-        <text>{{item.statusLabel}}</text>
+      <view class="overview-label">TRANSACTION RECORDS</view>
+      <view class="overview-title">每一步都有状态，<br />关键动作都有留痕。</view>
+    </view>
+    <view class="overview-count">
+      <view class="count-value">{{orders.length}}</view>
+      <view class="count-label">当前记录</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card list-state">
+    <view class="muted">正在加载订单记录...</view>
+  </view>
+
+  <view wx:if="{{errorText}}" class="card list-state">
+    <view class="error-text">{{errorText}}</view>
+    <button class="secondary-button retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <view wx:if="{{!loading && !errorText}}" class="card order-card" wx:for="{{orders}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+    <view class="order-card-head">
+      <view class="order-item">
+        <view class="order-number"># {{item.id}}</view>
+        <view class="order-name">{{item.itemName}}</view>
+      </view>
+      <view class="status-pill status-{{item.status}}">{{item.statusLabel}}</view>
+    </view>
+    <view class="order-route">{{item.route}}</view>
+    <view class="order-meta-grid">
+      <view class="order-meta">
+        <view class="meta-label">携带人</view>
+        <view class="meta-value">{{item.travellerName}}</view>
+      </view>
+      <view class="order-meta">
+        <view class="meta-label">服务费合计</view>
+        <view class="meta-value amount">{{item.totalText}}</view>
       </view>
     </view>
-    <view class="amount">{{item.totalText}}</view>
-  </view>
-
-  <view wx:if="{{!hasOrders}}" class="card">
-    <view class="muted">还没有订单，接受报价后会显示在这里。</view>
-  </view>
-
-  <view class="card">
-    <view class="timeline-title">MVP 状态机</view>
-    <view class="status-grid">
-      <view class="status-line" wx:for="{{statuses}}" wx:key="value">{{item.label}}</view>
+    <view class="order-footer">
+      <text>已记录 {{item.evidenceCount}} 份证据</text>
+      <text class="detail-link">查看详情 →</text>
     </view>
+  </view>
+
+  <view wx:if="{{!loading && !errorText && !hasOrders}}" class="card empty-state">
+    <view class="empty-mark">ORDER</view>
+    <view class="empty-title">还没有订单记录</view>
+    <view class="muted">接受报价并进入订单流程后，会显示在这里。</view>
+  </view>
+
+  <view class="flow-note">
+    <view class="flow-note-title">状态说明</view>
+    <view class="flow-note-desc">订单只使用既定状态流转，支付、交接、送达和争议处理均由后端记录。</view>
+    <scroll-view scroll-x class="status-scroll">
+      <view class="status-flow">
+        <block wx:for="{{statuses}}" wx:key="value">
+          <view class="status-node">{{item.label}}</view>
+          <text wx:if="{{index < statuses.length - 1}}" class="status-arrow">→</text>
+        </block>
+      </view>
+    </scroll-view>
   </view>
 </view>

@@ -28,7 +28,7 @@ function city(location: unknown): string {
 }
 
 function route(fromCity: string, toCity: string): string {
-  return `${fromCity || '-'} -> ${toCity || '-'}`;
+  return `${fromCity || '-'} → ${toCity || '-'}`;
 }
 
 export function formatTripRecord(record: Record<string, unknown> = demoTrip) {

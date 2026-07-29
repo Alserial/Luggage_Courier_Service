@@ -1,46 +1,76 @@
-.hero {
-  position: relative;
-  overflow: hidden;
-  padding: 40rpx 32rpx 30rpx;
-  border: 1rpx solid rgba(15, 118, 110, 0.1);
-  border-radius: 18rpx;
-  background: #0f766e;
-  color: #ffffff;
-  box-shadow: 0 16rpx 42rpx rgba(15, 118, 110, 0.18);
+.home-page {
+  padding-top: 24rpx;
 }
 
-.hero-kicker {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 21rpx;
-  font-weight: 800;
+.brand-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26rpx;
+}
+
+.brand-caption {
+  margin-top: 6rpx;
+  color: #8b9382;
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+.profile-chip {
+  width: auto;
+  height: 64rpx;
+  margin: 0;
+  padding: 0 24rpx;
+  border: 1rpx solid #d8cfbb;
+  border-radius: 999rpx;
+  background: #fffdf7;
+  color: #5f6e54;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 64rpx;
+}
+
+.hero {
+  overflow: hidden;
+  padding: 40rpx 34rpx 32rpx;
+  border-radius: 24rpx;
+  background: #3d4634;
+  color: #efe8d8;
+}
+
+.hero-eyebrow {
+  color: #aeb9a3;
+  font-size: 20rpx;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .hero-title {
-  margin-top: 12rpx;
-  font-size: 42rpx;
-  font-weight: 900;
-  line-height: 1.25;
+  margin-top: 16rpx;
+  font-size: 39rpx;
+  font-weight: 800;
+  line-height: 1.32;
 }
 
 .hero-subtitle {
-  margin-top: 14rpx;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 27rpx;
-  line-height: 1.55;
+  margin-top: 18rpx;
+  color: #c7ccbE;
+  font-size: 24rpx;
+  line-height: 1.6;
 }
 
 .hero-metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12rpx;
+  gap: 10rpx;
   margin-top: 30rpx;
 }
 
 .metric {
-  padding: 16rpx 14rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  padding: 16rpx 12rpx;
+  border: 1rpx solid rgba(239, 232, 216, 0.2);
   border-radius: 14rpx;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(239, 232, 216, 0.08);
 }
 
 .metric-value,
@@ -54,105 +84,180 @@
 }
 
 .metric-label {
+  margin-top: 5rpx;
+  color: #bfc5b6;
+  font-size: 19rpx;
+}
+
+.pending-strip {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-top: 22rpx;
+  padding: 24rpx;
+  border: 1rpx solid #e7d5aa;
+  border-radius: 18rpx;
+  background: #f7edd7;
+}
+
+.pending-mark {
+  display: flex;
+  width: 54rpx;
+  height: 54rpx;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14rpx;
+  background: #c99a3f;
+  color: #fffdf7;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.pending-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.pending-title {
+  color: #70591f;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.pending-desc {
   margin-top: 4rpx;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 20rpx;
+  color: #98752e;
+  font-size: 21rpx;
+  line-height: 1.4;
+}
+
+.pending-link {
+  flex-shrink: 0;
+  color: #765b22;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin: 34rpx 0 18rpx;
+}
+
+.section-heading .section-title {
+  margin-bottom: 0;
+}
+
+.section-subtitle {
+  margin-top: 5rpx;
+  color: #8b9382;
+  font-size: 22rpx;
 }
 
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18rpx;
-  margin-top: 24rpx;
+  gap: 16rpx;
 }
 
 .action-card {
-  min-height: 214rpx;
+  display: flex;
+  min-height: 280rpx;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
   padding: 26rpx;
-  border: 1rpx solid rgba(15, 118, 110, 0.1);
-  border-radius: 18rpx;
-  background: #ffffff;
-  box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.04);
+  border: 1rpx solid #e1d8c3;
+  border-radius: 20rpx;
+  background: #fffdf7;
+  color: #3d4634;
   text-align: left;
 }
 
-.action-eyebrow,
-.action-title,
-.action-desc {
-  display: block;
+.action-card-primary {
+  border-color: #7f9070;
+  background: #7f9070;
+  color: #fffdf7;
 }
 
-.action-eyebrow {
-  margin-bottom: 24rpx;
-  color: #0f766e;
+.action-index {
+  display: flex;
+  width: 52rpx;
+  height: 52rpx;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  border-radius: 14rpx;
+  background: #eef1e7;
+  color: #5f6e54;
   font-size: 20rpx;
   font-weight: 800;
 }
 
+.action-card-primary .action-index {
+  background: rgba(255, 253, 247, 0.16);
+  color: #fffdf7;
+}
+
 .action-title {
-  color: #111827;
-  font-size: 33rpx;
-  font-weight: 900;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 .action-desc {
-  margin-top: 12rpx;
-  color: #667085;
-  font-size: 24rpx;
-  line-height: 1.45;
+  margin-top: 10rpx;
+  color: #7f8778;
+  font-size: 22rpx;
+  line-height: 1.48;
 }
 
-.status-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18rpx;
+.action-card-primary .action-desc {
+  color: #e4e6df;
 }
 
-.status-title {
-  margin-bottom: 8rpx;
-  color: #102a27;
-  font-size: 30rpx;
-  font-weight: 800;
-}
-
-.mini-button {
-  display: flex;
-  width: 124rpx;
-  height: 64rpx;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  border-radius: 999rpx;
-  background: #0f766e;
-  color: #ffffff;
-  font-size: 26rpx;
+.action-link {
+  margin-top: auto;
+  padding-top: 22rpx;
+  color: #5f6e54;
+  font-size: 22rpx;
   font-weight: 700;
-  line-height: 1;
-  text-align: center;
+}
+
+.action-card-primary .action-link {
+  color: #fffdf7;
+}
+
+.rules-link {
+  color: #5f6e54;
+  font-size: 23rpx;
+  font-weight: 700;
 }
 
 .boundary-card {
-  border-color: rgba(217, 119, 6, 0.12);
-  background: #fffaf0;
+  padding: 26rpx 28rpx;
+  border: 1rpx solid #e1d8c3;
+  border-radius: 20rpx;
+  background: #fffdf7;
 }
 
 .rule-line {
   display: flex;
   gap: 14rpx;
   align-items: flex-start;
-  margin: 12rpx 0;
-  color: #6d4c12;
-  font-size: 26rpx;
+  padding: 10rpx 0;
+  color: #636b5c;
+  font-size: 24rpx;
   line-height: 1.5;
 }
 
 .rule-dot {
-  width: 12rpx;
-  height: 12rpx;
-  margin-top: 14rpx;
+  width: 10rpx;
+  height: 10rpx;
+  margin-top: 13rpx;
   border-radius: 50%;
-  background: #d97706;
+  background: #b5654a;
   flex-shrink: 0;
 }
