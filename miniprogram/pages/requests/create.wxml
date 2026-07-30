@@ -1,13 +1,20 @@
 <view class="page form-page safe-bottom">
+  <view wx:if="{{loadingRecord}}" class="card form-state">
+    <view class="muted">正在加载需求信息...</view>
+  </view>
+  <view wx:if="{{loadErrorText}}" class="card form-state">
+    <view class="form-error">{{loadErrorText}}</view>
+  </view>
+  <block wx:if="{{!loadingRecord && !loadErrorText}}">
   <view class="page-header">
-    <view class="eyebrow">CREATE REQUEST</view>
-    <view class="page-title">发布物品需求</view>
-    <view class="page-desc">提交低风险个人小件信息，平台会按正向品类、价值和重量规则审核。</view>
+    <view class="eyebrow">{{isEdit ? 'EDIT REQUEST' : 'CREATE REQUEST'}}</view>
+    <view class="page-title">{{isEdit ? '编辑物品需求' : '发布物品需求'}}</view>
+    <view class="page-desc">{{isEdit ? '修改后需求会重新进入审核，原有待处理报价将失效。' : '提交低风险个人小件信息，平台会按正向品类、价值和重量规则审核。'}}</view>
   </view>
 
   <view class="form-notice warning">
     <view class="notice-mark">!</view>
-    <view>不确定物品会进入人工审核或被拒绝，请勿隐藏真实品类、数量与价值。</view>
+    <view>{{isEdit ? '已有订单的需求不能修改；保存后需要重新审核。' : '不确定物品会进入人工审核或被拒绝，请勿隐藏真实品类、数量与价值。'}}</view>
   </view>
 
   <view class="form-section">
@@ -113,5 +120,6 @@
     </view>
     <view class="risk-text">我确认物品属于平台允许品类，并了解通关、查验、税费和退运风险。</view>
   </view>
-  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{uploading ? '正在上传图片' : '提交审核'}}</button>
+  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{uploading ? '正在上传图片' : (submitting ? '正在保存' : (isEdit ? '保存并重新审核' : '提交审核'))}}</button>
+  </block>
 </view>

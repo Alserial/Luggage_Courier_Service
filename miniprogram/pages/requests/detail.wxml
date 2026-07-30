@@ -9,7 +9,10 @@
 
   <block wx:if="{{!loading && !errorText}}">
   <view class="card">
-    <view class="eyebrow">REQUEST DETAIL</view>
+    <view class="detail-heading">
+      <view class="eyebrow">REQUEST DETAIL</view>
+      <view class="status-pill {{request.reviewStatus === 'approved' ? '' : 'status-warning'}}">{{statusLabel}}</view>
+    </view>
     <view class="detail-title">{{request.itemName}}</view>
     <view class="meta-line">
       <text>{{request.route}}</text>
@@ -54,6 +57,13 @@
     <view class="muted">该需求已通过平台审核。发布者身份和报价记录不会在公开页面展示。</view>
   </view>
 
-  <button wx:if="{{isOwner}}" class="primary-button" loading="{{accepting}}" bindtap="acceptOffer">接受报价并生成订单</button>
+  <button wx:if="{{isOwner && hasOffer}}" class="primary-button" loading="{{accepting}}" disabled="{{accepting || deleting}}" bindtap="acceptOffer">接受报价并生成订单</button>
+  <view wx:if="{{isOwner}}" class="manage-actions">
+    <view class="manage-row">
+      <button class="secondary-button" disabled="{{accepting || deleting}}" bindtap="goEdit">编辑需求</button>
+      <button class="danger-button" loading="{{deleting}}" disabled="{{accepting || deleting}}" bindtap="confirmDelete">删除需求</button>
+    </view>
+    <view class="manage-helper">修改后需要重新审核，待处理报价会失效；已有订单时不能修改或删除。</view>
+  </view>
   </block>
 </view>

@@ -9,7 +9,10 @@
 
   <block wx:if="{{!loading && !errorText}}">
   <view class="card">
-    <view class="eyebrow">TRIP DETAIL</view>
+    <view class="detail-heading">
+      <view class="eyebrow">TRIP DETAIL</view>
+      <view class="status-pill {{trip.verificationStatus === 'approved' ? '' : 'status-warning'}}">{{statusLabel}}</view>
+    </view>
     <view class="detail-title">{{trip.route}}</view>
     <view class="meta-line">
       <text>{{trip.departureDate}} 出发</text>
@@ -29,7 +32,14 @@
     </view>
   </view>
 
-  <button wx:if="{{isOwner}}" class="primary-button" bindtap="goMatches">查看匹配需求</button>
+  <view wx:if="{{isOwner}}" class="manage-actions">
+    <button class="primary-button" disabled="{{trip.verificationStatus !== 'approved'}}" bindtap="goMatches">{{trip.verificationStatus === 'approved' ? '查看匹配需求' : '核验通过后可查看匹配'}}</button>
+    <view class="manage-row">
+      <button class="secondary-button" bindtap="goEdit">编辑行程</button>
+      <button class="danger-button" loading="{{deleting}}" disabled="{{deleting}}" bindtap="confirmDelete">删除行程</button>
+    </view>
+    <view class="manage-helper">修改后需要重新核验；已有订单时不能修改或删除。</view>
+  </view>
   <view wx:else class="card public-notice">
     <view class="section-title compact-title">公开行程</view>
     <view class="muted">该行程已通过平台核验。携带者身份和私密资料不会在公开页面展示。</view>

@@ -124,6 +124,8 @@ Stores requester demand for low-risk personal items.
 | `reviewStatus` | ReviewStatus | yes | Defaults to `pending` |
 | `reviewReason` | string | yes | Empty until review decision |
 | `riskDeclarationAccepted` | boolean | yes | Must be true to submit |
+| `isDeleted` | boolean | no | Soft-delete marker; deleted requests are excluded from lists, matching, offers, and review |
+| `deletedAt` | Date | no | Server time of owner soft deletion |
 | `note` | string | no | Packaging, receipt, handover preference |
 | `createdAt` | Date | yes | Server time |
 | `updatedAt` | Date | yes | Server time |
@@ -166,6 +168,7 @@ Stores traveller routes and carrying capacity.
 | `status` | string | yes | `draft`, `active`, `paused`, `expired`, `cancelled` |
 | `verificationStatus` | ReviewStatus | yes | Flight evidence status |
 | `verificationEvidenceIds` | string[] | yes | Linked evidence ids |
+| `deletedAt` | Date | no | Server time when `status` becomes `cancelled` through owner deletion |
 | `createdAt` | Date | yes | Server time |
 | `updatedAt` | Date | yes | Server time |
 

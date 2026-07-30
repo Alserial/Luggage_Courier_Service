@@ -4,8 +4,8 @@ import { formatRequestRecord } from '../../utils/records';
 type RequestScope = 'market' | 'mine';
 type RequestView = ReturnType<typeof formatRequestRecord>;
 
-function getAuthVersion(): number {
-  return getApp<IAppOption>().globalData.authVersion;
+function getDataVersion(): number {
+  return getApp<IAppOption>().globalData.dataVersion;
 }
 
 let requestLoadSequence = 0;
@@ -33,7 +33,7 @@ Page({
   },
 
   onShow() {
-    const authVersion = getAuthVersion();
+    const authVersion = getDataVersion();
     const scope = this.data.scope as RequestScope;
     if (this.data.cacheAuthVersion !== authVersion) {
       this.setData({
@@ -61,7 +61,7 @@ Page({
 
   async loadRequests(force = false) {
     const scope = this.data.scope as RequestScope;
-    const authVersion = getAuthVersion();
+    const authVersion = getDataVersion();
     if (!force && this.data.cacheAuthVersion === authVersion && this.data.loadedScopes[scope]) {
       const requests = this.data.requestCache[scope];
       this.setData({ requests, hasRequests: requests.length > 0, errorText: '' });
@@ -76,7 +76,7 @@ Page({
       fallback: { ok: false, error: 'cloud_unavailable' },
     });
 
-    if (authVersion !== getAuthVersion()) return;
+    if (authVersion !== getDataVersion()) return;
 
     if (!result.ok) {
       if (sequence !== requestLoadSequence || scope !== this.data.scope) return;
@@ -111,7 +111,7 @@ Page({
     const scope = event.currentTarget.dataset.scope;
     if ((scope !== 'market' && scope !== 'mine') || scope === this.data.scope) return;
     const typedScope = scope as RequestScope;
-    const cacheValid = this.data.cacheAuthVersion === getAuthVersion() && this.data.loadedScopes[typedScope];
+    const cacheValid = this.data.cacheAuthVersion === getDataVersion() && this.data.loadedScopes[typedScope];
     const requests = cacheValid ? this.data.requestCache[typedScope] : [];
     const errorText = cacheValid ? this.data.scopeErrors[typedScope] : '';
     this.setData({ scope: typedScope, requests, hasRequests: requests.length > 0, errorText });

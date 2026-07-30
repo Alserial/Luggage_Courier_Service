@@ -33,32 +33,36 @@ Deploy lower-level functions first, then order workflow functions.
 
 1. `auth-login`
 2. `item-request-create`
-3. `item-request-review`
-4. `review-queue-list`
-5. `item-request-list`
-6. `item-request-get`
-7. `trip-create`
-8. `trip-verify`
-9. `trip-list`
-10. `trip-get`
-11. `match-search`
-12. `offer-create`
-13. `offer-accept`
-14. `order-list`
-15. `order-get`
-16. `chat-conversation-get`
-17. `chat-message-list`
-18. `chat-message-send` (deploy with `config.json` OpenAPI permission)
-19. `chat-mark-read`
-20. `chat-message-report`
-21. `chat-review-queue-list`
-22. `chat-admin-review`
-23. `chat-evidence-snapshot`
-24. `payment-confirm-mock`
-25. `handover-confirm-scan`
-26. `evidence-create`
-27. `order-transition`
-28. `dispute-open`
+3. `item-request-update`
+4. `item-request-delete`
+5. `item-request-review`
+6. `review-queue-list`
+7. `item-request-list`
+8. `item-request-get`
+9. `trip-create`
+10. `trip-update`
+11. `trip-delete`
+12. `trip-verify`
+13. `trip-list`
+14. `trip-get`
+15. `match-search`
+16. `offer-create`
+17. `offer-accept`
+18. `order-list`
+19. `order-get`
+20. `chat-conversation-get`
+21. `chat-message-list`
+22. `chat-message-send` (deploy with `config.json` OpenAPI permission)
+23. `chat-mark-read`
+24. `chat-message-report`
+25. `chat-review-queue-list`
+26. `chat-admin-review`
+27. `chat-evidence-snapshot`
+28. `payment-confirm-mock`
+29. `handover-confirm-scan`
+30. `evidence-create`
+31. `order-transition`
+32. `dispute-open`
 
 Each cloud function has its own `package.json`. In WeChat Developer Tools, upload and deploy each function folder under `cloudfunctions/`.
 

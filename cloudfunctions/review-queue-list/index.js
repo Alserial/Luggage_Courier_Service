@@ -40,7 +40,7 @@ exports.main = async (event) => {
 
   return {
     ok: true,
-    requests: requestResult.data || [],
-    trips: tripResult.data || [],
+    requests: (requestResult.data || []).filter((request) => !request.isDeleted),
+    trips: (tripResult.data || []).filter((trip) => trip.status !== 'cancelled'),
   };
 };

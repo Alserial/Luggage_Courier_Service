@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk');
+const crypto = require('crypto');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
@@ -18,6 +19,24 @@ function text(value) {
 function number(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function documentId(prefix, openid, operationId) {
+  const digest = crypto
+    .createHash('sha256')
+    .update(`${prefix}:${openid}:${operationId}`)
+    .digest('hex')
+    .slice(0, 32);
+  return `${prefix}_${digest}`;
+}
+
+async function getDoc(db, collection, id) {
+  if (!id) return null;
+  try {
+    return (await db.collection(collection).doc(id).get()).data;
+  } catch (error) {
+    return null;
+  }
 }
 
 function normalizeSize(size) {
@@ -53,10 +72,17 @@ function validate(form) {
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const form = event.form || {};
+  const operationId = text(event.operationId).slice(0, 128);
   const error = validate(form);
   if (error) return { ok: false, error };
 
   const db = cloud.database();
+  const idempotentRequestId = operationId ? documentId('request', OPENID, operationId) : '';
+  if (idempotentRequestId) {
+    const existing = await getDoc(db, 'item_requests', idempotentRequestId);
+    if (existing) return { ok: true, requestId: idempotentRequestId, idempotent: true };
+  }
+
   const now = new Date();
   const declaredValue = number(form.declaredValue);
   const estimatedWeightKg = number(form.estimatedWeightKg);
@@ -68,59 +94,69 @@ exports.main = async (event) => {
     itemPhotos.length ? 'item_photo_provided' : 'item_photo_pending',
   ];
 
-  const result = await db.collection('item_requests').add({
-    data: {
-      requesterOpenid: OPENID,
-      itemName: text(form.itemName),
-      category: form.category,
-      quantity: number(form.quantity),
-      declaredValue,
-      currency: 'CNY',
-      estimatedWeightKg,
-      estimatedSize: normalizeSize(form.estimatedSize),
-      purchaseMethod: text(form.purchaseMethod) || 'unknown',
-      pickupLocation: {
-        country: text(form.pickupCountry),
-        city: text(form.pickupCity),
-        addressText: text(form.pickupAddress),
-      },
-      deliveryLocation: {
-        country: text(form.deliveryCountry),
-        city: text(form.deliveryCity),
-        addressText: text(form.deliveryAddress),
-      },
-      deadline: form.deadline,
-      itemPhotos,
-      riskFlags,
+  const requestData = {
+    requesterOpenid: OPENID,
+    itemName: text(form.itemName),
+    category: form.category,
+    quantity: number(form.quantity),
+    declaredValue,
+    currency: 'CNY',
+    estimatedWeightKg,
+    estimatedSize: normalizeSize(form.estimatedSize),
+    purchaseMethod: text(form.purchaseMethod) || 'unknown',
+    pickupLocation: {
+      country: text(form.pickupCountry),
+      city: text(form.pickupCity),
+      addressText: text(form.pickupAddress),
+    },
+    deliveryLocation: {
+      country: text(form.deliveryCountry),
+      city: text(form.deliveryCity),
+      addressText: text(form.deliveryAddress),
+    },
+    deadline: form.deadline,
+    itemPhotos,
+    riskFlags,
+    reviewStatus: 'pending',
+    reviewReason: '',
+    riskDeclarationAccepted: true,
+    note: text(form.note),
+    operationId,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  let requestId = idempotentRequestId;
+  if (requestId) {
+    await db.collection('item_requests').doc(requestId).set({ data: requestData });
+  } else {
+    const result = await db.collection('item_requests').add({ data: requestData });
+    requestId = result._id;
+  }
+
+  const auditData = {
+    actorOpenid: OPENID,
+    actorRole: 'user',
+    targetType: 'item_request',
+    targetId: requestId,
+    action: 'itemRequest.create',
+    before: null,
+    after: {
       reviewStatus: 'pending',
-      reviewReason: '',
-      riskDeclarationAccepted: true,
-      note: text(form.note),
-      createdAt: now,
-      updatedAt: now,
+      category: form.category,
+      declaredValue,
+      estimatedWeightKg,
+      itemPhotoCount: itemPhotos.length,
+      riskFlags,
     },
-  });
+    operationId,
+    createdAt: now,
+  };
+  if (idempotentRequestId) {
+    await db.collection('audit_logs').doc(`audit_${requestId}`).set({ data: auditData });
+  } else {
+    await db.collection('audit_logs').add({ data: auditData });
+  }
 
-  await db.collection('audit_logs').add({
-    data: {
-      actorOpenid: OPENID,
-      actorRole: 'user',
-      targetType: 'item_request',
-      targetId: result._id,
-      action: 'itemRequest.create',
-      before: null,
-      after: {
-        reviewStatus: 'pending',
-        category: form.category,
-        declaredValue,
-        estimatedWeightKg,
-        itemPhotoCount: itemPhotos.length,
-        riskFlags,
-      },
-      operationId: event.operationId || '',
-      createdAt: now,
-    },
-  });
-
-  return { ok: true, requestId: result._id };
+  return { ok: true, requestId };
 };

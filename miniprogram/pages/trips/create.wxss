@@ -104,3 +104,14 @@
   font-size: 22rpx;
   line-height: 1.55;
 }
+
+.form-state {
+  padding: 40rpx 28rpx;
+  text-align: center;
+}
+
+.form-error {
+  color: #a64d3b;
+  font-size: 26rpx;
+  line-height: 1.5;
+}

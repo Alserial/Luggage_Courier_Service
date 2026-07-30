@@ -5,6 +5,8 @@
   "description": "Cross-border peer carrying WeChat Mini Program MVP.",
   "scripts": {
     "check:files": "node scripts/check-project-files.js",
+    "check:idempotency": "node scripts/check-create-idempotency.js",
+    "check:mutations": "node scripts/check-content-mutations.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

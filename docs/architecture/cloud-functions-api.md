@@ -18,11 +18,15 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 |---|---|---|
 | `auth-login` | Create/update formal WeChat login record | `users`, `audit_logs` |
 | `item-request-create` | Create item request for review | `item_requests`, `audit_logs` |
+| `item-request-update` | Owner updates an unbound request and returns it to review | `item_requests`, pending `offers`, `audit_logs` |
+| `item-request-delete` | Owner soft-deletes an unbound request | `item_requests`, pending `offers`, `audit_logs` |
 | `item-request-review` | Admin/reviewer review item request | `item_requests`, `audit_logs` |
 | `review-queue-list` | List pending admin/reviewer review queue | none |
 | `item-request-list` | List approved public or current user's item requests | none |
 | `item-request-get` | Read owner or approved public request detail | none |
 | `trip-create` | Create traveller trip | `trips`, `audit_logs` |
+| `trip-update` | Owner updates an unbound trip and returns it to verification | `trips`, pending `offers`, `audit_logs` |
+| `trip-delete` | Owner soft-deletes an unbound trip | `trips`, pending `offers`, `audit_logs` |
 | `trip-verify` | Admin/reviewer verify traveller trip | `trips`, `audit_logs` |
 | `trip-list` | List verified public or current user's trips | none |
 | `trip-get` | Read owner or verified public trip detail | none |

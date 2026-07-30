@@ -19,6 +19,7 @@ function toSafeRequest(request, isOwner) {
     itemPhotos: request.itemPhotos || [],
     riskFlags: request.riskFlags || [],
     reviewStatus: request.reviewStatus,
+    riskDeclarationAccepted: Boolean(request.riskDeclarationAccepted),
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
     isOwner,
@@ -46,6 +47,7 @@ exports.main = async (event) => {
   }
 
   const isOwner = request.requesterOpenid === OPENID;
+  if (request.isDeleted) return { ok: false, error: 'request_deleted' };
   if (!isOwner && request.reviewStatus !== 'approved') return { ok: false, error: 'permission_denied' };
 
   if (!isOwner) {

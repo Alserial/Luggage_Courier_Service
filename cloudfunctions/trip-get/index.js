@@ -47,6 +47,7 @@ exports.main = async (event) => {
   }
 
   const isOwner = trip.travellerOpenid === OPENID;
+  if (trip.status === 'cancelled') return { ok: false, error: 'trip_deleted' };
   if (!isOwner && (trip.verificationStatus !== 'approved' || trip.status !== 'active')) {
     return { ok: false, error: 'permission_denied' };
   }

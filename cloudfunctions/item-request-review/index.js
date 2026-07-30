@@ -41,6 +41,7 @@ exports.main = async (event) => {
 
   const before = await getRequest(db, requestId);
   if (!before) return { ok: false, error: 'request_not_found' };
+  if (before.isDeleted) return { ok: false, error: 'request_deleted' };
 
   const now = new Date();
   const after = {

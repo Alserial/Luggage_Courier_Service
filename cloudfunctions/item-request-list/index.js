@@ -40,7 +40,11 @@ exports.main = async (event) => {
       .limit(limit)
       .get();
 
-    return { ok: true, scope, requests: (result.data || []).map((request) => toListItem(request, true)) };
+    return {
+      ok: true,
+      scope,
+      requests: (result.data || []).filter((request) => !request.isDeleted).map((request) => toListItem(request, true)),
+    };
   }
 
   const result = await db
@@ -51,7 +55,7 @@ exports.main = async (event) => {
     .get();
 
   const requests = (result.data || [])
-    .filter((request) => request.requesterOpenid !== OPENID)
+    .filter((request) => request.requesterOpenid !== OPENID && !request.isDeleted)
     .slice(0, limit)
     .map((request) => toListItem(request, false));
 

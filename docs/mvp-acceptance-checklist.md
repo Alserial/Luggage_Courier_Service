@@ -36,6 +36,9 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `trip-verify` rejects non-admin/non-reviewer callers.
 - [ ] `trip-verify` updates `verificationStatus` and creates `audit_logs` record.
 - [ ] Trip list/detail can show the created or demo trip via `trip-list` and `trip-get`.
+- [ ] Trip owner can edit from detail; saving returns the trip to verification and cancels pending offers.
+- [ ] Trip owner can delete from detail after destructive confirmation; deletion is soft and audited.
+- [ ] Trip update/delete rejects non-owners and trips with any linked order.
 
 ## Publish Item Request
 
@@ -62,6 +65,9 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `item-request-review` rejects non-admin/non-reviewer callers.
 - [ ] `item-request-review` updates `reviewStatus` and creates `audit_logs` record.
 - [ ] Request list/detail can show the created or demo request via `item-request-list` and `item-request-get`.
+- [ ] Request owner can edit from detail; saving returns the request to review and cancels pending offers.
+- [ ] Request owner can delete from detail after destructive confirmation; deletion is soft and audited.
+- [ ] Request update/delete rejects non-owners and requests with any linked order.
 
 ## Matching
 
@@ -70,6 +76,7 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Match result shows route, date window, category, capacity, score, and reasons.
 - [ ] Real matching excludes unreviewed requests.
 - [ ] Real matching excludes inactive trips.
+- [ ] Real matching and offers exclude trips awaiting verification after creation or edit.
 - [ ] Real matching excludes incompatible route/date/category/capacity candidates.
 - [ ] Real matching rejects non-owners for `tripId` or `requestId` search.
 - [ ] Matching reasons are understandable to both parties.

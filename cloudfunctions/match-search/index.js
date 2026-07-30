@@ -72,6 +72,7 @@ function capacityEnough(request, trip) {
 }
 
 function buildCandidate(request, trip) {
+  if (request.isDeleted || trip.status !== 'active' || trip.verificationStatus !== 'approved') return null;
   const checks = {
     sameRoute: sameRoute(request, trip),
     dateCompatible: dateCompatible(request, trip),
@@ -149,6 +150,7 @@ exports.main = async (event) => {
     if (!trip) return { ok: false, error: 'trip_not_found' };
     if (trip.travellerOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
     if (trip.status !== 'active') return { ok: false, error: 'trip_not_active' };
+    if (trip.verificationStatus !== 'approved') return { ok: false, error: 'trip_not_verified' };
 
     const requests = await getList(db, 'item_requests', 'reviewStatus', 'approved');
     const matches = requests
@@ -162,6 +164,7 @@ exports.main = async (event) => {
 
   const request = await getDoc(db, 'item_requests', requestId);
   if (!request) return { ok: false, error: 'request_not_found' };
+  if (request.isDeleted) return { ok: false, error: 'request_deleted' };
   if (request.requesterOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
   if (request.reviewStatus !== 'approved') return { ok: false, error: 'request_not_approved' };
 

@@ -58,6 +58,7 @@ Page({
     });
     const app = getApp<IAppOption>();
     app.globalData.authVersion += 1;
+    app.globalData.dataVersion += 1;
     wx.showToast({ title: result.isNew ? '微信账号已创建' : '微信登录成功', icon: 'success' });
   },
 

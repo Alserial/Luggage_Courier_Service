@@ -4,8 +4,8 @@ import { formatTripRecord } from '../../utils/records';
 type TripScope = 'market' | 'mine';
 type TripView = ReturnType<typeof formatTripRecord>;
 
-function getAuthVersion(): number {
-  return getApp<IAppOption>().globalData.authVersion;
+function getDataVersion(): number {
+  return getApp<IAppOption>().globalData.dataVersion;
 }
 
 let tripLoadSequence = 0;
@@ -33,7 +33,7 @@ Page({
   },
 
   onShow() {
-    const authVersion = getAuthVersion();
+    const authVersion = getDataVersion();
     const scope = this.data.scope as TripScope;
     if (this.data.cacheAuthVersion !== authVersion) {
       this.setData({
@@ -61,7 +61,7 @@ Page({
 
   async loadTrips(force = false) {
     const scope = this.data.scope as TripScope;
-    const authVersion = getAuthVersion();
+    const authVersion = getDataVersion();
     if (!force && this.data.cacheAuthVersion === authVersion && this.data.loadedScopes[scope]) {
       const trips = this.data.tripCache[scope];
       this.setData({ trips, hasTrips: trips.length > 0, errorText: '' });
@@ -76,7 +76,7 @@ Page({
       fallback: { ok: false, error: 'cloud_unavailable' },
     });
 
-    if (authVersion !== getAuthVersion()) return;
+    if (authVersion !== getDataVersion()) return;
 
     if (!result.ok) {
       if (sequence !== tripLoadSequence || scope !== this.data.scope) return;
@@ -111,7 +111,7 @@ Page({
     const scope = event.currentTarget.dataset.scope;
     if ((scope !== 'market' && scope !== 'mine') || scope === this.data.scope) return;
     const typedScope = scope as TripScope;
-    const cacheValid = this.data.cacheAuthVersion === getAuthVersion() && this.data.loadedScopes[typedScope];
+    const cacheValid = this.data.cacheAuthVersion === getDataVersion() && this.data.loadedScopes[typedScope];
     const trips = cacheValid ? this.data.tripCache[typedScope] : [];
     const errorText = cacheValid ? this.data.scopeErrors[typedScope] : '';
     this.setData({ scope: typedScope, trips, hasTrips: trips.length > 0, errorText });

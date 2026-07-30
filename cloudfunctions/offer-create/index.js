@@ -46,10 +46,12 @@ function isDateCompatible(request, trip) {
 function getOfferBlockReason(request, trip, openid) {
   if (!request) return 'request_not_found';
   if (!trip) return 'trip_not_found';
+  if (request.isDeleted) return 'request_deleted';
   if (request.requesterOpenid === openid) return 'self_offer_not_allowed';
   if (trip.travellerOpenid !== openid) return 'permission_denied';
   if (request.reviewStatus !== 'approved') return 'request_not_approved';
   if (trip.status !== 'active') return 'trip_not_active';
+  if (trip.verificationStatus !== 'approved') return 'trip_not_verified';
   if (!Array.isArray(trip.acceptableCategories) || !trip.acceptableCategories.includes(request.category)) return 'category_not_accepted';
   if (Number(trip.luggageCapacityKg) < Number(request.estimatedWeightKg)) return 'capacity_not_enough';
   if (!isRouteCompatible(request, trip)) return 'route_not_compatible';

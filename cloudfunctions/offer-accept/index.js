@@ -20,6 +20,14 @@ async function getItemRequest(db, requestId) {
   }
 }
 
+async function getTrip(db, tripId) {
+  try {
+    return (await db.collection('trips').doc(tripId).get()).data;
+  } catch (error) {
+    return null;
+  }
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { offerId, operationId = '' } = event;
@@ -48,8 +56,14 @@ exports.main = async (event) => {
   if (offerId !== 'demo_offer_001') {
     const request = await getItemRequest(db, offer.requestId);
     if (!request) return { ok: false, error: 'request_not_found' };
+    if (request.isDeleted) return { ok: false, error: 'request_deleted' };
     if (request.requesterOpenid !== OPENID) return { ok: false, error: 'permission_denied' };
     if (request.reviewStatus !== 'approved') return { ok: false, error: 'request_not_approved' };
+    const trip = await getTrip(db, offer.tripId);
+    if (!trip) return { ok: false, error: 'trip_not_found' };
+    if (trip.status !== 'active') return { ok: false, error: 'trip_not_active' };
+    if (trip.verificationStatus !== 'approved') return { ok: false, error: 'trip_not_verified' };
+    if (trip.travellerOpenid !== offer.travellerOpenid) return { ok: false, error: 'offer_trip_mismatch' };
   }
 
   const order = await db.collection('orders').add({

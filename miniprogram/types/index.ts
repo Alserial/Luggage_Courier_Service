@@ -133,6 +133,7 @@ export interface TripRecord {
   status: TripStatus;
   verificationStatus: ReviewStatus;
   verificationEvidenceIds: EntityId[];
+  deletedAt?: CloudDate;
   createdAt: CloudDate;
   updatedAt: CloudDate;
 }
@@ -170,6 +171,8 @@ export interface ItemRequestRecord {
   reviewStatus: ReviewStatus;
   reviewReason: string;
   riskDeclarationAccepted: boolean;
+  isDeleted?: boolean;
+  deletedAt?: CloudDate;
   note: string;
   createdAt: CloudDate;
   updatedAt: CloudDate;

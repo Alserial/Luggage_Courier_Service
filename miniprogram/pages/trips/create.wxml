@@ -1,13 +1,20 @@
 <view class="page form-page safe-bottom">
+  <view wx:if="{{loadingRecord}}" class="card form-state">
+    <view class="muted">正在加载行程信息...</view>
+  </view>
+  <view wx:if="{{loadErrorText}}" class="card form-state">
+    <view class="form-error">{{loadErrorText}}</view>
+  </view>
+  <block wx:if="{{!loadingRecord && !loadErrorText}}">
   <view class="page-header">
-    <view class="eyebrow">CREATE TRIP</view>
-    <view class="page-title">发布携带人行程</view>
-    <view class="page-desc">填写真实路线、日期和可接受品类，后续只匹配审核通过的低风险需求。</view>
+    <view class="eyebrow">{{isEdit ? 'EDIT TRIP' : 'CREATE TRIP'}}</view>
+    <view class="page-title">{{isEdit ? '编辑携带人行程' : '发布携带人行程'}}</view>
+    <view class="page-desc">{{isEdit ? '修改后行程会重新进入核验，原有待处理报价将失效。' : '填写真实路线、日期和可接受品类，后续只匹配审核通过的低风险需求。'}}</view>
   </view>
 
   <view class="form-notice warning">
     <view class="notice-mark">!</view>
-    <view>请只填写真实路线和可接受品类，不要承诺“什么都能带”。</view>
+    <view>{{isEdit ? '已有订单的行程不能修改；保存后需要重新核验。' : '请只填写真实路线和可接受品类，不要承诺“什么都能带”。'}}</view>
   </view>
 
   <view class="form-section">
@@ -72,6 +79,7 @@
     </view>
   </view>
 
-  <view class="submit-note">提交后进入行程核验；航班凭证等敏感资料不会在公开列表展示。</view>
-  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '正在提交' : '提交行程'}}</button>
+  <view class="submit-note">{{isEdit ? '保存后重新进入行程核验；已有订单时系统会拒绝修改。' : '提交后进入行程核验；航班凭证等敏感资料不会在公开列表展示。'}}</view>
+  <button class="primary-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '正在保存' : (isEdit ? '保存修改' : '提交行程')}}</button>
+  </block>
 </view>

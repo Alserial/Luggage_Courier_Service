@@ -37,7 +37,11 @@ exports.main = async (event) => {
       .limit(limit)
       .get();
 
-    return { ok: true, scope, trips: (result.data || []).map((trip) => toListItem(trip, true)) };
+    return {
+      ok: true,
+      scope,
+      trips: (result.data || []).filter((trip) => trip.status !== 'cancelled').map((trip) => toListItem(trip, true)),
+    };
   }
 
   const result = await db

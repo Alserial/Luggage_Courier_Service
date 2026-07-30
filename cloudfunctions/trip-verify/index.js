@@ -43,6 +43,7 @@ exports.main = async (event) => {
 
   const before = await getTrip(db, tripId);
   if (!before) return { ok: false, error: 'trip_not_found' };
+  if (before.status === 'cancelled') return { ok: false, error: 'trip_deleted' };
 
   const now = new Date();
   const after = {
