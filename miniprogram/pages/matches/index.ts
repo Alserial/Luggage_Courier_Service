@@ -23,7 +23,7 @@ Page({
     const result = await callCloud<{ ok: boolean; matches?: MatchCandidate[]; error?: string }>({
       name: 'match-search',
       data: { tripId, requestId },
-      fallback: { ok: true, matches: [demo] },
+      demoFallback: { ok: true, matches: [demo] },
     });
 
     if (!result.ok) {

@@ -7,6 +7,7 @@
     "check:files": "node scripts/check-project-files.js",
     "check:idempotency": "node scripts/check-create-idempotency.js",
     "check:mutations": "node scripts/check-content-mutations.js",
+    "check:workflow": "node scripts/check-order-workflow.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

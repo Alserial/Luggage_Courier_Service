@@ -1,4 +1,7 @@
 <view class="page safe-bottom">
+  <view wx:if="{{loading && !hasOrder}}" class="card"><view class="muted">正在读取订单...</view></view>
+  <view wx:if="{{errorText && !hasOrder}}" class="card warning">{{errorText}}</view>
+  <block wx:if="{{hasOrder}}">
   <view class="order-hero">
     <view class="order-hero-top">
       <view class="hero-eyebrow">ORDER DETAIL</view>
@@ -11,12 +14,16 @@
 
   <view class="next-card">
     <view class="next-kicker">NEXT ACTION</view>
-    <view wx:if="{{order.status === 'pending_payment'}}" class="next-title">确认服务费支付占位</view>
-    <view wx:elif="{{order.status === 'paid_locked'}}" class="next-title">完成出发地交接确认</view>
-    <view wx:else class="next-title">继续按当前订单状态留痕</view>
+    <view class="next-title">{{nextTitle}}</view>
     <view class="next-desc">支付、交接、送达和异常处理都应通过平台入口操作并形成记录。</view>
-    <button wx:if="{{order.status === 'pending_payment'}}" class="primary-button" bindtap="goPayment">服务费支付占位（Mock）</button>
-    <button wx:if="{{order.status === 'paid_locked'}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
+    <button wx:if="{{canPay}}" class="primary-button" bindtap="goPayment">确认 Mock 服务费</button>
+    <button wx:if="{{canHandover}}" class="primary-button" bindtap="goHandover">出发地交接确认</button>
+    <button wx:if="{{canStartTransit}}" class="primary-button" loading="{{submitting}}" data-status="in_transit" bindtap="confirmTransition">确认进入在途</button>
+    <button wx:if="{{canArrive}}" class="primary-button" loading="{{submitting}}" data-status="arrived" bindtap="confirmTransition">确认抵达目的地</button>
+    <button wx:if="{{needsDeliveryEvidence}}" class="primary-button" data-type="delivery_photo_or_video" bindtap="goEvidence">上传送达照片/视频</button>
+    <button wx:if="{{canDeliver}}" class="primary-button" loading="{{submitting}}" data-status="delivered" bindtap="confirmTransition">确认已送达</button>
+    <button wx:if="{{canComplete}}" class="primary-button" loading="{{submitting}}" data-status="completed" bindtap="confirmTransition">确认收货并完成</button>
+    <button wx:if="{{canCancel}}" class="cancel-button" loading="{{submitting}}" bindtap="cancelOrder">取消待支付订单</button>
     <view class="quick-actions">
       <button class="secondary-button" bindtap="goChat">订单内沟通</button>
       <button class="secondary-button" bindtap="goEvidence">上传证据</button>
@@ -63,10 +70,28 @@
     </view>
   </view>
 
+  <view wx:if="{{evidence.length}}" class="card">
+    <view class="section-title compact-title">证据明细</view>
+    <view
+      class="evidence-row"
+      wx:for="{{evidence}}"
+      wx:key="_id"
+      data-id="{{item._id}}"
+      bindtap="previewEvidence"
+    >
+      <view>
+        <view class="evidence-name">{{item.label}}</view>
+        <view class="section-helper">{{item.description || '平台系统记录'}} {{item.createdText}}</view>
+      </view>
+      <view class="evidence-action">{{item.fileCount ? '预览' : '记录'}}</view>
+    </view>
+  </view>
+
   <view class="card warning">
     <view class="section-title compact-title">税费与通关提示</view>
     <view class="rule-text">{{order.taxRule}}</view>
   </view>
 
-  <button class="dispute-button" bindtap="goDispute">出现问题，提交争议与证据</button>
+  <button wx:if="{{canDispute}}" class="dispute-button" bindtap="goDispute">出现问题，提交争议与证据</button>
+  </block>
 </view>

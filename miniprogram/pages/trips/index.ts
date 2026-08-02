@@ -73,7 +73,7 @@ Page({
     const result = await callCloud<{ ok: boolean; trips?: Array<Record<string, unknown>>; error?: string }>({
       name: 'trip-list',
       data: { limit: 20, scope },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
 
     if (authVersion !== getDataVersion()) return;

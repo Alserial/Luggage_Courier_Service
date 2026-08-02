@@ -117,25 +117,6 @@ exports.main = async (event) => {
   if (messageType !== 'text') return { ok: false, error: 'invalid_message_type' };
   if (!content || content.length > 500) return { ok: false, error: 'invalid_message_length' };
 
-  if (conversationId === 'demo_conversation_001') {
-    const moderationReason = localRiskReason(content);
-    const moderationStatus = moderationReason ? 'blocked' : 'visible';
-    const message = {
-      _id: `demo_${clientMessageId}`,
-      conversationId,
-      orderId: 'demo_order_001',
-      senderOpenid: OPENID,
-      senderRole: 'requester',
-      messageType: 'text',
-      content,
-      moderationStatus,
-      moderationReason,
-      orderStatusAtSend: 'pending_payment',
-      createdAt: new Date(),
-    };
-    return { ok: true, messageId: message._id, moderationStatus, message: sanitizeMessage(message, OPENID) };
-  }
-
   const db = cloud.database();
   const conversation = await getDoc(db, 'conversations', conversationId);
   if (!conversation) return { ok: false, error: 'conversation_not_found' };

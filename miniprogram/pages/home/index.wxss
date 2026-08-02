@@ -2,6 +2,18 @@
   padding-top: 24rpx;
 }
 
+.demo-banner {
+  margin-bottom: 20rpx;
+  padding: 18rpx 22rpx;
+  border: 1rpx solid #e7d5aa;
+  border-radius: 14rpx;
+  background: #f7edd7;
+  color: #765b22;
+  font-size: 22rpx;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .brand-bar {
   display: flex;
   align-items: center;

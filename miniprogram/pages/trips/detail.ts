@@ -47,7 +47,7 @@ Page({
     const result = await callCloud<{ ok: boolean; trip?: Record<string, unknown>; isOwner?: boolean; error?: string }>({
       name: 'trip-get',
       data: { tripId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
 
     if (!result.ok || !result.trip) {
@@ -108,7 +108,7 @@ Page({
     const result = await callCloud<{ ok: boolean; error?: string }>({
       name: 'trip-delete',
       data: { tripId: this.data.trip.id, operationId: tripDeleteOperationId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
     if (!result.ok) {
       tripDeleteLocked = false;

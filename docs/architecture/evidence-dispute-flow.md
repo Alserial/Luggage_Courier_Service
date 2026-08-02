@@ -62,13 +62,13 @@ flowchart TD
 Current implementation:
 
 - Handover page collects checklist confirmation.
-- `handover-confirm-scan` creates `handover_records` and an audit log.
+- The page requires linked `item_photo` evidence before confirmation.
+- `handover-confirm-scan` creates `handover_records`, `handover_qr_scan` system evidence, and audit logs in one transaction.
 - `handover-confirm-scan` advances the order from `paid_locked` to `item_handed_to_carrier`.
-- Evidence upload can preselect `handover_qr_scan`.
+- Evidence upload preselects the user-uploadable `item_photo` type.
 
 Required follow-up:
 
-- Require evidence ids before transitioning to `item_handed_to_carrier`.
 - Replace mock handover code with expiring server-generated code.
 - Ensure both parties can see relevant handover evidence.
 
@@ -106,11 +106,8 @@ Current implementation:
 - User can navigate to evidence upload before submission.
 - `dispute-open` creates a `disputes` record and audit log.
 - `dispute-open` advances the order to `disputed`.
-
-Required follow-up:
-
-- Pass evidence ids from frontend after upload.
-- Prevent duplicate open disputes for the same active order unless admin allows it.
+- The page requires and passes at least one evidence id.
+- `orders.activeDisputeId` prevents a second active dispute.
 
 ## Admin Review Flow
 
@@ -122,7 +119,7 @@ flowchart TD
   C --> E["Complete order"]
   C --> F["Cancel order"]
   C --> G["Keep disputed / request more evidence"]
-  D --> H["Audit decision + payment refund TODO"]
+  D --> H["Atomic audit + Mock service-fee refund"]
   E --> H
   F --> H
   G --> H
@@ -143,7 +140,6 @@ Allowed decision actions:
 - `complete`
 - `cancel_order`
 - `keep_in_dispute`
-- `none`
 
 Rules:
 
@@ -151,6 +147,7 @@ Rules:
 - Refund decisions apply to service fee only.
 - Merchandise loss/damage compensation is not automatic and must not be promised.
 - Any order state change caused by dispute decision must go through an audited backend function.
+- `dispute-decide` is restricted to `admin`/`reviewer` and commits decision, order, evidence, Mock payment changes, and audit logs atomically.
 
 ## Evidence Visibility
 
@@ -213,22 +210,10 @@ When a dispute is opened or an authorized reviewer requests a transcript, `chat-
 
 Admin-hidden or blocked messages remain available only according to admin evidence visibility. Generating a later snapshot creates a new evidence record and never modifies an earlier snapshot. See `docs/architecture/in-app-chat.md` for the complete design.
 
-## Current Gaps
+## Deployment Checklist
 
-- Item-request image upload now stores real cloud file ids, but the general evidence upload page still sends `fileCount` fallback instead of uploading every evidence file.
-- Generic evidence producers do not yet persist canonical `storagePath` consistently.
-- `in_app_chat` snapshot generation is implemented; deployment still requires CloudBase storage permission, collections/indexes, and end-to-end authorization testing.
-- Frontend does not pass dispute evidence ids yet.
-- Admin decision cloud function does not exist yet.
-- Order state transitions are not yet strictly evidence-gated.
-
-## Implementation Checklist
-
-- Reuse the existing cloud file upload wrapper in the general evidence page and persist `fileIds`.
-- Add evidence picker shortcuts from order detail by evidence type.
-- Add `payment_record` evidence on payment confirmation.
-- Add active-dispute guard to completion.
-- Add admin dispute decision cloud function.
-- Add evidence requirements to `order-transition`.
-- Add audit logs with `evidenceIds` and `operationId`.
+- Deploy all 33 cloud functions with `wx-server-sdk` 4.0.2.
+- Create `evidence(orderId, createdAt)` and `disputes(status, updatedAt)` indexes.
+- Verify CloudBase storage permissions for `evidence/{orderId}/{operationId}/...`.
+- Test requester, traveller, and admin accounts through happy-path and dispute/Mock-refund paths.
 - Deploy and test supervised order chat and `chat-evidence-snapshot` according to `docs/architecture/in-app-chat.md`.

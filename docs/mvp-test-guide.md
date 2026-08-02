@@ -17,6 +17,9 @@ Current test environment:
 Before starting each test run:
 
 - Run `npm run check:files`.
+- Run `npm run check:idempotency`.
+- Run `npm run check:mutations`.
+- Run `npm run check:workflow`.
 - Run `npm run typecheck`.
 - Recompile the Mini Program in WeChat Developer Tools.
 - Confirm `miniprogram/config/env.ts` uses `luggage-d1ghv33fy2cb9ef96`.
@@ -383,12 +386,12 @@ Expected result:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `cloud_not_ready` | `cloudEnvId` not configured or app not recompiled | Confirm `env.ts`, then recompile |
+| `cloud_unavailable` | CloudBase is missing, offline, empty, or the function is undeployed | Confirm `env.ts`, network, environment, and function deployment |
 | `permission_denied` on review | Current user lacks `admin` or `reviewer` | Edit `users.roleFlags` |
 | Empty match list | Review status, route, date, category, or capacity mismatch | Check fields in `item_requests` and `trips` |
 | Cloud function not found | Function not deployed or wrong environment selected | Deploy function to `luggage-d1ghv33fy2cb9ef96` |
 | Database write fails | Collection missing or permission/runtime issue | Confirm collection exists and function deployed |
-| Demo data still appears | Cloud function call failed and frontend used fallback | Check console logs and cloud function logs |
+| Demo banner appears | `appConfig.demoMode` was explicitly enabled | Set `demoMode: false` for pilot builds |
 
 ## 6. Pass Criteria
 
@@ -401,7 +404,9 @@ The first MVP test pass is successful when:
 - Offer acceptance creates an order.
 - Mock payment advances order to `paid_locked`.
 - Handover advances order to `item_handed_to_carrier`.
-- Evidence and dispute records are created.
+- Traveller advances through in-transit, arrival, and evidence-gated delivery; requester confirms completion.
+- Real evidence uploads and dispute records are created.
+- Admin/reviewer can keep, refund Mock service fee, complete, or cancel an active dispute with audited evidence.
 - Item request images are uploaded to CloudBase, stored as cloud file ids, and visible on request detail.
 - Critical actions create `audit_logs`.
 
@@ -412,8 +417,6 @@ These are intentionally not complete in the current MVP:
 - Real WeChat Pay or real refund.
 - Real settlement or payout.
 - Real-name verification.
-- Real cloud storage file id upload for every general evidence path; item-request image upload is implemented and should be tested.
-- Admin dispute decision.
 - Deployed in-app chat end-to-end testing until the new collections, indexes, permissions, functions, and content-security permission are configured; use the test matrix below after deployment.
 - Subscription notifications.
 

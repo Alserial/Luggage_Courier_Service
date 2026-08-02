@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
@@ -11,17 +12,21 @@ function number(value) {
   return Number.isFinite(parsed) ? parsed : NaN;
 }
 
-function validate(form) {
-  if (!form.requestId || !form.tripId) return 'missing_refs';
-  const serviceFeeQuote = number(form.serviceFeeQuote);
-  if (!serviceFeeQuote || serviceFeeQuote <= 0) return 'invalid_fee';
-  if (serviceFeeQuote > 500) return 'fee_too_high_for_mvp';
-  return null;
+function documentId(prefix, ...parts) {
+  const digest = crypto.createHash('sha256').update(parts.join(':')).digest('hex').slice(0, 32);
+  return `${prefix}_${digest}`;
 }
 
-async function getDoc(db, collection, id) {
+function businessError(code, details = {}) {
+  const error = new Error(code);
+  error.businessCode = code;
+  Object.assign(error, details);
+  return error;
+}
+
+async function getDoc(database, collection, id) {
   try {
-    return (await db.collection(collection).doc(id).get()).data;
+    return (await database.collection(collection).doc(id).get()).data;
   } catch (error) {
     return null;
   }
@@ -39,8 +44,7 @@ function isRouteCompatible(request, trip) {
 function isDateCompatible(request, trip) {
   const deadline = Date.parse(request.deadline);
   const arrival = Date.parse(trip.arrivalTime);
-  if (Number.isNaN(deadline) || Number.isNaN(arrival)) return false;
-  return deadline >= arrival;
+  return !Number.isNaN(deadline) && !Number.isNaN(arrival) && deadline >= arrival;
 }
 
 function getOfferBlockReason(request, trip, openid) {
@@ -52,7 +56,9 @@ function getOfferBlockReason(request, trip, openid) {
   if (request.reviewStatus !== 'approved') return 'request_not_approved';
   if (trip.status !== 'active') return 'trip_not_active';
   if (trip.verificationStatus !== 'approved') return 'trip_not_verified';
-  if (!Array.isArray(trip.acceptableCategories) || !trip.acceptableCategories.includes(request.category)) return 'category_not_accepted';
+  if (!Array.isArray(trip.acceptableCategories) || !trip.acceptableCategories.includes(request.category)) {
+    return 'category_not_accepted';
+  }
   if (Number(trip.luggageCapacityKg) < Number(request.estimatedWeightKg)) return 'capacity_not_enough';
   if (!isRouteCompatible(request, trip)) return 'route_not_compatible';
   if (!isDateCompatible(request, trip)) return 'date_not_compatible';
@@ -62,51 +68,76 @@ function getOfferBlockReason(request, trip, openid) {
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const form = event.form || {};
-  const error = validate(form);
-  if (error) return { ok: false, error };
+  const operationId = text(event.operationId).slice(0, 128);
+  const serviceFeeQuote = number(form.serviceFeeQuote);
+
+  if (!operationId) return { ok: false, error: 'missing_operation_id' };
+  if (!form.requestId || !form.tripId) return { ok: false, error: 'missing_refs' };
+  if (!serviceFeeQuote || serviceFeeQuote <= 0) return { ok: false, error: 'invalid_fee' };
+  if (serviceFeeQuote > 500) return { ok: false, error: 'fee_too_high_for_mvp' };
 
   const db = cloud.database();
-  const now = new Date();
-  const request = await getDoc(db, 'item_requests', form.requestId);
-  const trip = await getDoc(db, 'trips', form.tripId);
-  const blockReason = getOfferBlockReason(request, trip, OPENID);
-  if (blockReason) return { ok: false, error: blockReason };
+  const offerId = documentId('offer', OPENID, operationId);
+  const auditId = documentId('audit', 'offer-create', OPENID, operationId);
+  let response;
 
-  const serviceFeeQuote = number(form.serviceFeeQuote);
-  const offer = await db.collection('offers').add({
-    data: {
-      requestId: form.requestId,
-      tripId: form.tripId,
-      travellerOpenid: OPENID,
-      serviceFeeQuote,
-      currency: 'CNY',
-      message: text(form.message),
-      conditions: text(form.conditions),
-      status: 'pending',
-      expiresAt: new Date(now.getTime() + 48 * 60 * 60 * 1000),
-      createdAt: now,
-      updatedAt: now,
-    },
-  });
+  try {
+    await db.runTransaction(async (transaction) => {
+      const existing = await getDoc(transaction, 'offers', offerId);
+      if (existing) {
+        if (existing.travellerOpenid !== OPENID || existing.requestId !== form.requestId || existing.tripId !== form.tripId) {
+          throw businessError('idempotency_conflict');
+        }
+        response = { ok: true, offerId, idempotent: true };
+        return;
+      }
 
-  await db.collection('audit_logs').add({
-    data: {
-      actorOpenid: OPENID,
-      actorRole: 'user',
-      targetType: 'offer',
-      targetId: offer._id,
-      action: 'offer.create',
-      before: null,
-      after: {
-        status: 'pending',
-        serviceFeeQuote,
-        requestId: form.requestId,
-        tripId: form.tripId,
-      },
-      operationId: event.operationId || '',
-      createdAt: now,
-    },
-  });
+      const request = await getDoc(transaction, 'item_requests', form.requestId);
+      const trip = await getDoc(transaction, 'trips', form.tripId);
+      const blockReason = getOfferBlockReason(request, trip, OPENID);
+      if (blockReason) throw businessError(blockReason);
 
-  return { ok: true, offerId: offer._id };
+      const now = new Date();
+      await transaction.collection('offers').doc(offerId).set({
+        data: {
+          requestId: form.requestId,
+          tripId: form.tripId,
+          travellerOpenid: OPENID,
+          serviceFeeQuote,
+          currency: 'CNY',
+          message: text(form.message),
+          conditions: text(form.conditions),
+          status: 'pending',
+          operationId,
+          expiresAt: new Date(now.getTime() + 48 * 60 * 60 * 1000),
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+      await transaction.collection('audit_logs').doc(auditId).set({
+        data: {
+          actorOpenid: OPENID,
+          actorRole: 'traveller',
+          targetType: 'offer',
+          targetId: offerId,
+          action: 'offer.create',
+          before: null,
+          after: {
+            status: 'pending',
+            serviceFeeQuote,
+            requestId: form.requestId,
+            tripId: form.tripId,
+          },
+          operationId,
+          createdAt: now,
+        },
+      });
+      response = { ok: true, offerId };
+    });
+    return response || { ok: false, error: 'transaction_failed' };
+  } catch (error) {
+    if (error && error.businessCode) return { ok: false, error: error.businessCode };
+    console.error('offer-create transaction failed', error);
+    return { ok: false, error: 'transaction_failed' };
+  }
 };

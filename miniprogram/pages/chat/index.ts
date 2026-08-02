@@ -142,12 +142,12 @@ Page({
       }>({
         name: 'chat-conversation-get',
         data: { orderId },
-        fallback: { ok: false, error: 'cloud_unavailable' },
+        demoFallback: { ok: false, error: 'cloud_unavailable' },
       }),
       callCloud<{ ok: boolean; order?: Record<string, unknown> }>({
         name: 'order-get',
         data: { orderId },
-        fallback: { ok: true, order: demoOrder as unknown as Record<string, unknown> },
+        demoFallback: { ok: true, order: demoOrder as unknown as Record<string, unknown> },
       }),
     ]);
 
@@ -188,7 +188,7 @@ Page({
         cursor: refresh ? undefined : this.data.nextCursor || undefined,
         limit: 30,
       },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
 
     if (!result.ok) {
@@ -254,7 +254,7 @@ Page({
         messageType: 'text',
         content,
       },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
     this.setData({ sending: false });
 
@@ -295,7 +295,7 @@ Page({
             reason: reasons[selection.tapIndex],
             operationId: `report_${Date.now()}`,
           },
-          fallback: { ok: false, error: 'cloud_unavailable' },
+          demoFallback: { ok: false, error: 'cloud_unavailable' },
         });
         wx.showToast({
           title: result.ok ? '已提交平台审核' : (errorLabels[result.error || ''] || '举报失败'),
@@ -320,7 +320,7 @@ Page({
         const result = await callCloud<{ ok: boolean; error?: string }>({
           name: 'chat-evidence-snapshot',
           data: { orderId: this.data.orderId, operationId: `snapshot_${Date.now()}` },
-          fallback: { ok: false, error: 'cloud_unavailable' },
+          demoFallback: { ok: false, error: 'cloud_unavailable' },
         });
         this.setData({ creatingSnapshot: false });
         wx.showToast({
@@ -335,7 +335,7 @@ Page({
     await callCloud<{ ok: boolean }>({
       name: 'chat-mark-read',
       data: { conversationId: this.data.conversationId, lastReadMessageId },
-      fallback: { ok: false },
+      demoFallback: { ok: false },
     });
   },
 

@@ -112,7 +112,7 @@ Page({
     }>({
       name: 'item-request-get',
       data: { requestId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
     if (!result.ok || !result.request || !result.isOwner) {
       this.setData({
@@ -289,7 +289,7 @@ Page({
     const result = await callCloud<{ ok: boolean; requestId?: string; mock?: boolean; error?: string }>({
       name: isEdit ? 'item-request-update' : 'item-request-create',
       data: { requestId: this.data.requestId, form: submittedForm, operationId: requestOperationId },
-      fallback: isEdit ? { ok: false, error: 'cloud_unavailable' } : { ok: true, mock: true },
+      demoFallback: isEdit ? { ok: false, error: 'cloud_unavailable' } : { ok: true, mock: true },
     });
 
     if (!result.ok) {
@@ -304,7 +304,10 @@ Page({
 
     requestSubmissionCompleted = true;
     getApp<IAppOption>().globalData.dataVersion += 1;
-    wx.showToast({ title: isEdit ? '需求已更新，等待重新审核' : '已提交审核', icon: 'success' });
+    wx.showToast({
+      title: result.mock ? '演示完成，未保存到云端' : isEdit ? '需求已更新，等待重新审核' : '已提交审核',
+      icon: result.mock ? 'none' : 'success',
+    });
     const url = result.requestId ? `/pages/requests/detail?id=${result.requestId}` : '/pages/requests/index';
     setTimeout(() => {
       const handleNavigationFailure = () => {

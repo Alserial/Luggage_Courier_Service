@@ -40,8 +40,6 @@ exports.main = async (event) => {
   if (!messageId || !reason) return { ok: false, error: 'missing_params' };
   if (!allowedReasons.has(reason)) return { ok: false, error: 'invalid_reason' };
   if (reason === 'other' && !description) return { ok: false, error: 'missing_description' };
-  if (messageId.startsWith('demo_')) return { ok: true, reportId: `demo_report_${Date.now()}` };
-
   const db = cloud.database();
   const message = await getDoc(db, 'messages', messageId);
   if (!message) return { ok: false, error: 'message_not_found' };

@@ -30,10 +30,6 @@ function text(value) {
   return String(value || '').trim();
 }
 
-function isDemoId(id, prefix) {
-  return typeof id === 'string' && id.indexOf(prefix) === 0;
-}
-
 async function getDoc(db, collection, id) {
   try {
     return (await db.collection(collection).doc(id).get()).data;
@@ -110,38 +106,10 @@ function buildCandidate(request, trip) {
   };
 }
 
-function demoMatch(tripId, requestId) {
-  return {
-    id: 'demo_match_001',
-    tripId: tripId || 'demo_trip_001',
-    requestId: requestId || 'demo_request_001',
-    route: '上海 -> 墨尔本',
-    dateWindow: '2026-08-18 至 2026-08-22',
-    categoryLabel: '普通服饰鞋帽',
-    capacityKg: 3,
-    score: calculateScore({
-      sameRoute: true,
-      dateCompatible: true,
-      categoryApproved: true,
-      capacityEnough: true,
-      locationAcceptable: true,
-      travellerTrust: 4,
-      requesterTrust: 4,
-      priceCompatible: true,
-      riskPenalty: 0,
-    }),
-    reasons: ['路线一致', '时间窗口兼容', '物品已审核', '容量满足', '交接城市可接受'],
-  };
-}
-
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { tripId, requestId } = event;
   if (!tripId && !requestId) return { ok: false, error: 'missing_search_target' };
-
-  if (isDemoId(tripId, 'demo_') || isDemoId(requestId, 'demo_')) {
-    return { ok: true, matches: [demoMatch(tripId, requestId)] };
-  }
 
   const db = cloud.database();
 

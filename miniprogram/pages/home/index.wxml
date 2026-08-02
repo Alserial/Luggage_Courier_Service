@@ -1,4 +1,6 @@
 <view class="page home-page">
+  <view wx:if="{{demoMode}}" class="demo-banner">演示模式 · 所有操作仅在本机展示，不会写入云端</view>
+
   <view class="brand-bar">
     <view class="brand-lockup">
       <view class="brand-mark"></view>

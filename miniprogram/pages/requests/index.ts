@@ -73,7 +73,7 @@ Page({
     const result = await callCloud<{ ok: boolean; requests?: Array<Record<string, unknown>>; error?: string }>({
       name: 'item-request-list',
       data: { limit: 20, scope },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
 
     if (authVersion !== getDataVersion()) return;

@@ -6,6 +6,7 @@ export function isCloudBaseConfigured(): boolean {
 }
 
 export const appConfig = {
+  demoMode: false,
   valueCapCny: 2000,
   weightCapKg: 5,
   supportedRoutes: ['中国-澳大利亚', '澳大利亚-中国'],

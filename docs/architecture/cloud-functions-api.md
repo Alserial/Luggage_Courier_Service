@@ -40,6 +40,7 @@ All functions return an object with `ok: boolean`. Error responses use `ok: fals
 | `evidence-create` | Create evidence record | `evidence`, `audit_logs` |
 | `order-transition` | Move order through allowed state machine | `orders`, `audit_logs` |
 | `dispute-open` | Open dispute and advance order | `disputes`, `orders`, `audit_logs` |
+| `dispute-decide` | Admin/reviewer adjudicates an active dispute | `disputes`, `orders`, optional mock `payments`, `evidence`, `audit_logs` |
 | `chat-conversation-get` | Get/create participant order conversation and initial system notice | `conversations`, `messages` when missing |
 | `chat-message-list` | Read participant-gated message history | none |
 | `chat-message-send` | Moderate and append order chat message | `messages`, `conversations`, moderation `audit_logs` |
@@ -238,6 +239,7 @@ Success response:
   ok: true;
   requests: ItemRequestRecord[];
   trips: TripRecord[];
+  disputes: Array<DisputeRecord & { order: object; evidence: EvidenceRecord[] }>;
 }
 ```
 
@@ -250,6 +252,7 @@ Rules:
 - Caller must have `admin` or `reviewer` in `users.roleFlags`.
 - Returns `item_requests` where `reviewStatus` is `pending` or `manual_review`.
 - Returns `trips` where `verificationStatus` is `pending` or `manual_review`.
+- Returns active disputes (`open` or `under_review`) with order and linked evidence summaries.
 - This function does not make decisions and does not write audit logs.
 
 ### `item-request-review`
@@ -419,7 +422,7 @@ Rules:
 - Matching must stay explainable.
 - Real matching excludes unreviewed requests, inactive trips, incompatible routes, incompatible dates, incompatible categories, and insufficient capacity.
 - Travellers may search from their own `tripId`; requesters may search from their own `requestId`.
-- Demo ids beginning with `demo_` still return a demo candidate for local frontend fallback.
+- Cloud functions never accept special `demo_*` records. Demo data is frontend-only and requires the explicit `demoMode` flag.
 
 ## `offer-create`
 
@@ -436,7 +439,7 @@ Request:
     message?: string;
     conditions?: string;
   };
-  operationId?: string;
+  operationId: string;
 }
 ```
 
@@ -478,7 +481,7 @@ Rules:
 - Caller cannot quote on their own item request.
 - Request must be approved and trip must be active.
 - Route, date, category, and capacity must be compatible.
-- Audit log includes `operationId` when provided.
+- The operation is transactional and idempotent by required `operationId`.
 
 ## `offer-accept`
 
@@ -489,7 +492,7 @@ Request:
 ```ts
 {
   offerId: string;
-  operationId?: string;
+  operationId: string;
 }
 ```
 
@@ -521,7 +524,8 @@ Rules:
 
 - Creates service-fee `feeBreakdown`.
 - Does not create or hold merchandise payment.
-- Demo fallback exists for `demo_offer_001`.
+- A single offer can create at most one deterministic order; duplicate calls return the existing result.
+- Cloud functions reject all `demo_*` ids.
 - Real offers can only be accepted by the request owner.
 - Real requests must be `approved`.
 
@@ -543,6 +547,8 @@ Success response:
 {
   ok: true;
   order: object;
+  viewerRole: "requester" | "traveller";
+  evidence: object[];
 }
 ```
 
@@ -558,9 +564,8 @@ Writes:
 
 Notes:
 
-- Returns a demo response for `demo_order_001`.
 - Real orders can only be read by requester or traveller.
-- Real order responses include item and route summary when related request/trip records exist.
+- Responses include item/route data, caller role, and visible evidence summaries.
 
 ## `order-list`
 
@@ -601,8 +606,7 @@ Request:
 ```ts
 {
   orderId: string;
-  amount: number;
-  operationId?: string;
+  operationId: string;
 }
 ```
 
@@ -621,12 +625,12 @@ Success response:
 
 Error codes:
 
-- `missing_params`
-- `invalid_amount`
+- `missing_order_id`
+- `missing_operation_id`
 - `order_not_found`
 - `permission_denied`
 - `illegal_transition`
-- `amount_mismatch`
+- `invalid_order_amount`
 
 Writes:
 
@@ -643,12 +647,12 @@ Rules:
 - Lock status is created as `locked`.
 - Does not process merchandise payments.
 - Caller must be the requester.
-- Payment amount must match `orders.feeBreakdown.total`.
+- Amount is read only from `orders.feeBreakdown.total`; the client cannot submit an amount.
+- Payment, system evidence, order state, and audit logs are committed atomically with deterministic ids.
 
 Remaining TODO:
 
-- Add provider callback verification before real payment.
-- Add idempotent duplicate-payment handling with `operationId` or provider payment id.
+- Add verified provider callbacks before replacing the Mock provider.
 
 ## `handover-confirm-scan`
 
@@ -660,8 +664,8 @@ Request:
 {
   orderId: string;
   handoverCode: string;
-  evidenceIds?: string[];
-  operationId?: string;
+  evidenceIds: string[];
+  operationId: string;
 }
 ```
 
@@ -679,7 +683,8 @@ Success response:
 Error codes:
 
 - `missing_params`
-- `invalid_evidence_ids`
+- `handover_photo_required`
+- `invalid_evidence_reference`
 - `order_not_found`
 - `permission_denied`
 - `illegal_transition`
@@ -697,11 +702,12 @@ Rules:
 - Caller must be requester or traveller.
 - Order must be `paid_locked`.
 - MVP mock code must match `HANDOVER-{last 6 chars of orderId}`.
+- At least one linked `item_photo` is required; the function creates `system://handover/...` evidence.
+- Handover, order state, evidence, and audit records are transactional and idempotent.
 
 Remaining TODO:
 
 - Add expiring server-generated handover codes.
-- Require evidence ids before transition when policy is tightened.
 
 ## `evidence-create`
 
@@ -714,9 +720,9 @@ Request:
   orderId: string;
   evidenceType: EvidenceType;
   description?: string;
-  fileIds?: string[];
-  fileCount?: number;
-  operationId?: string;
+  fileIds: string[];
+  fileMetadata: Array<{ fileType: "image" | "video"; sizeBytes: number }>;
+  operationId: string;
 }
 ```
 
@@ -734,8 +740,9 @@ Error codes:
 - `missing_order_id`
 - `invalid_file_ids`
 - `invalid_file_count`
+- `invalid_file_metadata`
+- `file_size_exceeded`
 - `invalid_evidence_type`
-- `missing_files`
 - `order_not_found`
 - `permission_denied`
 
@@ -746,14 +753,12 @@ Writes:
 
 Rules:
 
-- `evidenceType` must be in the required evidence type list.
-- At least one file id or mock file count is required.
+- Users may create only `item_photo`, `flight_record`, `customs_or_airline_proof`, and `delivery_photo_or_video`.
+- One to six real `cloud://` file ids are required. Images are capped at 5 MB and videos at 20 MB.
+- `storagePath` is always `fileIds[0]`; system evidence uses an explicit `system://...` path.
 - Evidence must not be overwritten.
 - Caller must be requester or traveller on the order.
-
-Remaining TODO:
-
-- Upload real files from the general evidence page and persist a canonical `storagePath` on every evidence record. The current `fileCount` fallback is not sufficient for production proof.
+- Evidence and audit records are committed atomically and are idempotent by `operationId`.
 
 ## `order-transition`
 
@@ -767,7 +772,7 @@ Request:
   nextStatus: OrderStatus;
   reason?: string;
   evidenceIds?: string[];
-  operationId?: string;
+  operationId: string;
 }
 ```
 
@@ -784,7 +789,9 @@ Success response:
 Error codes:
 
 - `missing_params`
-- `invalid_evidence_ids`
+- `missing_operation_id`
+- `required_evidence_missing`
+- `active_dispute`
 - `order_not_found`
 - `permission_denied`
 - `illegal_transition`
@@ -796,24 +803,16 @@ Writes:
 
 Allowed transitions:
 
-- `approved -> pending_payment | cancelled | disputed`
-- `pending_payment -> paid_locked | cancelled | disputed`
-- `paid_locked -> item_handed_to_carrier | cancelled | refunded | disputed`
-- `item_handed_to_carrier -> in_transit | disputed`
-- `in_transit -> arrived | disputed`
-- `arrived -> delivered | disputed`
-- `delivered -> completed | disputed`
-- `disputed -> refunded | completed | cancelled`
+- participant: `pending_payment -> cancelled` with a required reason
+- traveller: `item_handed_to_carrier -> in_transit -> arrived -> delivered`
+- requester: `delivered -> completed`
 
 Rules:
 
-- Caller must be requester or traveller on the order.
-- Audit log includes `evidenceIds` and `operationId` when provided.
-
-Remaining TODO:
-
-- Require evidence ids for stricter evidence-gated transitions.
-- Add idempotency via `operationId`.
+- `arrived -> delivered` requires linked `delivery_photo_or_video` evidence.
+- `delivered -> completed` automatically creates `mutual_confirmation` system evidence.
+- Participants cannot transition an active disputed order and can never select `refunded`.
+- Order, evidence, and audit changes are transactional and idempotent.
 
 ## `dispute-open`
 
@@ -826,8 +825,8 @@ Request:
   orderId: string;
   reason: string;
   description: string;
-  evidenceIds?: string[];
-  operationId?: string;
+  evidenceIds: string[];
+  operationId: string;
 }
 ```
 
@@ -847,7 +846,8 @@ Error codes:
 - `missing_order_id`
 - `missing_reason`
 - `missing_description`
-- `invalid_evidence_ids`
+- `evidence_required`
+- `invalid_evidence_reference`
 - `order_not_found`
 - `permission_denied`
 - `order_already_disputed`
@@ -864,11 +864,33 @@ Rules:
 
 - Caller must be requester or traveller.
 - Terminal states `completed`, `cancelled`, and `refunded` cannot open a normal user dispute.
-- Uploaded evidence ids may be linked at open time.
+- At least one evidence record from the same order is required.
+- `orders.activeDisputeId` prevents more than one active dispute.
+- Dispute, order, and audit changes are transactional and idempotent.
 
-Remaining TODO:
+## `dispute-decide`
 
-- Add admin decision function.
+Admin/reviewer adjudicates an active dispute.
+
+Request:
+
+```ts
+{
+  disputeId: string;
+  action: "refund" | "complete" | "cancel_order" | "keep_in_dispute";
+  reason: string;
+  evidenceIdsReviewed: string[];
+  operationId: string;
+}
+```
+
+Rules:
+
+- Caller must have `admin` or `reviewer` in `users.roleFlags`.
+- Final actions require reviewed evidence and a non-empty reason.
+- `refund` only marks the Mock service-fee payment refunded and creates `system://payment/refund/...` evidence; it never handles merchandise money.
+- `complete` creates system confirmation evidence, `cancel_order` cancels, and `keep_in_dispute` leaves the order disputed.
+- Decision, payment (when applicable), evidence, order, dispute, and audit records are transactional and idempotent.
 - Prevent duplicate open disputes with a database uniqueness/idempotency pattern.
 
 ## In-App Chat APIs

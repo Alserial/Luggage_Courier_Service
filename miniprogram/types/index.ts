@@ -49,7 +49,7 @@ export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'cancelled';
 export type DisputeDecisionAction = 'none' | 'refund' | 'complete' | 'cancel_order' | 'keep_in_dispute';
 export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 export type UserRoleFlag = 'requester' | 'traveller' | 'admin' | 'reviewer';
-export type ActorRole = 'user' | 'traveller' | 'requester' | 'admin' | 'system';
+export type ActorRole = 'user' | 'traveller' | 'requester' | 'admin' | 'reviewer' | 'system';
 export type ConversationStatus = 'active' | 'read_only' | 'closed';
 export type MessageType = 'text' | 'system';
 export type MessageModerationStatus = 'visible' | 'under_review' | 'blocked' | 'admin_hidden';
@@ -230,6 +230,9 @@ export interface OrderRecord {
   taxRule: TaxRule;
   cancellationRule: CancellationRule;
   evidenceRequired: EvidenceType[];
+  paymentId?: EntityId;
+  activeDisputeId?: EntityId | null;
+  statusBeforeDispute?: OrderStatus | null;
   currentRiskLevel: RiskLevel;
   createdAt: CloudDate;
   updatedAt: CloudDate;
@@ -246,6 +249,7 @@ export interface EvidenceRecord {
   description: string;
   visibility: EvidenceVisibility;
   metadata: Record<string, unknown>;
+  operationId?: string;
   createdAt: CloudDate;
 }
 
@@ -306,6 +310,7 @@ export interface PaymentRecord {
   orderId: EntityId;
   provider: PaymentProvider;
   providerPaymentId: string;
+  providerRefundId?: string;
   amount: number;
   currency: Currency;
   paymentStatus: PaymentStatus;
@@ -343,6 +348,7 @@ export interface DisputeRecord {
   evidenceIds: EntityId[];
   status: DisputeStatus;
   decision: DisputeDecision | null;
+  operationId?: string;
   createdAt: CloudDate;
   updatedAt: CloudDate;
 }

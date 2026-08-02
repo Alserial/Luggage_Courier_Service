@@ -16,10 +16,11 @@
 
   <view class="card" wx:if="{{files.length}}">
     <view class="file-row" wx:for="{{files}}" wx:key="tempFilePath">
-      <view class="file-name">{{item.type}} · {{item.sizeText}}</view>
-      <view class="muted">待上传</view>
+      <view class="file-name">{{item.fileType}} · {{item.sizeText}}</view>
+      <view class="muted">{{item.uploadStatus}}</view>
     </view>
   </view>
 
+  <view wx:if="{{progressText}}" class="upload-progress">{{progressText}}</view>
   <button class="primary-button" loading="{{submitting}}" bindtap="submitEvidence">保存证据记录</button>
 </view>

@@ -60,10 +60,6 @@ exports.main = async (event) => {
   const disputeId = text(event.disputeId);
   const operationId = text(event.operationId);
   if (!orderId) return { ok: false, error: 'missing_order_id' };
-  if (orderId === 'demo_order_001') {
-    return { ok: true, evidenceId: `demo_chat_evidence_${Date.now()}`, fileId: 'demo://chat-transcript' };
-  }
-
   const db = cloud.database();
   const order = await getDoc(db, 'orders', orderId);
   if (!order) return { ok: false, error: 'order_not_found' };

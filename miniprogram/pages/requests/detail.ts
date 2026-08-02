@@ -1,9 +1,11 @@
 import { callCloud } from '../../services/cloud';
 import { demoOffer, demoRequest } from '../../services/mock';
 import { formatOfferRecord, formatRequestRecord } from '../../utils/records';
+import { createOperationId } from '../../utils/operation';
 
 let requestDeleteLocked = false;
 let requestDeleteOperationId = '';
+let acceptOfferOperationId = '';
 
 function deleteErrorMessage(error: string | undefined): string {
   if (error === 'linked_order_exists') return '该需求已有订单，不能删除，请通过订单流程处理';
@@ -38,6 +40,7 @@ Page({
   onLoad(query) {
     requestDeleteLocked = false;
     requestDeleteOperationId = '';
+    acceptOfferOperationId = '';
     this.setData({ requestId: query.id || demoRequest.id });
   },
 
@@ -56,7 +59,7 @@ Page({
     }>({
       name: 'item-request-get',
       data: { requestId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
 
     if (!result.ok || !result.request) {
@@ -94,10 +97,11 @@ Page({
     }
 
     this.setData({ accepting: true });
-    const result = await callCloud<{ ok: boolean; orderId?: string; error?: string }>({
+    acceptOfferOperationId ||= createOperationId('offer_accept');
+    const result = await callCloud<{ ok: boolean; orderId?: string; error?: string; demo?: boolean }>({
       name: 'offer-accept',
-      data: { offerId: this.data.offer.id },
-      fallback: { ok: true, orderId: 'demo_order_001' },
+      data: { offerId: this.data.offer.id, operationId: acceptOfferOperationId },
+      demoFallback: { ok: true, orderId: 'demo_order_001', demo: true },
     });
     this.setData({ accepting: false });
 
@@ -106,7 +110,8 @@ Page({
       return;
     }
 
-    wx.showToast({ title: '订单已生成', icon: 'success' });
+    acceptOfferOperationId = '';
+    wx.showToast({ title: result.demo ? '演示完成，未保存到云端' : '订单已生成', icon: 'none' });
     setTimeout(() => wx.navigateTo({ url: `/pages/orders/detail?id=${result.orderId || 'demo_order_001'}` }), 600);
   },
 
@@ -143,7 +148,7 @@ Page({
     const result = await callCloud<{ ok: boolean; error?: string }>({
       name: 'item-request-delete',
       data: { requestId: this.data.request.id, operationId: requestDeleteOperationId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
     if (!result.ok) {
       requestDeleteLocked = false;

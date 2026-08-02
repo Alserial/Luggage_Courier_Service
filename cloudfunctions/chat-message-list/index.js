@@ -61,29 +61,6 @@ exports.main = async (event) => {
   const limit = Math.min(Math.max(Number(event.limit) || 30, 1), 50);
   if (!conversationId) return { ok: false, error: 'missing_conversation_id' };
 
-  if (conversationId === 'demo_conversation_001') {
-    return {
-      ok: true,
-      messages: [
-        {
-          id: 'demo_message_system',
-          conversationId,
-          orderId: 'demo_order_001',
-          senderRole: 'system',
-          isMine: false,
-          messageType: 'system',
-          content: '订单已创建。请在平台内沟通交接安排，并保留关键凭证。',
-          moderationStatus: 'visible',
-          moderationReason: '',
-          orderStatusAtSend: 'pending_payment',
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      nextCursor: null,
-      callerRole: 'requester',
-    };
-  }
-
   const db = cloud.database();
   const conversation = await getDoc(db, 'conversations', conversationId);
   if (!conversation) return { ok: false, error: 'conversation_not_found' };

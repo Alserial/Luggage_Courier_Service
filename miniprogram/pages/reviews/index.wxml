@@ -2,13 +2,14 @@
   <view class="page-header">
     <view class="eyebrow">REVIEW</view>
     <view class="page-title">审核后台</view>
-    <view class="page-desc">内测使用的最小审核台，处理低风险需求、行程核验和站内沟通举报。</view>
+    <view class="page-desc">内测使用的最小审核台，处理低风险需求、行程核验、沟通举报和订单争议。</view>
   </view>
 
   <view class="review-tabs">
     <button class="tab-button {{activeTab === 'requests' ? 'tab-active' : ''}}" data-tab="requests" bindtap="switchTab">需求 {{requests.length}}</button>
     <button class="tab-button {{activeTab === 'trips' ? 'tab-active' : ''}}" data-tab="trips" bindtap="switchTab">行程 {{trips.length}}</button>
     <button class="tab-button {{activeTab === 'messages' ? 'tab-active' : ''}}" data-tab="messages" bindtap="switchTab">沟通举报 {{messageReports.length}}</button>
+    <button class="tab-button {{activeTab === 'disputes' ? 'tab-active' : ''}}" data-tab="disputes" bindtap="switchTab">争议 {{disputes.length}}</button>
   </view>
 
   <view class="card reason-card">
@@ -95,6 +96,43 @@
 
     <view wx:if="{{!loading && !hasMessageReports && !errorText}}" class="card">
       <view class="muted">暂无待处理沟通举报。</view>
+    </view>
+  </block>
+
+  <block wx:if="{{activeTab === 'disputes'}}">
+    <view class="card review-card" wx:for="{{disputes}}" wx:key="_id">
+      <view class="surface-row">
+        <view class="card-title">订单争议</view>
+        <view class="status-pill status-warning">{{item.status}}</view>
+      </view>
+      <view class="meta-line">
+        <text>订单 {{item.orderId}}</text>
+        <text>当前 {{item.order ? item.order.status : '订单缺失'}}</text>
+        <text>服务费 {{item.order && item.order.feeBreakdown ? item.order.feeBreakdown.total : 0}} 元</text>
+      </view>
+      <view class="reported-message">原因：{{item.reason}}<text wx:if="{{item.description}}"> · {{item.description}}</text></view>
+      <view class="dispute-evidence">
+        <view class="field-label">待审查证据 {{item.evidence.length}} 条</view>
+        <button
+          wx:for="{{item.evidence}}"
+          wx:for-item="evidenceItem"
+          wx:key="_id"
+          class="evidence-preview-button"
+          data-dispute-id="{{item._id}}"
+          data-evidence-id="{{evidenceItem._id}}"
+          catchtap="previewDisputeEvidence"
+        >{{evidenceItem.evidenceType}} · {{evidenceItem.fileIds && evidenceItem.fileIds.length ? '预览附件' : '系统记录'}}</button>
+      </view>
+      <view class="dispute-actions">
+        <button class="small-button danger-small" loading="{{submittingId === item._id}}" data-id="{{item._id}}" data-action="refund" bindtap="decideDispute">Mock 退款</button>
+        <button class="small-button primary-small" loading="{{submittingId === item._id}}" data-id="{{item._id}}" data-action="complete" bindtap="decideDispute">完成订单</button>
+        <button class="small-button danger-small" loading="{{submittingId === item._id}}" data-id="{{item._id}}" data-action="cancel_order" bindtap="decideDispute">取消订单</button>
+        <button class="small-button secondary-small" loading="{{submittingId === item._id}}" data-id="{{item._id}}" data-action="keep_in_dispute" bindtap="decideDispute">继续调查</button>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && !hasDisputes && !errorText}}" class="card">
+      <view class="muted">暂无待处理争议。</view>
     </view>
   </block>
 

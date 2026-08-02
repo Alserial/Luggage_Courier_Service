@@ -40,7 +40,7 @@ Page({
       error?: string;
     }>({
       name: 'auth-login',
-      fallback: { ok: false, error: 'cloud_not_ready' },
+      demoFallback: { ok: false, error: 'cloud_not_ready' },
     });
     this.setData({ loginLoading: false });
 

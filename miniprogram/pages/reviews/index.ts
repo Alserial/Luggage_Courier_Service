@@ -1,7 +1,8 @@
-import { callCloud } from '../../services/cloud';
+import { callCloud, getCloudFileUrls } from '../../services/cloud';
 import { formatRequestRecord, formatTripRecord } from '../../utils/records';
+import { createOperationId } from '../../utils/operation';
 
-type ReviewTab = 'requests' | 'trips' | 'messages';
+type ReviewTab = 'requests' | 'trips' | 'messages' | 'disputes';
 type ReviewDecision = 'approved' | 'rejected' | 'manual_review';
 
 type ReviewItem = ReturnType<typeof formatRequestRecord>;
@@ -20,6 +21,37 @@ type MessageReport = {
   createdAt: string;
 };
 
+type DisputeEvidence = {
+  _id: string;
+  evidenceType: string;
+  description?: string;
+  fileIds?: string[];
+  metadata?: { files?: Array<{ fileType?: string }> };
+};
+
+type DisputeQueueItem = {
+  _id: string;
+  orderId: string;
+  reason: string;
+  description: string;
+  status: string;
+  evidenceIds: string[];
+  evidence: DisputeEvidence[];
+  order?: {
+    status: string;
+    feeBreakdown?: { total?: number };
+  };
+};
+
+const disputeActionLabels: Record<string, string> = {
+  refund: 'Mock 服务费退款',
+  complete: '完成订单',
+  cancel_order: '取消订单',
+  keep_in_dispute: '继续调查',
+};
+
+const disputeDecisionOperationIds: Record<string, string> = {};
+
 function operationId(targetType: string, targetId: string, decision: string): string {
   return `${targetType}-${targetId}-${decision}-${Date.now()}`;
 }
@@ -30,9 +62,11 @@ Page({
     requests: [] as ReviewItem[],
     trips: [] as ReviewTrip[],
     messageReports: [] as MessageReport[],
+    disputes: [] as DisputeQueueItem[],
     hasRequests: false,
     hasTrips: false,
     hasMessageReports: false,
+    hasDisputes: false,
     reviewReason: '',
     loading: false,
     submittingId: '',
@@ -59,16 +93,17 @@ Page({
         ok: boolean;
         requests?: Array<Record<string, unknown>>;
         trips?: Array<Record<string, unknown>>;
+        disputes?: DisputeQueueItem[];
         error?: string;
       }>({
         name: 'review-queue-list',
         data: { limit: 30 },
-        fallback: { ok: false, error: 'cloud_not_ready' },
+        demoFallback: { ok: false, error: 'cloud_not_ready' },
       }),
       callCloud<{ ok: boolean; reports?: MessageReport[]; error?: string }>({
         name: 'chat-review-queue-list',
         data: { limit: 30 },
-        fallback: { ok: false, error: 'cloud_not_ready' },
+        demoFallback: { ok: false, error: 'cloud_not_ready' },
       }),
     ]);
     this.setData({ loading: false });
@@ -82,9 +117,11 @@ Page({
         requests: [],
         trips: [],
         messageReports: [],
+        disputes: [],
         hasRequests: false,
         hasTrips: false,
         hasMessageReports: false,
+        hasDisputes: false,
       });
       wx.showToast({ title: errorText, icon: 'none' });
       return;
@@ -93,13 +130,16 @@ Page({
     const requests = (result.requests || []).map((item) => formatRequestRecord(item));
     const trips = (result.trips || []).map((item) => formatTripRecord(item));
     const messageReports = chatResult.reports || [];
+    const disputes = result.disputes || [];
     this.setData({
       requests,
       trips,
       messageReports,
+      disputes,
       hasRequests: requests.length > 0,
       hasTrips: trips.length > 0,
       hasMessageReports: messageReports.length > 0,
+      hasDisputes: disputes.length > 0,
     });
   },
 
@@ -146,7 +186,7 @@ Page({
         reason,
         operationId: operationId('message-report', reportId, action),
       },
-      fallback: { ok: false, error: 'cloud_not_ready' },
+      demoFallback: { ok: false, error: 'cloud_not_ready' },
     });
     this.setData({ submittingId: '' });
     if (!result.ok) {
@@ -183,7 +223,7 @@ Page({
         verificationEvidenceIds: [],
         operationId: operationId(options.targetType, options.targetId, options.decision),
       },
-      fallback: { ok: false, error: 'cloud_not_ready' },
+      demoFallback: { ok: false, error: 'cloud_not_ready' },
     });
     this.setData({ submittingId: '' });
 
@@ -194,6 +234,82 @@ Page({
 
     wx.showToast({ title: '已提交审核', icon: 'success' });
     this.setData({ reviewReason: '' });
+    await this.loadQueue();
+  },
+
+  async previewDisputeEvidence(event: WechatMiniprogram.TouchEvent) {
+    const disputeId = String(event.currentTarget.dataset.disputeId || '');
+    const evidenceId = String(event.currentTarget.dataset.evidenceId || '');
+    const dispute = this.data.disputes.find((item) => item._id === disputeId);
+    const evidence = dispute?.evidence.find((item) => item._id === evidenceId);
+    if (!evidence || !evidence.fileIds || !evidence.fileIds.length) {
+      wx.showToast({ title: '这是系统记录，没有附件', icon: 'none' });
+      return;
+    }
+    try {
+      const urls = await getCloudFileUrls(evidence.fileIds);
+      if (!urls.length) throw new Error('no_preview_url');
+      const files = evidence.metadata?.files || [];
+      wx.previewMedia({
+        current: 0,
+        sources: urls.map((url, index) => ({
+          url,
+          type: files[index]?.fileType === 'video' ? 'video' : 'image',
+        })),
+      });
+    } catch (error) {
+      wx.showToast({ title: '证据附件暂时无法预览', icon: 'none' });
+    }
+  },
+
+  async decideDispute(event: WechatMiniprogram.TouchEvent) {
+    const disputeId = String(event.currentTarget.dataset.id || '');
+    const action = String(event.currentTarget.dataset.action || '');
+    const reason = this.data.reviewReason.trim();
+    const dispute = this.data.disputes.find((item) => item._id === disputeId);
+    if (!dispute || !disputeActionLabels[action]) return;
+    if (!reason) {
+      wx.showToast({ title: '争议裁决必须填写理由', icon: 'none' });
+      return;
+    }
+    const evidenceIdsReviewed = dispute.evidence.map((item) => item._id);
+    if (!evidenceIdsReviewed.length) {
+      wx.showToast({ title: '该争议没有可审查证据', icon: 'none' });
+      return;
+    }
+    const confirmation = await new Promise<WechatMiniprogram.ShowModalSuccessCallbackResult>((resolve) =>
+      wx.showModal({
+        title: `确认${disputeActionLabels[action]}？`,
+        content: `将依据 ${evidenceIdsReviewed.length} 条证据处理订单。理由：${reason}`,
+        confirmText: '确认裁决',
+        confirmColor: action === 'refund' || action === 'cancel_order' ? '#a64d3b' : '#5f6e54',
+        success: resolve,
+      }),
+    );
+    if (!confirmation.confirm) return;
+
+    const operationKey = `${disputeId}:${action}`;
+    disputeDecisionOperationIds[operationKey] ||= createOperationId('dispute_decide');
+    this.setData({ submittingId: disputeId });
+    const result = await callCloud<{ ok: boolean; error?: string }>({
+      name: 'dispute-decide',
+      data: {
+        disputeId,
+        action,
+        reason,
+        evidenceIdsReviewed,
+        operationId: disputeDecisionOperationIds[operationKey],
+      },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
+    });
+    this.setData({ submittingId: '' });
+    if (!result.ok) {
+      wx.showToast({ title: result.error || '争议裁决失败', icon: 'none' });
+      return;
+    }
+    delete disputeDecisionOperationIds[operationKey];
+    this.setData({ reviewReason: '' });
+    wx.showToast({ title: '争议裁决已记录', icon: 'success' });
     await this.loadQueue();
   },
 

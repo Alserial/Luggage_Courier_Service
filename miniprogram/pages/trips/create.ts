@@ -75,7 +75,7 @@ Page({
     const result = await callCloud<{ ok: boolean; trip?: Record<string, unknown>; isOwner?: boolean; error?: string }>({
       name: 'trip-get',
       data: { tripId },
-      fallback: { ok: false, error: 'cloud_unavailable' },
+      demoFallback: { ok: false, error: 'cloud_unavailable' },
     });
     if (!result.ok || !result.trip || !result.isOwner) {
       this.setData({
@@ -163,7 +163,7 @@ Page({
     const result = await callCloud<{ ok: boolean; tripId?: string; mock?: boolean; error?: string }>({
       name: isEdit ? 'trip-update' : 'trip-create',
       data: { tripId: this.data.tripId, form, operationId: tripOperationId },
-      fallback: isEdit ? { ok: false, error: 'cloud_unavailable' } : { ok: true, mock: true },
+      demoFallback: isEdit ? { ok: false, error: 'cloud_unavailable' } : { ok: true, mock: true },
     });
 
     if (!result.ok) {
@@ -178,7 +178,10 @@ Page({
 
     tripSubmissionCompleted = true;
     getApp<IAppOption>().globalData.dataVersion += 1;
-    wx.showToast({ title: isEdit ? '行程已更新，等待重新核验' : '行程已提交', icon: 'success' });
+    wx.showToast({
+      title: result.mock ? '演示完成，未保存到云端' : isEdit ? '行程已更新，等待重新核验' : '行程已提交',
+      icon: result.mock ? 'none' : 'success',
+    });
     const url = result.tripId ? `/pages/trips/detail?id=${result.tripId}` : '/pages/trips/index';
     setTimeout(() => {
       const handleNavigationFailure = () => {

@@ -97,6 +97,7 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `offer-accept` creates `orders` record in `pending_payment`.
 - [ ] `offer-accept` updates real offer to `accepted`.
 - [ ] `offer-accept` creates `audit_logs` record.
+- [ ] Double-tapping accept creates only one deterministic order.
 - [ ] `offer-accept` rejects users who do not own the request.
 - [ ] `offer-accept` rejects requests that are not approved.
 - [ ] Order list can show requester/traveller related real orders via `order-list`.
@@ -106,12 +107,14 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 
 - [ ] Pending-payment order shows payment action.
 - [ ] Payment page shows service fee, platform fee, and total.
+- [ ] Payment amount is loaded from `order-get`; the frontend does not submit an amount.
 - [ ] Payment page clearly says current payment is mock.
 - [ ] `payment-confirm-mock` creates `payments` record.
 - [ ] Payment record uses `provider: "mock"`.
 - [ ] Payment record uses `paymentStatus: "paid"` and `lockStatus: "locked"`.
 - [ ] Backend transition to `paid_locked` is implemented or tracked as explicit TODO.
 - [ ] Payment audit log is implemented or tracked as explicit TODO.
+- [ ] Retrying the same payment operation creates only one payment/evidence/audit set.
 
 ## Handover
 
@@ -119,6 +122,8 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Handover page shows confirmation code.
 - [ ] User must complete all checklist items before confirming.
 - [ ] User can navigate to upload handover evidence.
+- [ ] Handover is blocked until linked `item_photo` evidence exists.
+- [ ] Handover automatically creates `handover_qr_scan` system evidence.
 - [ ] `handover-confirm-scan` creates `handover_records` record.
 - [ ] `handover-confirm-scan` creates `audit_logs` record.
 - [ ] Transition to `item_handed_to_carrier` is implemented or tracked as explicit TODO.
@@ -126,14 +131,15 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 
 ## Evidence
 
-- [ ] Evidence page supports all required evidence types.
+- [ ] Evidence page supports the four user-uploadable evidence types; system-only types cannot be selected.
 - [ ] User can choose image/video.
+- [ ] Images are capped at 5 MB, videos at 20 MB, and no more than 6 files are accepted.
 - [ ] User cannot submit evidence without files.
 - [ ] `evidence-create` validates evidence type.
 - [ ] `evidence-create` rejects non-participants.
 - [ ] `evidence-create` creates `evidence` record.
 - [ ] `evidence-create` creates `audit_logs` record.
-- [ ] CloudBase storage file id upload is implemented or tracked as explicit TODO.
+- [ ] CloudBase storage upload completes for all files before `evidence-create` runs.
 - [ ] Every evidence record stores a canonical `storagePath` or an explicit non-file system marker.
 - [ ] Evidence records are append-only.
 
@@ -147,6 +153,10 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] Evidence-gated transitions are implemented or tracked as explicit TODO.
 - [ ] Active dispute blocks completion.
 - [ ] Cancel/refund behavior is explicit before launch.
+- [ ] Traveller alone can advance `item_handed_to_carrier -> in_transit -> arrived -> delivered`.
+- [ ] Delivery requires `delivery_photo_or_video`; requester alone can confirm `delivered -> completed`.
+- [ ] Completion automatically creates `mutual_confirmation` evidence.
+- [ ] Participants cannot transition `disputed` or select `refunded`.
 
 ## Dispute
 
@@ -157,8 +167,10 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 - [ ] `dispute-open` creates `disputes` record.
 - [ ] `dispute-open` creates `audit_logs` record.
 - [ ] Order transition to `disputed` is implemented or tracked as explicit TODO.
-- [ ] Admin dispute decision function is implemented or tracked as explicit TODO.
+- [ ] `dispute-decide` rejects non-admin/non-reviewers and requires reason plus reviewed evidence.
+- [ ] Final decisions require a second confirmation in the review UI.
 - [ ] Refund decision applies only to service fee.
+- [ ] One order cannot have two active disputes.
 
 ## Supervised In-App Chat
 
@@ -178,7 +190,8 @@ The MVP boundary is low-value, low-frequency, low-risk personal items only. It m
 ## CloudBase Setup
 
 - [ ] CloudBase environment id is configured.
-- [ ] Placeholder env id skips cloud initialization and keeps demo fallback working.
+- [ ] Missing config/network/function/response returns `cloud_unavailable` and never displays success.
+- [ ] Demo mode is default-off, frontend-only, and shows a visible banner when explicitly enabled.
 - [ ] All required collections exist.
 - [ ] Required indexes are created.
 - [ ] Direct frontend writes to critical collections are disabled.
@@ -202,10 +215,13 @@ Run before every demo build:
 
 ```bash
 npm run check:files
+npm run check:idempotency
+npm run check:mutations
+npm run check:workflow
 npm run typecheck
 ```
 
-Acceptance requires both commands to pass.
+Acceptance requires all commands to pass.
 
 ## Demo Path
 
@@ -219,8 +235,10 @@ Minimum happy path:
 6. Accept offer.
 7. Confirm mock service-fee payment.
 8. Confirm handover.
-9. Upload evidence.
-10. Open dispute or complete order path.
+9. Advance in transit and arrival.
+10. Upload delivery proof and mark delivered.
+11. Confirm completion as the requester.
+12. Separately open and adjudicate a dispute with an admin/reviewer.
 
 Minimum risk path:
 

@@ -10,3 +10,10 @@
   color: #5f6658;
   font-size: 26rpx;
 }
+
+.upload-progress {
+  margin: 16rpx 0;
+  color: #687964;
+  font-size: 24rpx;
+  text-align: center;
+}

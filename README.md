@@ -39,3 +39,4 @@ Current feature status:
 - Request/trip marketplace results are cached per public/my scope. Tab switching reuses cache; network refresh occurs on first load, successful WeChat login, pull-down refresh, or explicit retry.
 - Item-request image selection, preview, removal, CloudBase upload, backend validation, and request-detail gallery are implemented.
 - Supervised text-only order chat, message reporting/admin review, and immutable transcript evidence are implemented in the repository; CloudBase collections, indexes, permissions, and functions still require deployment/configuration per the setup guide.
+- The pilot order path now uses fail-closed cloud calls, server-authoritative Mock service-fee amounts, transactional/idempotent mutations, real evidence uploads, role/evidence-gated fulfillment transitions, and admin-only dispute adjudication.

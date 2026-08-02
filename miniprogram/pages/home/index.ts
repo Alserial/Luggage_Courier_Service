@@ -1,5 +1,8 @@
+import { appConfig } from '../../config/env';
+
 Page({
   data: {
+    demoMode: appConfig.demoMode,
     rules: [
       '只做低值、低频、低风险个人小件',
       '不做代购、物流、清关或商品货款托管',

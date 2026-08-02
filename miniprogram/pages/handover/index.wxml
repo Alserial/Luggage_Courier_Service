@@ -17,6 +17,10 @@
     </view>
   </view>
 
-  <button class="primary-button" loading="{{submitting}}" bindtap="confirmHandover">确认交接</button>
-  <button class="secondary-button evidence-button" bindtap="goEvidence">上传交接照片/视频</button>
+  <view wx:if="{{evidenceLoading}}" class="card"><view class="muted">正在检查交接照片...</view></view>
+  <view wx:if="{{evidenceError}}" class="card warning">{{evidenceError}}</view>
+  <view wx:if="{{itemPhotoEvidenceIds.length}}" class="card evidence-ready">已关联 {{itemPhotoEvidenceIds.length}} 条物品照片证据</view>
+
+  <button class="primary-button" disabled="{{evidenceLoading || !itemPhotoEvidenceIds.length}}" loading="{{submitting}}" bindtap="confirmHandover">确认交接</button>
+  <button class="secondary-button evidence-button" bindtap="goEvidence">上传物品照片证据</button>
 </view>

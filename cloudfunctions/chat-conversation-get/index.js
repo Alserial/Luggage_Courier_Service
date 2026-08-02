@@ -38,18 +38,6 @@ exports.main = async (event) => {
   const { orderId } = event;
   if (!orderId) return { ok: false, error: 'missing_order_id' };
 
-  if (orderId === 'demo_order_001') {
-    return {
-      ok: true,
-      conversation: {
-        id: 'demo_conversation_001',
-        orderId,
-        status: 'active',
-        callerRole: 'requester',
-      },
-    };
-  }
-
   const db = cloud.database();
   const order = await getDoc(db, 'orders', orderId);
   if (!order) return { ok: false, error: 'order_not_found' };

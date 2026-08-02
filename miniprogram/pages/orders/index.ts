@@ -21,7 +21,7 @@ Page({
     const result = await callCloud<{ ok: boolean; orders?: Array<Record<string, unknown>>; error?: string }>({
       name: 'order-list',
       data: { limit: 20 },
-      fallback: { ok: true, orders: [demoOrder] },
+      demoFallback: { ok: true, orders: [demoOrder] },
     });
     if (!result.ok) {
       this.setData({

@@ -54,3 +54,9 @@
 .evidence-button {
   margin-top: 18rpx;
 }
+
+.evidence-ready {
+  color: #5f6e54;
+  font-size: 24rpx;
+  font-weight: 700;
+}

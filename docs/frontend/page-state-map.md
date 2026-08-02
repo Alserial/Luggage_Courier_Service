@@ -509,14 +509,14 @@ Future backend behavior:
 | `cancelled` | view records | no normal actions |
 | `refunded` | view records | no normal actions |
 
-## Current Gaps
+## Current Implementation
 
-- Order detail has only payment, handover, evidence, and dispute actions.
-- Evidence upload uses `fileCount` fallback instead of cloud file ids.
-- Trip/request/order list pages read real CloudBase data when `cloudEnvId` is configured and use demo fallback otherwise.
+- Order detail exposes only the next role/state-legal action, including in-transit, arrival, evidence-gated delivery, and requester completion.
+- Evidence upload stores real CloudBase file ids and preserves successful uploads for retry.
+- Normal mode fails closed on missing CloudBase/config/network/function responses. Frontend-only demo data requires explicit `demoMode: true` and a visible badge/banner.
 - Trip/request create pages navigate to real detail pages when cloud functions return ids.
 - Match search supports real owner-scoped matching when `tripId` or `requestId` points to real records.
 - Offer creation supports real backend compatibility checks, but the offer page still displays demo summary text.
-- Minimal operator review page exists at `pages/reviews/index` for pending item requests and trip verification. Broader order/dispute admin handling is still needed.
-- Dispute page does not pass evidence ids yet.
+- The operator review page handles pending item requests, trip verification, message reports, and evidence-backed dispute decisions.
+- The dispute page requires and passes at least one same-order evidence id.
 - Supervised order chat is implemented with realtime-watch fallback polling, server moderation, reporting, admin review, and evidence snapshots; production deployment/privacy/retention validation remains.

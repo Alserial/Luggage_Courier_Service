@@ -17,6 +17,25 @@
     </view>
   </view>
 
+  <view class="card">
+    <view class="field-label">关联订单证据（至少 1 条）</view>
+    <view wx:if="{{loadingEvidence}}" class="muted">正在读取证据...</view>
+    <view wx:elif="{{!evidence.length}}" class="muted">暂无证据，请先补充上传。</view>
+    <view
+      wx:for="{{evidence}}"
+      wx:key="_id"
+      class="evidence-option {{item.selected ? 'evidence-selected' : ''}}"
+      data-id="{{item._id}}"
+      bindtap="toggleEvidence"
+    >
+      <view class="evidence-check">{{item.selected ? '✓' : ''}}</view>
+      <view>
+        <view class="evidence-title">{{item.label}}</view>
+        <view class="muted">{{item.description || '平台订单证据'}}</view>
+      </view>
+    </view>
+  </view>
+
   <button class="secondary-button" bindtap="goEvidence">补充证据</button>
-  <button class="primary-button submit-button" loading="{{submitting}}" bindtap="openDispute">提交争议</button>
+  <button class="primary-button submit-button" disabled="{{loadingEvidence || !selectedEvidenceIds.length}}" loading="{{submitting}}" bindtap="openDispute">提交争议</button>
 </view>

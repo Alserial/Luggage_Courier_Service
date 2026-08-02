@@ -19,8 +19,6 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const { conversationId, lastReadMessageId = '' } = event;
   if (!conversationId) return { ok: false, error: 'missing_conversation_id' };
-  if (conversationId === 'demo_conversation_001') return { ok: true };
-
   const db = cloud.database();
   const conversation = await getDoc(db, 'conversations', conversationId);
   if (!conversation) return { ok: false, error: 'conversation_not_found' };

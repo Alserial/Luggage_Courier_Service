@@ -219,6 +219,9 @@ Stores the transaction record and lifecycle after an offer is accepted.
 | `requesterOpenid` | string | yes | Requesting user |
 | `status` | OrderStatus | yes | Explicit state machine |
 | `feeBreakdown` | object | yes | Service fee, platform fee, total, currency |
+| `paymentId` | string | no | Current service-fee payment record |
+| `activeDisputeId` | string/null | no | Only active dispute; cleared after final decision |
+| `statusBeforeDispute` | OrderStatus/null | no | State captured when dispute opens |
 | `taxRule` | object | yes | Default payer and note |
 | `cancellationRule` | object | yes | Before/after handover handling |
 | `evidenceRequired` | EvidenceType[] | yes | Required proof checklist |
@@ -297,6 +300,7 @@ Stores service-fee payment records only. It must not store or imply merchandise 
 | `orderId` | string | yes | `orders._id` |
 | `provider` | string | yes | `mock`, `wechat_pay`, `provider_todo` |
 | `providerPaymentId` | string | yes | Mock/provider id |
+| `providerRefundId` | string | no | Mock/provider refund id |
 | `amount` | number | yes | Service-fee total |
 | `currency` | `CNY` | yes | MVP currency |
 | `paymentStatus` | string | yes | `pending`, `paid`, `failed`, `cancelled` |
@@ -323,11 +327,12 @@ Stores append-only proof records.
 | `uploaderOpenid` | string | yes | Uploader |
 | `evidenceType` | EvidenceType | yes | Positive-list only |
 | `fileIds` | string[] | yes | Cloud file ids |
-| `storagePath` | string | yes | Canonical primary CloudBase storage path; empty only for explicitly non-file system evidence |
-| `fileCount` | number | yes | Allows mock count before storage integration |
+| `storagePath` | string | yes | `fileIds[0]` for uploads or explicit `system://...` marker |
+| `fileCount` | number | yes | Uploaded attachment count; system evidence may use zero |
 | `description` | string | no | User note |
 | `visibility` | string | yes | `both_parties`, `requester_only`, `traveller_only`, `admin_only` |
-| `metadata` | object | yes | Source, device, linked state, etc. |
+| `metadata` | object | yes | Source and file type/size metadata or system linkage |
+| `operationId` | string | no | Idempotency/correlation id |
 | `createdAt` | Date | yes | Server time |
 
 Indexes:
@@ -394,7 +399,7 @@ Stores append-only audit records for critical actions.
 |---|---|---:|---|
 | `_id` | string | yes | CloudBase document id |
 | `actorOpenid` | string | yes | Acting user, admin, or system id |
-| `actorRole` | string | yes | `user`, `requester`, `traveller`, `admin`, `system` |
+| `actorRole` | string | yes | `user`, `requester`, `traveller`, `admin`, `reviewer`, `system` |
 | `targetType` | string | yes | Collection/domain target |
 | `targetId` | string | yes | Target document id |
 | `action` | string | yes | Stable action string |
@@ -435,7 +440,7 @@ Current cloud functions already create these collections:
 - `payments`: `payment-confirm-mock`
 - `evidence`: `evidence-create`
 - `handover_records`: `handover-confirm-scan`
-- `disputes`: `dispute-open`
+- `disputes`: `dispute-open`, `dispute-decide`
 - `audit_logs`: create/request/trip/offer/order/evidence/dispute/handover actions
 
 - `conversations`: `chat-conversation-get`
@@ -448,9 +453,6 @@ Current cloud functions already create these collections:
 
 - Add CloudBase collection initialization and index setup scripts.
 - Normalize `reviewStatus` and `verificationStatus` defaults in cloud functions.
-- Add `operationId` and `evidenceIds` to critical audit records.
-- Update every evidence producer to persist canonical `storagePath`; the current generic `evidence-create` implementation does not do this consistently yet.
-- Add admin review functions for item requests, trip verification, and dispute decisions.
 - Add provider-facing payment callback functions before any real payment launch.
-- Add read models or join helpers for list/detail pages so frontend does not duplicate derived fields.
+- Add CloudBase rules/tests that enforce evidence visibility outside cloud functions.
 - Deploy and test chat indexes, participant-scoped read permissions, WeChat content-security permission, and retention/privacy policy defined in `docs/architecture/in-app-chat.md`.

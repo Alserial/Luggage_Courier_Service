@@ -6,3 +6,37 @@
 .submit-button {
   margin-top: 18rpx;
 }
+
+.evidence-option {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  padding: 16rpx;
+  border: 1rpx solid #ded5c1;
+  border-radius: 12rpx;
+}
+
+.evidence-selected {
+  border-color: #7f9070;
+  background: #eef3ea;
+}
+
+.evidence-check {
+  display: flex;
+  width: 34rpx;
+  height: 34rpx;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid #7f9070;
+  border-radius: 50%;
+  color: #5f6e54;
+  font-size: 22rpx;
+  flex-shrink: 0;
+}
+
+.evidence-title {
+  color: #42513f;
+  font-size: 25rpx;
+  font-weight: 700;
+}

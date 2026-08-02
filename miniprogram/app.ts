@@ -1,4 +1,4 @@
-import { cloudEnvId, isCloudBaseConfigured } from './config/env';
+import { appConfig, cloudEnvId, isCloudBaseConfigured } from './config/env';
 
 App<IAppOption>({
   globalData: {
@@ -15,6 +15,12 @@ App<IAppOption>({
         traceUser: true,
       });
       this.globalData.cloudReady = true;
+    }
+  },
+
+  onShow() {
+    if (appConfig.demoMode) {
+      wx.setTabBarBadge({ index: 0, text: '演示' });
     }
   },
 });

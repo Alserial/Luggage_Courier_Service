@@ -21,6 +21,7 @@ const requiredPaths = [
   'cloudfunctions/evidence-create/index.js',
   'cloudfunctions/handover-confirm-scan/index.js',
   'cloudfunctions/dispute-open/index.js',
+  'cloudfunctions/dispute-decide/index.js',
   'miniprogram/pages/orders/detail.ts',
   'miniprogram/pages/trips/detail.ts',
   'miniprogram/pages/requests/detail.ts',
@@ -30,6 +31,7 @@ const requiredPaths = [
   'miniprogram/pages/handover/index.ts',
   'miniprogram/pages/evidence/upload.ts',
   'miniprogram/pages/disputes/detail.ts',
+  'miniprogram/utils/operation.ts',
   'cloudfunctions/match-search/index.js',
   'cloudfunctions/offer-create/index.js',
   'cloudfunctions/offer-accept/index.js',
@@ -53,4 +55,23 @@ if (missing.length) {
   process.exit(1);
 }
 
-console.log(`Project skeleton OK. Checked ${requiredPaths.length} files.`);
+const cloudFunctionRoot = path.join(process.cwd(), 'cloudfunctions');
+const cloudFunctionNames = fs
+  .readdirSync(cloudFunctionRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(cloudFunctionRoot, entry.name, 'package.json')))
+  .map((entry) => entry.name);
+if (cloudFunctionNames.length !== 33) {
+  console.error(`Expected 33 cloud functions, found ${cloudFunctionNames.length}.`);
+  process.exit(1);
+}
+
+const invalidSdkPins = cloudFunctionNames.filter((name) => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(cloudFunctionRoot, name, 'package.json'), 'utf8'));
+  return !manifest.dependencies || manifest.dependencies['wx-server-sdk'] !== '4.0.2';
+});
+if (invalidSdkPins.length) {
+  console.error(`Cloud functions without wx-server-sdk 4.0.2: ${invalidSdkPins.join(', ')}`);
+  process.exit(1);
+}
+
+console.log(`Project skeleton OK. Checked ${requiredPaths.length} files and 33 pinned cloud functions.`);
