@@ -16,10 +16,6 @@ Page({
     wx.navigateTo({ url: '/pages/requests/create' });
   },
 
-  goProfile() {
-    wx.switchTab({ url: '/pages/profile/index' });
-  },
-
   goOrders() {
     wx.switchTab({ url: '/pages/orders/index' });
   },

@@ -7,7 +7,6 @@
         <view class="brand-caption">顺路帮带 · 过程留痕</view>
       </view>
     </view>
-    <button class="profile-chip" bindtap="goProfile">我的</button>
   </view>
 
   <view class="hero">

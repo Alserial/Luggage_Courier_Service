@@ -5,7 +5,6 @@
 .brand-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 26rpx;
 }
 
@@ -14,20 +13,6 @@
   color: #8b9382;
   font-size: 20rpx;
   line-height: 1;
-}
-
-.profile-chip {
-  width: auto;
-  height: 64rpx;
-  margin: 0;
-  padding: 0 24rpx;
-  border: 1rpx solid #d8cfbb;
-  border-radius: 999rpx;
-  background: #fffdf7;
-  color: #5f6e54;
-  font-size: 24rpx;
-  font-weight: 700;
-  line-height: 64rpx;
 }
 
 .hero {
