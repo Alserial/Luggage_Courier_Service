@@ -8,6 +8,9 @@
     "check:idempotency": "node scripts/check-create-idempotency.js",
     "check:mutations": "node scripts/check-content-mutations.js",
     "check:workflow": "node scripts/check-order-workflow.js",
+    "cloudbase:plan": "node scripts/setup-cloudbase.js --plan",
+    "cloudbase:check": "node scripts/setup-cloudbase.js",
+    "cloudbase:apply": "node scripts/setup-cloudbase.js --apply",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

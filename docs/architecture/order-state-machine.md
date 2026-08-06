@@ -32,8 +32,11 @@ The MVP must not implement real platform-held escrow, automatic payout, or platf
 - `arrived -> delivered`
 - `delivered -> completed`
 - any active state -> `disputed`
-- allowed pre-handover states -> `cancelled`
-- eligible cancelled or disputed states -> `refunded`
+- `pending_payment -> cancelled`: either participant, required reason, no refund record
+- `paid_locked -> cancelled`: either participant before handover, required reason, atomically mark the Mock service fee refunded and create payment evidence/audit
+- eligible disputed states -> `refunded` by admin/reviewer decision
+
+The pre-handover cancellation refund is only a Mock service-fee record. It does not refund, hold, transfer, or otherwise handle merchandise money. Once handover is confirmed, participants must use the dispute flow instead of cancelling directly.
 
 ## Audit Requirements
 

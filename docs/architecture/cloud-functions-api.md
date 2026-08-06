@@ -739,6 +739,7 @@ Error codes:
 
 - `missing_order_id`
 - `invalid_file_ids`
+- `invalid_file_path`
 - `invalid_file_count`
 - `invalid_file_metadata`
 - `file_size_exceeded`
@@ -755,6 +756,7 @@ Rules:
 
 - Users may create only `item_photo`, `flight_record`, `customs_or_airline_proof`, and `delivery_photo_or_video`.
 - One to six real `cloud://` file ids are required. Images are capped at 5 MB and videos at 20 MB.
+- Every uploaded file must belong to `evidence/{orderId}/{operationId}/`; cross-order and cross-operation file ids are rejected.
 - `storagePath` is always `fileIds[0]`; system evidence uses an explicit `system://...` path.
 - Evidence must not be overwritten.
 - Caller must be requester or traveller on the order.
@@ -795,6 +797,9 @@ Error codes:
 - `order_not_found`
 - `permission_denied`
 - `illegal_transition`
+- `payment_not_found`
+- `unsupported_payment_provider`
+- `payment_not_refundable`
 
 Writes:
 
@@ -804,6 +809,7 @@ Writes:
 Allowed transitions:
 
 - participant: `pending_payment -> cancelled` with a required reason
+- participant: `paid_locked -> cancelled` with a required reason and automatic Mock service-fee refund
 - traveller: `item_handed_to_carrier -> in_transit -> arrived -> delivered`
 - requester: `delivered -> completed`
 
@@ -811,6 +817,7 @@ Rules:
 
 - `arrived -> delivered` requires linked `delivery_photo_or_video` evidence.
 - `delivered -> completed` automatically creates `mutual_confirmation` system evidence.
+- `paid_locked -> cancelled` atomically marks the related Mock payment as refunded, unlocks it, creates `payment_record` system evidence, and writes payment/order audit logs. It does not process merchandise money.
 - Participants cannot transition an active disputed order and can never select `refunded`.
 - Order, evidence, and audit changes are transactional and idempotent.
 

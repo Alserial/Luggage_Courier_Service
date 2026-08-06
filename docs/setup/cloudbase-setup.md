@@ -23,7 +23,7 @@ Recommended setup:
 5. Deploy cloud functions in the order listed below.
 6. Create the database collections and indexes.
 7. Configure restrictive collection permissions.
-8. Create cloud storage folders for item-request images and evidence files.
+8. Verify the storage path prefixes used by item-request images, evidence files, and chat snapshots.
 
 The current `miniprogram/config/env.ts` contains the configured environment id shown above. Normal builds use `demoMode: false`; missing configuration, network failure, empty response, or an undeployed function returns `cloud_unavailable` and never simulates success. Demo data is frontend-only and requires explicitly setting `demoMode: true`, which displays a visible banner.
 
@@ -91,6 +91,29 @@ Create these collections before using the real CloudBase backend:
 
 The field-level schema is defined in `docs/architecture/data-model.md`.
 
+### Repeatable Collection And Index Setup
+
+The repository includes a non-destructive schema tool backed by the official CloudBase Manager Node SDK:
+
+```powershell
+npm install --no-save @cloudbase/manager-node@5.6.4
+npm run cloudbase:plan
+
+$env:TENCENTCLOUD_SECRET_ID = '<temporary secret id>'
+$env:TENCENTCLOUD_SECRET_KEY = '<temporary secret key>'
+$env:CLOUDBASE_ENV_ID = 'luggage-d1ghv33fy2cb9ef96'
+
+npm run cloudbase:check
+npm run cloudbase:apply
+```
+
+- `cloudbase:plan` is offline and prints the expected collections/indexes.
+- `cloudbase:check` is read-only and exits non-zero when resources are missing or drifted.
+- `cloudbase:apply` creates only missing collections and missing named indexes.
+- The tool refuses to drop or recreate a same-name index whose definition differs.
+- Never commit Tencent Cloud credentials. Prefer short-lived credentials with only the permissions needed for this environment.
+- Collection security rules remain a manual verification step because participant-scoped chat reads require environment-specific testing.
+
 ## First Admin Setup
 
 Review functions use `users.roleFlags` for access control.
@@ -141,6 +164,9 @@ Create indexes according to the query patterns below. CloudBase index UI names c
 
 - `requesterOpenid`, `status`, `updatedAt`
 - `travellerOpenid`, `status`, `updatedAt`
+- `requesterOpenid`, `updatedAt`
+- `travellerOpenid`, `updatedAt`
+- `offerId`
 - `requestId`
 - `tripId`
 
@@ -153,7 +179,7 @@ Create indexes according to the query patterns below. CloudBase index UI names c
 ### Chat indexes
 
 - `conversations`: unique `orderId`; `participantOpenids`, `lastMessageAt`
-- `messages`: unique `conversationId`, `clientMessageId`; `conversationId`, `createdAt`; `orderId`, `createdAt`; `moderationStatus`, `createdAt`; `conversationId`, `senderOpenid`, `createdAt`
+- `messages`: unique `conversationId`, `clientMessageId`; `conversationId`, `createdAt`; `conversationId`, `moderationStatus`, `createdAt` (frontend chat `watch()`); `orderId`, `createdAt`; `moderationStatus`, `createdAt`; `conversationId`, `senderOpenid`, `createdAt`
 - `message_receipts`: unique `conversationId`, `readerOpenid`
 - `message_reports`: `status`, `createdAt`; `messageId`, `reporterOpenid`, `status`; `orderId`, `createdAt`
 
@@ -204,20 +230,25 @@ Recommended baseline:
 | `message_receipts` | Own receipt only or cloud function only | No direct write | Full |
 | `message_reports` | Reporter/admin as policy permits | No direct write | Full |
 
+Recommended console permission mode:
+
+- `orders`, `payments`, `evidence`, `handover_records`, `disputes`, `audit_logs` → **仅管理端可读写** (read/write only via cloud functions).
+- `users`, `item_requests`, `trips`, `offers`, `conversations`, `message_reports` → no direct frontend write; reads are participant-scoped via cloud functions.
+- `messages` → the participant-scoped `watch()` read is the only intended direct frontend read; keep all writes cloud-function only. Until the participant-scoped rule is verified with both parties, an unrelated user, and an admin, switch `messages` to 仅管理端可读写 and rely on `chat-message-list` polling.
+
+Source review confirms the Mini Program performs no `db.collection().add/update/remove`; the only direct `db.collection().where()` is the read-only chat `watch()`. The frontend therefore cannot write orders, payments, evidence, disputes, or audit data directly. The console permission mode above is the defense-in-depth control that must be confirmed in the live environment.
+
 For the initial MVP, prefer disabling direct frontend writes to all critical collections. Use cloud functions for create/update operations.
 
 ## Cloud Storage
 
-Create these logical folders in CloudBase storage:
+Uploads use these logical CloudBase storage prefixes:
 
-- `item-requests/`
-- `evidence/item-photo/`
-- `evidence/handover/`
-- `evidence/flight-record/`
-- `evidence/customs-airline-proof/`
-- `evidence/delivery/`
-- `evidence/dispute/`
-- `evidence/in-app-chat/` (chat transcript snapshots)
+- `item-requests/{timestamp}-{index}-{random}.{extension}`
+- `evidence/{orderId}/{operationId}/{index}.{extension}` for user-uploaded order evidence
+- `evidence/in-app-chat/{orderId}/...` for chat transcript snapshots
+
+Object storage does not require empty folders to be initialized: the prefixes appear when the first object is uploaded. Validate the resulting object paths during acceptance rather than creating placeholder files.
 
 Rules:
 
@@ -263,6 +294,7 @@ npm run check:idempotency
 npm run check:mutations
 npm run check:workflow
 npm run typecheck
+npm run cloudbase:plan
 ```
 
 After CloudBase deployment:
@@ -285,7 +317,6 @@ After CloudBase deployment:
 
 ## Known TODOs
 
-- Add scripted collection/index initialization.
 - Add CloudBase permission JSON exports once the target environment is confirmed.
 - Add payment provider callback function before enabling real payment.
 - Deploy and validate the supervised chat stack, permissions, moderation, privacy disclosure, report/admin flow, and evidence snapshot according to `docs/architecture/in-app-chat.md`.

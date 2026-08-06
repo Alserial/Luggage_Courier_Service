@@ -7,6 +7,13 @@ const transitionRules = {
   pending_payment: {
     cancelled: { roles: ['requester', 'traveller'], reasonRequired: true },
   },
+  paid_locked: {
+    cancelled: {
+      roles: ['requester', 'traveller'],
+      reasonRequired: true,
+      refundMockServiceFee: true,
+    },
+  },
   item_handed_to_carrier: {
     in_transit: { roles: ['traveller'] },
   },
@@ -51,6 +58,12 @@ function participantRole(order, openid) {
   return null;
 }
 
+async function findLegacyPaymentId(db, order) {
+  if (order.paymentId) return order.paymentId;
+  const result = await db.collection('payments').where({ orderId: order._id }).limit(1).get();
+  return result.data[0] ? result.data[0]._id : '';
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const orderId = text(event.orderId);
@@ -65,9 +78,17 @@ exports.main = async (event) => {
   const db = cloud.database();
   const auditId = documentId('audit', 'order-transition', orderId, operationId);
   const confirmationEvidenceId = documentId('evidence', 'mutual-confirmation', orderId, operationId);
+  const refundEvidenceId = documentId('evidence', 'pre-handover-refund', orderId, operationId);
+  const refundAuditId = documentId('audit', 'pre-handover-refund', orderId, operationId);
+  let paymentSnapshotId = '';
   let response;
 
   try {
+    const orderSnapshot = await getDoc(db, 'orders', orderId);
+    if (orderSnapshot && orderSnapshot.status === 'paid_locked' && nextStatus === 'cancelled') {
+      paymentSnapshotId = await findLegacyPaymentId(db, orderSnapshot);
+    }
+
     await db.runTransaction(async (transaction) => {
       const existingAudit = await getDoc(transaction, 'audit_logs', auditId);
       if (existingAudit) {
@@ -84,6 +105,7 @@ exports.main = async (event) => {
           currentStatus: existingAudit.before && existingAudit.before.status,
           nextStatus,
           evidenceIds: existingAudit.evidenceIds || [],
+          mockServiceFeeRefunded: Boolean(existingAudit.after && existingAudit.after.mockServiceFeeRefunded),
           idempotent: true,
         };
         return;
@@ -115,6 +137,77 @@ exports.main = async (event) => {
 
       const now = new Date();
       const transitionEvidenceIds = [...evidenceIds];
+      let mockServiceFeeRefunded = false;
+
+      if (rule.refundMockServiceFee) {
+        const paymentId = order.paymentId || paymentSnapshotId;
+        const payment = await getDoc(transaction, 'payments', paymentId);
+        if (!payment || payment.orderId !== orderId) throw businessError('payment_not_found');
+        if (payment.provider !== 'mock') throw businessError('unsupported_payment_provider');
+        if (payment.paymentStatus !== 'paid' || payment.refundStatus === 'refunded') {
+          throw businessError('payment_not_refundable');
+        }
+
+        const providerRefundId = documentId('mockrefund', orderId, operationId);
+        await transaction.collection('payments').doc(paymentId).update({
+          data: {
+            providerRefundId,
+            paymentStatus: 'paid',
+            lockStatus: 'none',
+            refundStatus: 'refunded',
+            refundedAt: now,
+            updatedAt: now,
+          },
+        });
+        await transaction.collection('evidence').doc(refundEvidenceId).set({
+          data: {
+            orderId,
+            uploaderOpenid: 'system',
+            evidenceType: 'payment_record',
+            fileIds: [],
+            storagePath: `system://payment/refund/${paymentId}`,
+            fileCount: 0,
+            description: '交接前取消订单，Mock 服务费记录已标记退款；不涉及商品货款。',
+            visibility: 'both_parties',
+            metadata: {
+              source: 'order-transition',
+              reason: 'pre_handover_cancellation',
+              provider: 'mock',
+              paymentId,
+              providerRefundId,
+            },
+            operationId,
+            createdAt: now,
+          },
+        });
+        await transaction.collection('audit_logs').doc(refundAuditId).set({
+          data: {
+            actorOpenid: OPENID,
+            actorRole,
+            targetType: 'payment',
+            targetId: paymentId,
+            action: 'payment.mockRefundBeforeHandover',
+            before: {
+              paymentStatus: payment.paymentStatus,
+              lockStatus: payment.lockStatus,
+              refundStatus: payment.refundStatus,
+            },
+            after: {
+              paymentStatus: 'paid',
+              lockStatus: 'none',
+              refundStatus: 'refunded',
+              providerRefundId,
+            },
+            reason,
+            evidenceIds: [refundEvidenceId],
+            operationId,
+            createdAt: now,
+          },
+        });
+        transitionEvidenceIds.push(refundEvidenceId);
+        mockServiceFeeRefunded = true;
+      }
+
       if (rule.createConfirmation) {
         await transaction.collection('evidence').doc(confirmationEvidenceId).set({
           data: {
@@ -140,6 +233,7 @@ exports.main = async (event) => {
       await transaction.collection('orders').doc(orderId).update({
         data: {
           status: nextStatus,
+          ...(nextStatus === 'cancelled' ? { cancellationReason: reason, cancelledAt: now } : {}),
           updatedAt: now,
         },
       });
@@ -151,7 +245,7 @@ exports.main = async (event) => {
           targetId: orderId,
           action: 'order.transition',
           before: { status: order.status },
-          after: { status: nextStatus },
+          after: { status: nextStatus, mockServiceFeeRefunded },
           reason,
           evidenceIds: transitionEvidenceIds,
           operationId,
@@ -163,6 +257,7 @@ exports.main = async (event) => {
         currentStatus: order.status,
         nextStatus,
         evidenceIds: transitionEvidenceIds,
+        mockServiceFeeRefunded,
       };
     });
     return response || { ok: false, error: 'transaction_failed' };

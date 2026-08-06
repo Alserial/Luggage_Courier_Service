@@ -23,7 +23,7 @@
     <button wx:if="{{needsDeliveryEvidence}}" class="primary-button" data-type="delivery_photo_or_video" bindtap="goEvidence">上传送达照片/视频</button>
     <button wx:if="{{canDeliver}}" class="primary-button" loading="{{submitting}}" data-status="delivered" bindtap="confirmTransition">确认已送达</button>
     <button wx:if="{{canComplete}}" class="primary-button" loading="{{submitting}}" data-status="completed" bindtap="confirmTransition">确认收货并完成</button>
-    <button wx:if="{{canCancel}}" class="cancel-button" loading="{{submitting}}" bindtap="cancelOrder">取消待支付订单</button>
+    <button wx:if="{{canCancel}}" class="cancel-button" loading="{{submitting}}" bindtap="cancelOrder">{{cancelButtonText}}</button>
     <view class="quick-actions">
       <button class="secondary-button" bindtap="goChat">订单内沟通</button>
       <button class="secondary-button" bindtap="goEvidence">上传证据</button>

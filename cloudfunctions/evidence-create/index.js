@@ -48,6 +48,17 @@ function normalizeFileMetadata(fileIds, metadata) {
   }));
 }
 
+function cloudStoragePath(fileId) {
+  if (!fileId.startsWith('cloud://')) return '';
+  const pathStart = fileId.indexOf('/', 'cloud://'.length);
+  return pathStart >= 0 ? fileId.slice(pathStart + 1) : '';
+}
+
+function belongsToEvidenceOperation(fileId, orderId, operationId) {
+  const storagePath = cloudStoragePath(fileId);
+  return storagePath.startsWith(`evidence/${orderId}/${operationId}/`);
+}
+
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const orderId = text(event.orderId);
@@ -61,6 +72,9 @@ exports.main = async (event) => {
   if (!userEvidenceTypes.has(evidenceType)) return { ok: false, error: 'invalid_evidence_type' };
   if (!fileIds.length || fileIds.length > 6) return { ok: false, error: 'invalid_file_count' };
   if (fileIds.some((fileId) => !fileId.startsWith('cloud://'))) return { ok: false, error: 'invalid_file_ids' };
+  if (fileIds.some((fileId) => !belongsToEvidenceOperation(fileId, orderId, operationId))) {
+    return { ok: false, error: 'invalid_file_path' };
+  }
 
   const files = normalizeFileMetadata(fileIds, event.fileMetadata);
   if (!files) return { ok: false, error: 'invalid_file_metadata' };

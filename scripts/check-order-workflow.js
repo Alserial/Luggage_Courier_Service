@@ -25,6 +25,7 @@ async function main() {
   };
   const offerAccept = require('../cloudfunctions/offer-accept/index.js');
   const paymentConfirm = require('../cloudfunctions/payment-confirm-mock/index.js');
+  const evidenceCreate = require('../cloudfunctions/evidence-create/index.js');
   const orderTransition = require('../cloudfunctions/order-transition/index.js');
   const disputeOpen = require('../cloudfunctions/dispute-open/index.js');
   const disputeDecide = require('../cloudfunctions/dispute-decide/index.js');
@@ -74,6 +75,92 @@ async function main() {
     'repeated payment must create one payment evidence',
   );
 
+  const cancelledAfterPayment = await orderTransition.main({
+    orderId,
+    nextStatus: 'cancelled',
+    reason: '交接前行程有变',
+    evidenceIds: [],
+    operationId: 'cancel_paid_operation',
+  });
+  const cancelledAfterPaymentAgain = await orderTransition.main({
+    orderId,
+    nextStatus: 'cancelled',
+    reason: '交接前行程有变',
+    evidenceIds: [],
+    operationId: 'cancel_paid_operation',
+  });
+  assert.equal(cancelledAfterPayment.ok, true);
+  assert.equal(cancelledAfterPayment.mockServiceFeeRefunded, true);
+  assert.equal(cancelledAfterPaymentAgain.idempotent, true);
+  assert.equal(database.get('orders', orderId).status, 'cancelled');
+  assert.equal(database.get('payments', paid.paymentId).refundStatus, 'refunded');
+  assert.equal(database.get('payments', paid.paymentId).lockStatus, 'none');
+  assert.equal(
+    database
+      .list('evidence')
+      .filter(
+        (item) =>
+          item.orderId === orderId &&
+          item.evidenceType === 'payment_record' &&
+          String(item.storagePath).includes('/refund/'),
+      ).length,
+    1,
+    'pre-handover cancellation must create one refund evidence record',
+  );
+
+  database.seed('orders', 'legacy_cancel_order', {
+    requesterOpenid: 'requester_openid',
+    travellerOpenid: 'traveller_openid',
+    status: 'paid_locked',
+  });
+  database.seed('payments', 'legacy_cancel_payment', {
+    orderId: 'legacy_cancel_order',
+    provider: 'mock',
+    paymentStatus: 'paid',
+    lockStatus: 'locked',
+    refundStatus: 'none',
+  });
+  currentOpenid = 'traveller_openid';
+  const legacyCancelledByTraveller = await orderTransition.main({
+    orderId: 'legacy_cancel_order',
+    nextStatus: 'cancelled',
+    reason: '携带人交接前取消',
+    evidenceIds: [],
+    operationId: 'legacy_cancel_operation',
+  });
+  assert.equal(legacyCancelledByTraveller.ok, true);
+  assert.equal(database.get('payments', 'legacy_cancel_payment').refundStatus, 'refunded');
+  currentOpenid = 'requester_openid';
+
+  database.seed('orders', 'cancel_rollback_order', {
+    requesterOpenid: 'requester_openid',
+    travellerOpenid: 'traveller_openid',
+    status: 'paid_locked',
+    paymentId: 'cancel_rollback_payment',
+  });
+  database.seed('payments', 'cancel_rollback_payment', {
+    orderId: 'cancel_rollback_order',
+    provider: 'mock',
+    paymentStatus: 'paid',
+    lockStatus: 'locked',
+    refundStatus: 'none',
+  });
+  database.failTransactionAtWrite(2);
+  const originalConsoleError = console.error;
+  console.error = () => undefined;
+  const failedCancellation = await orderTransition.main({
+    orderId: 'cancel_rollback_order',
+    nextStatus: 'cancelled',
+    reason: '测试事务回滚',
+    evidenceIds: [],
+    operationId: 'cancel_rollback_operation',
+  });
+  console.error = originalConsoleError;
+  database.clearFailure();
+  assert.equal(failedCancellation.ok, false);
+  assert.equal(database.get('orders', 'cancel_rollback_order').status, 'paid_locked');
+  assert.equal(database.get('payments', 'cancel_rollback_payment').refundStatus, 'none');
+
   database.seed('orders', 'rollback_order', {
     requesterOpenid: 'requester_openid',
     travellerOpenid: 'traveller_openid',
@@ -82,7 +169,6 @@ async function main() {
   });
   const paymentCountBeforeFailure = database.size('payments');
   database.failTransactionAtWrite(2);
-  const originalConsoleError = console.error;
   console.error = () => undefined;
   const failedPayment = await paymentConfirm.main(
     {
@@ -95,6 +181,36 @@ async function main() {
   assert.equal(failedPayment.ok, false);
   assert.equal(database.get('orders', 'rollback_order').status, 'pending_payment');
   assert.equal(database.size('payments'), paymentCountBeforeFailure, 'failed transaction must roll back payment');
+
+  database.seed('orders', 'evidence_path_order', {
+    requesterOpenid: 'requester_openid',
+    travellerOpenid: 'traveller_openid',
+    status: 'paid_locked',
+  });
+  const invalidEvidencePath = await evidenceCreate.main({
+    orderId: 'evidence_path_order',
+    evidenceType: 'item_photo',
+    fileIds: ['cloud://test-env/evidence/another_order/evidence_path_operation/0.jpg'],
+    fileMetadata: [{ fileType: 'image', sizeBytes: 1024 }],
+    operationId: 'evidence_path_operation',
+  });
+  assert.equal(invalidEvidencePath.error, 'invalid_file_path');
+  const invalidEvidenceOperation = await evidenceCreate.main({
+    orderId: 'evidence_path_order',
+    evidenceType: 'item_photo',
+    fileIds: ['cloud://test-env/evidence/evidence_path_order/another_operation/0.jpg'],
+    fileMetadata: [{ fileType: 'image', sizeBytes: 1024 }],
+    operationId: 'evidence_path_operation',
+  });
+  assert.equal(invalidEvidenceOperation.error, 'invalid_file_path');
+  const validEvidencePath = await evidenceCreate.main({
+    orderId: 'evidence_path_order',
+    evidenceType: 'item_photo',
+    fileIds: ['cloud://test-env/evidence/evidence_path_order/evidence_path_operation/0.jpg'],
+    fileMetadata: [{ fileType: 'image', sizeBytes: 1024 }],
+    operationId: 'evidence_path_operation',
+  });
+  assert.equal(validEvidencePath.ok, true);
 
   database.seed('orders', 'delivery_order', {
     requesterOpenid: 'requester_openid',
@@ -209,7 +325,7 @@ async function main() {
   assert.match(cloudServiceSource, /if \(appConfig\.demoMode\)/);
 
   console.log(
-    'Order workflow checks OK. Transactions, rollback, idempotency, evidence gates, role gates, disputes, and Mock refund passed.',
+    'Order workflow checks OK. Transactions, rollback, idempotency, evidence paths/gates, role gates, cancellation, disputes, and Mock refunds passed.',
   );
 }
 

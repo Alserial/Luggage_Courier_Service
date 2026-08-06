@@ -38,6 +38,9 @@ function transitionError(error?: string): string {
     illegal_transition: '订单状态已变化，请刷新后重试',
     required_evidence_missing: '请先上传送达照片或视频',
     active_dispute: '订单正在争议处理中，参与方不能继续流转',
+    payment_not_found: '未找到对应的 Mock 服务费记录，请刷新后重试',
+    unsupported_payment_provider: '当前支付记录不能通过此入口退款',
+    payment_not_refundable: '当前 Mock 服务费记录不能重复退款',
     cloud_unavailable: '云服务不可用，操作没有保存',
   };
   return labels[error || ''] || error || '订单操作失败';
@@ -74,6 +77,7 @@ Page({
     needsDeliveryEvidence: false,
     canComplete: false,
     canCancel: false,
+    cancelButtonText: '取消待支付订单',
     canDispute: false,
   },
 
@@ -140,7 +144,9 @@ Page({
     const needsDeliveryEvidence =
       order.status === 'arrived' && viewerRole === 'traveller' && deliveryEvidenceIds.length === 0;
     const canComplete = order.status === 'delivered' && viewerRole === 'requester';
-    const canCancel = order.status === 'pending_payment';
+    const canCancel = ['pending_payment', 'paid_locked'].includes(order.status);
+    const cancelButtonText =
+      order.status === 'paid_locked' ? '取消并退回 Mock 服务费' : '取消待支付订单';
     const canDispute = !['completed', 'cancelled', 'refunded', 'disputed'].includes(order.status);
     const nextTitle = canPay
       ? '确认 Mock 服务费记录'
@@ -187,6 +193,7 @@ Page({
       needsDeliveryEvidence,
       canComplete,
       canCancel,
+      cancelButtonText,
       canDispute,
     });
   },
@@ -261,9 +268,12 @@ Page({
   },
 
   async cancelOrder() {
+    const paidLocked = this.data.order.status === 'paid_locked';
     const result = await modal({
-      title: '取消待支付订单',
-      content: '请输入取消原因。此操作会写入订单审计记录。',
+      title: paidLocked ? '取消并退回 Mock 服务费' : '取消待支付订单',
+      content: paidLocked
+        ? '交接前取消会把 Mock 服务费记录标记为已退款，并写入证据与审计；不涉及商品货款。请输入取消原因。'
+        : '请输入取消原因。此操作会写入订单审计记录。',
       editable: true,
       placeholderText: '必填：为什么取消订单',
       confirmText: '确认取消',
@@ -282,7 +292,12 @@ Page({
     if (this.data.submitting) return;
     transitionOperationIds[nextStatus] ||= createOperationId(`order_${nextStatus}`);
     this.setData({ submitting: true });
-    const result = await callCloud<{ ok: boolean; error?: string; demo?: boolean }>({
+    const result = await callCloud<{
+      ok: boolean;
+      error?: string;
+      demo?: boolean;
+      mockServiceFeeRefunded?: boolean;
+    }>({
       name: 'order-transition',
       data: {
         orderId: this.data.order.id,
@@ -301,7 +316,11 @@ Page({
     }
     delete transitionOperationIds[nextStatus];
     wx.showToast({
-      title: result.demo ? '演示完成，未保存到云端' : '订单状态已更新',
+      title: result.demo
+        ? '演示完成，未保存到云端'
+        : result.mockServiceFeeRefunded
+          ? '订单已取消，Mock 服务费已退款'
+          : '订单状态已更新',
       icon: 'none',
     });
     await this.loadOrder(this.data.order.id);

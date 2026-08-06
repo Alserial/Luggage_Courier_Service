@@ -222,6 +222,8 @@ Stores the transaction record and lifecycle after an offer is accepted.
 | `paymentId` | string | no | Current service-fee payment record |
 | `activeDisputeId` | string/null | no | Only active dispute; cleared after final decision |
 | `statusBeforeDispute` | OrderStatus/null | no | State captured when dispute opens |
+| `cancellationReason` | string | no | Required reason when a participant cancels |
+| `cancelledAt` | Date | no | Server time when cancellation succeeds |
 | `taxRule` | object | yes | Default payer and note |
 | `cancellationRule` | object | yes | Before/after handover handling |
 | `evidenceRequired` | EvidenceType[] | yes | Required proof checklist |
@@ -304,7 +306,7 @@ Stores service-fee payment records only. It must not store or imply merchandise 
 | `amount` | number | yes | Service-fee total |
 | `currency` | `CNY` | yes | MVP currency |
 | `paymentStatus` | string | yes | `pending`, `paid`, `failed`, `cancelled` |
-| `lockStatus` | string | yes | `none`, `locked`, `released` |
+| `lockStatus` | string | yes | `none`, `locked`, `released`; Mock refund returns it to `none` |
 | `refundStatus` | string | yes | `none`, `requested`, `approved`, `refunded`, `rejected` |
 | `createdByOpenid` | string | yes | Payer |
 | `createdAt` | Date | yes | Server time |

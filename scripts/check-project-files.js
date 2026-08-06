@@ -4,6 +4,7 @@ const path = require('path');
 const requiredPaths = [
   'project.config.json',
   'package.json',
+  'scripts/setup-cloudbase.js',
   'miniprogram/app.json',
   'miniprogram/app.ts',
   'miniprogram/pages/home/index.wxml',
