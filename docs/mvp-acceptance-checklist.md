@@ -4,7 +4,7 @@ Use this checklist to decide whether the Mini Program MVP is ready for a control
 
 The MVP boundary is low-value, low-frequency, low-risk personal items only. It must not become a daigou, logistics, customs-clearance, or cross-border payment product.
 
-Verification status as of 2026-08-06:
+Verification status as of 2026-08-13 (live CloudBase verification performed 2026-08-07; console permission + cloud-function version checks confirmed by operator on 2026-08-12/13):
 
 - `[x]` means the behavior is implemented and verified by source review, local automated checks, or the recorded test-environment deployment.
 - `[ ]` means it still requires target CloudBase inspection, real-account/device acceptance, or an outstanding implementation.
@@ -202,12 +202,15 @@ Verification status as of 2026-08-06:
 - [x] Repository schema plan/check/apply commands cover all required collections and named indexes without destructive index replacement.
 - [x] All 14 required collections exist in `luggage-d1ghv33fy2cb9ef96`.
 - [x] Pilot-critical `evidence_order_created` and `disputes_status_updated` indexes are created with the documented field order.
-- [x] Remaining named indexes from `scripts/setup-cloudbase.js` are defined and source-verified against cloud-function query patterns (added `messages_conversation_moderation_created`, `orders_requester_updated`, `orders_traveller_updated`, `orders_offer`); creation in CloudBase pending `npm run cloudbase:apply`.
-- [x] Direct frontend writes to critical collections are disabled (verified: `miniprogram` performs no `db.collection().add/update/remove`; the only direct `db.collection().where()` is the read-only chat `watch()`). Console permission mode must still be set to 仅管理端可读写 for orders/payments/evidence/disputes/audit_logs.
+- [x] Remaining named indexes from `scripts/setup-cloudbase.js` are defined and source-verified against cloud-function query patterns (added `messages_conversation_moderation_created`, `orders_requester_updated`, `orders_traveller_updated`, `orders_offer`); **created and verified live in `luggage-d1ghv33fy2cb9ef96` on 2026-08-07** — a direct throttle-aware `describeCollection` confirmed all 51 expected indexes present, including the 4 new ones and especially `messages_conversation_moderation_created`. NOTE: `npm run cloudbase:check` intermittently reports false "missing" because Tencent Cloud `DescribeTable` caps at 20 calls/sec; verify via direct index listing, not the script.
+- [x] Direct frontend writes to critical collections are disabled (verified: `miniprogram` performs no `db.collection().add/update/remove`; the only direct `db.collection().where()` is the read-only chat `watch()`). **Console permission mode still must be set/confirmed to 仅管理端可读写 for orders/payments/evidence/disputes/audit_logs/handover_records (manual console check — see below).**
 - [ ] Real CloudBase uploads have produced and verified the `item-requests/`, `evidence/{orderId}/{operationId}/`, and chat snapshot prefixes.
 - [x] All 33 cloud functions exist with normal status; `order-transition` and `evidence-create` were redeployed with cloud-side dependency installation on 2026-08-06.
 - [x] Cloud function dependencies are installed/deployed.
-- [ ] First admin/reviewer user is bootstrapped in `users.roleFlags` (pending live CloudBase write; `scripts/bootstrap-admin.js` and manual console steps in `docs/setup/cloudbase-setup.md` are ready — needs the operator openid and CloudBase write access).
+- [x] First admin/reviewer user is bootstrapped in `users.roleFlags` — done 2026-08-07 via `scripts/bootstrap-admin.js --openid=o7dBp3UXAvKOsYsJnNq2TzTWN4G8`; the user record existed (had logged in) and `roleFlags` is now `['admin','reviewer']`.
+- [x] Commit `ca9c924` and tag `v1.0.1-test.4` pushed to `origin/main` and origin tags on 2026-08-07.
+- [x] Key collection permission modes confirmed as 仅管理端可读写 in the CloudBase console for orders/payments/evidence/disputes/audit_logs/handover_records (console-verified by operator on 2026-08-12/13 — set to "所有用户不可读写" which is the console equivalent of 仅管理端可读写).
+- [x] Cloud function deployment versions for all 33 functions (especially `order-transition`, `evidence-create`) confirmed to match the current commit `ca9c924` in the CloudBase console (console-verified by operator on 2026-08-12/13).
 
 ## Frontend Quality
 
@@ -257,3 +260,16 @@ Minimum risk path:
 4. Try broad trip note such as "anything is okay".
 5. Try illegal order transition.
 6. Try dispute without description.
+
+## Real-Device Acceptance (operator-run, 2026-08-13)
+
+Console-side preconditions already met: indexes live, 6 critical collections set to 仅管理端可读写, 33 cloud functions confirmed at `ca9c924`, admin bootstrap done (`o7dBp3UXAvKOsYsJnNq2TzTWN4G8` = admin/reviewer).
+
+Remaining operator actions (WeChat Developer Tools + 3 physical accounts + 2 device flows):
+- [ ] Experience version uploaded from `miniprogram/` and the 3 test accounts added as 体验者.
+- [ ] Three test accounts prepared: 需求方 / 携带人 / 管理员.
+- [ ] Normal flow executed end-to-end: 报价 → 支付 → 交接 → 送达 → 完成 (capture `orderId`).
+- [ ] Dispute flow executed: 上传证据 → 发起争议 → 管理员 Mock 退款 (capture `orderId` + `disputeId`).
+- [ ] Both flows' results posted back (orderId / disputeId / errors) for CloudBase-side verification (order state+history, duplicate check, payments=service-fee only, evidence completeness, dispute decision + Mock refund, audit_logs coverage, cloud-function log anomalies).
+
+Step-by-step device playbook: `docs/device-test-playbook.md`.
