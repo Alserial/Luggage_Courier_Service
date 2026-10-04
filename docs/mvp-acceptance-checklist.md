@@ -18,6 +18,21 @@ Verification status as of 2026-08-13 (live CloudBase verification performed 2026
 - [x] Service-fee payment is clearly labeled as service fee only.
 - [x] Mock payment is clearly marked as mock/TODO.
 
+## Legal And Policy Readiness
+
+- [x] Chinese legal-review drafts exist for the user agreement, privacy policy, transaction, item/declaration, fee/refund, evidence/dispute, chat/content, account/appeal and personal-information rules.
+- [x] Separate China and Australia border annexes and China→Australia / Australia→China stage checklists exist.
+- [x] The drafts identify paid carrying classification and Australian visa/work-right questions as launch-blocking legal issues.
+- [x] The bilateral legal risk register documents P0 stop-lines, controls and required launch evidence.
+- [ ] PRC counsel has confirmed the platform classification, paid-carrying boundary, terms, customs approach and operating-entity obligations.
+- [ ] Australian counsel has confirmed platform/consumer/privacy obligations, carrier work rights, tax/insurance and accompanied-baggage treatment.
+- [ ] Every P0 stop-line applicable to the release scope is closed with written legal, regulatory, provider or insurance evidence.
+- [ ] Operator legal name, registration details, address, customer service, complaints and privacy contacts replace all placeholders.
+- [ ] Data storage region, cross-border access, retention schedule and third-party recipient list match the deployed environment.
+- [ ] Real payment provider, merchant, settlement, refund, invoice and tax rules are approved before Mock payment is replaced.
+- [ ] The final Chinese text is professionally translated and legally reviewed before serving English-language Australian users.
+- [ ] Rule detail/search/history/download pages and versioned backend consent records are implemented and tested.
+
 ## User And Login
 
 - [x] User can open profile page.

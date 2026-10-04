@@ -21,6 +21,10 @@ Only project-specific Codex settings and skills should be committed here. User-l
 
 Do not implement real platform-held escrow, automatic payout, payment custody, or settlement production logic until payment-provider, legal, and operational rules are confirmed.
 
+## Legal Draft Package
+
+The review-ready Chinese draft agreement and rule set is indexed in `docs/legal/README.md`. It uses one common agreement set plus separate China and Australia border annexes and a route-stage checklist. The drafts contain explicit launch-blocking placeholders and must be reviewed by qualified PRC and Australian counsel before production publication.
+
 ## Project Documentation
 
 - `docs/mini-program-development-guide.md`: product, frontend, backend, progress, and implementation roadmap.
@@ -31,6 +35,7 @@ Do not implement real platform-held escrow, automatic payout, payment custody, o
 - `docs/frontend/page-state-map.md`: current page states/actions, including item-photo upload and order chat.
 - `docs/setup/cloudbase-setup.md`: environment, collections, indexes, permissions, storage, and deployment notes.
 - `docs/mvp-test-guide.md` and `docs/mvp-acceptance-checklist.md`: executable test path and acceptance coverage.
+- `docs/legal/README.md`: draft user agreement, privacy, transaction, item, fee, evidence, content, account, China/Australia border and route rules.
 
 Current feature status:
 
